@@ -8,17 +8,17 @@
 
 ```
 오디오 파일
-    → Step 1 탐색 (01_explore)        → onset_beats.json
-    → Step 2 스템 분리 (02_split_stem) → stems/htdemucs/{트랙}/drums|bass|vocals|other.wav
-    → Step 3 시각화 (03_visualize_point) → onset_events.json
-    → 레이어드 익스포트 (01_energy ~ 05_context) → onset_events_energy|clarity|temporal|spectral|context.json
-    → 레이어 통합 (06_layered_export)  → onset_events_layered.json
-    → 스트림·섹션 (07_streams_sections) → streams_sections.json (streams, sections, keypoints)
-    → (선택) 드럼 대역 에너지/키포인트 (08_drum_band_energy, 09_madmom_drum_band)
-    → (선택) CNN 대역 onset (10_cnn_band_onsets)
-    → (선택) CNN 스트림·레이어·섹션 (11_cnn_streams_layers) → streams_sections_cnn.json
+    → Step 1 탐색 (explore/01_explore)        → onset_beats.json
+    → Step 2 스템 분리 (explore/02_split_stem) → stems/htdemucs/{트랙}/drums|bass|vocals|other.wav
+    → Step 3 시각화 (explore/03_visualize_point) → onset_events.json
+    → 레이어드 익스포트 (onset_layered/01_energy ~ 05_context) → onset_events_energy|clarity|temporal|spectral|context.json
+    → 레이어 통합 (onset_layered/06_layered_export)  → onset_events_layered.json
+    → (선택) 드럼 대역 (drum/cnn_band_onsets, drum/madmom_band)
+    → 통합 진입점 (export/run_stem_folder) → drum + bass → streams_sections_cnn.json
     → Web (JsonUploader, parseEvents) → 파형 위 이벤트/레이어 표시
 ```
+
+**메인 드럼 파이프라인은 스트림/섹션을 사용하지 않음.** 드럼은 `drum/run.py`(CNN → keypoints_by_band, texture_blocks_by_band)로, 베이스는 `bass/run.py`로 분석 후 `export/run_stem_folder.py`에서 한 번에 JSON 출력. 레거시 스트림·섹션 스크립트는 `legacy/` 참고.
 
 **06 내부 파이프라인 (목표 순서)**  
 1. **대역 분류**: `compute_band_hz(y, sr)` — 곡 전체 스펙트럼 + 고정 Hz 혼합으로 저/중/고 경계 산출.  
@@ -33,22 +33,19 @@
 
 | 스크립트 | 경로 | 역할 | 출력 JSON |
 |----------|------|------|-----------|
-| 01_explore | `audio_engine/scripts/01_basic_test/01_explore.py` | Onset/Beat 검출 | `onset_beats.json` |
-| 02_split_stem | `audio_engine/scripts/01_basic_test/02_split_stem.py` | Demucs 스템 분리 | (WAV 4개) |
-| 03_visualize_point | `audio_engine/scripts/01_basic_test/03_visualize_point.py` | 세기·질감 시각화용 JSON | `onset_events.json` |
-| 01_energy | `audio_engine/scripts/02_layered_onset_export/01_energy.py` | Energy(RMS·대역) | `onset_events_energy.json` |
-| 02_clarity | `audio_engine/scripts/02_layered_onset_export/02_clarity.py` | Clarity(attack time) | `onset_events_clarity.json` |
-| 03_temporal | `audio_engine/scripts/02_layered_onset_export/03_temporal.py` | Temporal(그리드·반복) | `onset_events_temporal.json` |
-| 04_spectral | `audio_engine/scripts/02_layered_onset_export/04_spectral.py` | Spectral(focus) | `onset_events_spectral.json` |
-| 05_context | `audio_engine/scripts/02_layered_onset_export/05_context.py` | Context(dependency) | `onset_events_context.json` |
-| **06_layered_export** | `audio_engine/scripts/02_layered_onset_export/06_layered_export.py` | 5개 피처 + band 기반 역할(P0/P1/P2) 할당 | `onset_events_layered.json` |
-| **07_streams_sections** | `audio_engine/scripts/02_layered_onset_export/07_streams_sections.py` | band_onset_times → build_streams → segment_sections → 키포인트 → JSON | `streams_sections.json` |
-| 08_drum_band_energy | `audio_engine/scripts/02_layered_onset_export/08_drum_band_energy.py` | stem 폴더 기반 low/mid/high 에너지 | (JSON/시각화) |
-| 09_madmom_drum_band | `audio_engine/scripts/02_layered_onset_export/09_madmom_drum_band.py` | madmom 드럼 대역 키포인트 | (JSON) |
-| 10_cnn_band_onsets | `audio_engine/scripts/02_layered_onset_export/10_cnn_band_onsets.py` | CNN + ODF band onset/stength | (내부용) |
-| **11_cnn_streams_layers** | `audio_engine/scripts/02_layered_onset_export/11_cnn_streams_layers.py` | compute_cnn_band_onsets_with_odf → build_streams → simplify_shaker_clap_streams → assign_layer_to_streams → segment_sections → JSON | `streams_sections_cnn.json` |
+| 01_explore | `audio_engine/scripts/explore/01_explore.py` | Onset/Beat 검출 | `onset_beats.json` |
+| 02_split_stem | `audio_engine/scripts/explore/02_split_stem.py` | Demucs 스템 분리 | (WAV 4개) |
+| 03_visualize_point | `audio_engine/scripts/explore/03_visualize_point.py` | 세기·질감 시각화용 JSON | `onset_events.json` |
+| 01_energy ~ 06_layered_export | `audio_engine/scripts/onset_layered/01_energy.py` ~ `06_layered_export.py` | Energy/Clarity/Temporal/Spectral/Context + 레이어 통합 | `onset_events_*.json`, `onset_events_layered.json` |
+| drum/run | `audio_engine/scripts/drum/run.py` | CNN band onset → keypoints_by_band, texture_blocks_by_band (스트림 미사용) | (반환값만, JSON 직접 쓰지 않음) |
+| drum/cnn_band_onsets | `audio_engine/scripts/drum/cnn_band_onsets.py` | CNN band onset만 → drum_band_energy JSON (선택) | (선택) |
+| drum/madmom_band | `audio_engine/scripts/drum/madmom_band.py` | madmom 드럼 대역 (선택) | (선택) |
+| bass/run | `audio_engine/scripts/bass/run.py` | run_bass_pipeline → curve, keypoints | (반환값만) |
+| **export/run_stem_folder** | `audio_engine/scripts/export/run_stem_folder.py` | stem 폴더명 → drum.run + bass.run(조건부) → write_streams_sections_json | `streams_sections_cnn.json` |
+| legacy/streams_sections | `audio_engine/scripts/legacy/streams_sections.py` | (LEGACY) build_streams → segment_sections | 실행 비활성 |
+| legacy/drum_band_energy | `audio_engine/scripts/legacy/drum_band_energy.py` | (LEGACY) stem 기반 low/mid/high 에너지 | 실행 비활성 |
 
-02_layered_onset_export 스크립트는 모두 `audio_engine.engine.onset`만 사용합니다.
+공용 경로·스템 기준 디렉터리는 `scripts/_common.py`의 `find_project_root`, `get_stems_base_dir` 사용.
 
 ---
 

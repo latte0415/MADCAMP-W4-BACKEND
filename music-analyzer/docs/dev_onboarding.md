@@ -24,36 +24,44 @@
 
 1. **컨텍스트 + 피처별 JSON**  
    ```bash
-   python audio_engine/scripts/02_layered_onset_export/01_energy.py
-   python audio_engine/scripts/02_layered_onset_export/02_clarity.py
-   python audio_engine/scripts/02_layered_onset_export/03_temporal.py
-   python audio_engine/scripts/02_layered_onset_export/04_spectral.py
-   python audio_engine/scripts/02_layered_onset_export/05_context.py
+   python audio_engine/scripts/onset_layered/01_energy.py
+   python audio_engine/scripts/onset_layered/02_clarity.py
+   python audio_engine/scripts/onset_layered/03_temporal.py
+   python audio_engine/scripts/onset_layered/04_spectral.py
+   python audio_engine/scripts/onset_layered/05_context.py
    ```
 
 2. **레이어 통합 JSON**  
    ```bash
-   python audio_engine/scripts/02_layered_onset_export/06_layered_export.py
+   python audio_engine/scripts/onset_layered/06_layered_export.py
    ```
 
-3. **(선택) 스트림·섹션 JSON (librosa)**  
+3. **드럼 + 베이스 통합 JSON (메인 진입점)**  
    ```bash
-   python audio_engine/scripts/02_layered_onset_export/07_streams_sections.py
+   python audio_engine/scripts/export/run_stem_folder.py
    ```
-   - `build_context_with_band_evidence` 필요. 산출: `streams_sections.json`.
+   - stem 폴더명 지정(예: sample_animal_spirits_3_45). drum/run + bass/run(조건부) → `streams_sections_cnn.json`.
 
-4. **(선택) CNN 스트림·레이어·섹션 JSON**  
-   ```bash
-   python audio_engine/scripts/02_layered_onset_export/11_cnn_streams_layers.py
-   ```
-   - stem 폴더(drum_low/mid/high.wav) 필요. madmom·soundfile 의존. 산출: `streams_sections_cnn.json`.
-
-- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, (선택) `streams_sections.json`, (선택) `streams_sections_cnn.json`.  
+- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, `streams_sections_cnn.json`.  
 - `web/public/` 이 있으면 동일 파일이 복사됨.
 
 ---
 
-## 4. 검증 한 번에
+## 4. 웹에서 듣고 테스트
+
+웹 앱에서 **오디오 재생 + JSON 시각화**를 함께 테스트할 수 있습니다.
+
+1. **웹 실행**: `music-analyzer/web/`에서 `npm install` 후 `npm run dev`.
+2. **샘플 오디오 로드**: 상단 **「샘플 오디오 로드」** 버튼 클릭 → `web/public/sample_drums.wav`(sample_animal_spirits_3_45 드럼 스템) 재생 가능.
+3. **JSON 로드**: 원하는 탭(예: **13 Drum Keypoints**) 선택 후 **「○○ 샘플 로드」** 클릭 → `streams_sections_cnn.json` 등 로드.
+4. **재생**: 파형 위 **재생 버튼** 클릭 → 오디오 재생, 시각화와 동기화.
+
+**직접 오디오 파일 사용**: 상단 **「오디오 파일 업로드」**로 WAV/MP3 업로드 후, 같은 방식으로 JSON 로드·재생하면 됩니다.  
+(샘플 JSON과 시간축이 맞는 오디오를 쓰면 시각화와 재생이 일치합니다.)
+
+---
+
+## 5. 검증 한 번에
 
 **공개 API import**:
 ```bash
@@ -71,13 +79,19 @@ print('OK: 공개 API import 성공')
 
 **엔드투엔드 (06까지)**:
 ```bash
-python audio_engine/scripts/02_layered_onset_export/06_layered_export.py
+python audio_engine/scripts/onset_layered/06_layered_export.py
 # 종료 코드 0, onset_events_layered.json 생성 확인
+```
+
+**엔드투엔드 (드럼+베이스 통합)**:
+```bash
+python audio_engine/scripts/export/run_stem_folder.py
+# stem 폴더명 인자로 전달. streams_sections_cnn.json 생성 확인
 ```
 
 ---
 
-## 5. 문서 참조
+## 6. 문서 참조
 
 | 문서 | 내용 |
 |------|------|

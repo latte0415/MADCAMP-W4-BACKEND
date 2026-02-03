@@ -20,8 +20,8 @@ Energy/Clarity가 "같은 비트(MIDI·청각 동일)인데 다른 값"으로 �
 
 | 대상 | 역할 |
 |------|------|
-| `audio_engine/scripts/02_layered_onset_export/01_energy.py` | Energy(RMS·대역별), energy_score |
-| `audio_engine/scripts/02_layered_onset_export/02_clarity.py` | Attack time, clarity_score |
+| `audio_engine/scripts/onset_layered/01_energy.py` | Energy(RMS·대역별), energy_score |
+| `audio_engine/scripts/onset_layered/02_clarity.py` | Attack time, clarity_score |
 | `audio_engine/engine/onset/` | 위 계획 중 일부 이미 반영(backtrack=False, refine, mid_prev/mid_next) |
 
 노트북이 **동일한 onset 파이프라인**을 쓰므로, 0·1·2단계는 한 번 적용하면 둘 다 이득.

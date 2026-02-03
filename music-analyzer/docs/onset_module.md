@@ -29,7 +29,7 @@
 | L2-ext | `onset/drum_band_energy.py` | `compute_drum_band_energy` |
 | L2-ext | `onset/madmom_drum_band.py` | `compute_madmom_drum_band_keypoints` |
 | L5 | `onset/export.py` | `write_energy_json`, …, `write_layered_json`, `write_streams_sections_json`, `write_drum_band_energy_json` |
-| L6 | `audio_engine/scripts/02_layered_onset_export/01_energy.py` ~ `11_cnn_streams_layers.py` | 엔트리 스크립트 |
+| L6 | `audio_engine/scripts/onset_layered/01_energy.py` ~ `06_layered_export.py`, `scripts/drum/run.py`, `scripts/bass/run.py`, `scripts/export/run_stem_folder.py` | 엔트리 스크립트 |
 
 ---
 
@@ -153,14 +153,14 @@ print('OK: 공개 API import 성공')
 ### 5.2 스크립트 → JSON
 
 ```bash
-python audio_engine/scripts/02_layered_onset_export/01_energy.py
+python audio_engine/scripts/onset_layered/01_energy.py
 # ... 02 ~ 05
-python audio_engine/scripts/02_layered_onset_export/06_layered_export.py
-# (선택) CNN 스트림·레이어·섹션
-python audio_engine/scripts/02_layered_onset_export/11_cnn_streams_layers.py
+python audio_engine/scripts/onset_layered/06_layered_export.py
+# 드럼+베이스 통합 JSON
+python audio_engine/scripts/export/run_stem_folder.py
 ```
 
-- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, (11 실행 시) `streams_sections_cnn.json`
+- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, `streams_sections_cnn.json`
 - `web/public` 디렉터리가 있으면 동일 파일 복사
 
 ### 5.3 L3 feature 간 참조 없음

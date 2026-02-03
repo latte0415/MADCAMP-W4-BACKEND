@@ -77,7 +77,7 @@ flowchart LR
 
 ## 1. 진행 현황
 
-### 1.1 레이어링·JSON (02_layered_onset_export)
+### 1.1 레이어링·JSON (onset_layered/)
 
 **01_energy.ipynb**
 
@@ -232,7 +232,7 @@ flowchart LR
 | JSON texture | `textures` | min–max → 0~1. `texture_hz`는 원시 Hz |
 | 시각화 점 크기 | `strengths` | min–max 후 30~500 선형 매핑 |
 
-### 2.3 01_energy.ipynb (02_layered_onset_export)
+### 2.3 01_energy.ipynb (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -244,7 +244,7 @@ flowchart LR
 | E_norm_* | band_energy | 각 대역별 `robust_norm` → 0~1 |
 | JSON | — | `strength`=energy_score, `texture`=E_norm_high. 원시·정규화 값 모두 포함 |
 
-### 2.4 02_clarity.ipynb (02_layered_onset_export)
+### 2.4 02_clarity.ipynb (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -259,7 +259,7 @@ flowchart LR
 | clarity_score | clarity_raw | percentile 1–99 정규화 → 0~1, 이후 상·하위 1% clip |
 | JSON | — | `attack_time_ms`, `clarity_score` 저장 |
 
-### 2.5 03_temporal.py (02_layered_onset_export)
+### 2.5 03_temporal.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -272,7 +272,7 @@ flowchart LR
 | temporal_score | — | `grid_align × repetition × strength_weight(0.85~1.0)`. robust_norm |
 | JSON | — | `grid_align_score`, `repetition_score`, `temporal_score`, `ioi_prev/next` |
 
-### 2.6 04_spectral.py (02_layered_onset_export)
+### 2.6 04_spectral.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -285,7 +285,7 @@ flowchart LR
 | focus_score | flatness, bandwidth | `1 - 0.5×norm(flat) - 0.5×norm(bw)`. robust_norm |
 | JSON | — | `spectral_centroid_hz`, `spectral_bandwidth_hz`, `spectral_flatness`, `focus_score` |
 
-### 2.7 05_context.py (02_layered_onset_export)
+### 2.7 05_context.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -317,11 +317,10 @@ flowchart LR
 
 - CNN + ODF band onset/strength. `compute_cnn_band_onsets`, `compute_cnn_band_onsets_with_odf` 내부용.
 
-**11_cnn_streams_layers.py**
+**export/run_stem_folder.py (드럼+베이스 통합)**
 
-- **입력**: stem 폴더(drum_low.wav, drum_mid.wav, drum_high.wav).
-- **흐름**: `compute_cnn_band_onsets_with_odf`(CNN+ODF → `merge_close_band_onsets` 체인 클러스터링, `filter_transient_mid_high`) → `build_streams` → `simplify_shaker_clap_streams`(mid/high 고밀도 스트림 temporal pooling) → `assign_layer_to_streams` → `segment_sections` → keypoints.
-- **저장**: `write_streams_sections_json(..., streams, sections, keypoints, events, ...)` → `streams_sections_cnn.json`.
+- **입력**: stem 폴더명. **흐름**: drum/run(CNN band onset → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(조건부).
+- **저장**: `write_streams_sections_json(..., keypoints_by_band=..., texture_blocks_by_band=..., bass=bass_dict)` → `streams_sections_cnn.json`.
 
 ---
 
@@ -381,7 +380,7 @@ drums stem 확보 → 01_explore·03_visualize_point 드럼 입력으로 사용.
 
 ---
 
-### 3.4 01_energy.ipynb, 02_clarity.ipynb, 03_temporal.py, 04_spectral.py, 05_context.py (02_layered_onset_export)
+### 3.4 01_energy.ipynb, 02_clarity.ipynb, 03_temporal.py, 04_spectral.py, 05_context.py (onset_layered/)
 
 - **01_energy**: 구간별 RMS·대역 에너지 → energy_score, E_norm_* → JSON. §2.3 참고.
 - **02_clarity**: 구간별 Attack Time(10%→90%) → clarity_score → JSON. §2.4 참고.

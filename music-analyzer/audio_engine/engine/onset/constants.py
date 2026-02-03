@@ -59,8 +59,8 @@ MERGE_CLOSE_SEC_MID = 0.10   # 클랩·롤 과검출 억제 (더 많이 병합)
 MERGE_CLOSE_SEC_HIGH = 0.12  # 쉐이커·하이햇 과검출 억제 (더 많이 병합)
 # 대역별 onset 에너지 필터: strength 이하는 제거 (0~1, 0=비활성)
 STRENGTH_FLOOR_BAND_ONSET = 0.05
-# mid/high 전용: 클랩·쉐이커만 남기기 위해 강도 하한 상향 (선택)
-STRENGTH_FLOOR_MID_HIGH = 0.08
+# mid/high 전용: low와 동일하게 두면 손실 완화 (0.08 → 0.05)
+STRENGTH_FLOOR_MID_HIGH = 0.06
 # 클랩/쉐이커 필터: 어택 후/전 에너지 비율이 이 값 이상인 onset만 유지 (트랜지언트만 통과)
 CLAP_SHAKER_TRANSIENT_WINDOW_SEC = 0.03
 CLAP_SHAKER_TRANSIENT_RATIO_MIN = 1.8
@@ -83,7 +83,12 @@ SECTION_MERGE_NEAR_SEC = 1.0
 
 # KeyOnsetSelector: 대역별 핵심 타격 선택
 KEY_ONSET_MIN_SEP_SEC = 0.08  # 키포인트끼리 최소 간격 (60~120ms)
-ENERGY_PERCENTILE_THRESHOLD = 70  # 이 percentile 이상만 유지 (상위 30%)
+ENERGY_PERCENTILE_THRESHOLD = 20  # 이 percentile 이상만 유지 (상위 80%) — 에너지 20% 선까지 살림
+ENERGY_PERCENTILE_THRESHOLD_LOW = 20  # low도 동일 (상위 80%)
+# mid/high: 진폭(에너지) 기준 더 걸러서 고스트 제거 — 상위 60%만 유지
+ENERGY_PERCENTILE_THRESHOLD_MID_HIGH = 40
+# onset 시점 기준 짧은 구간 진폭(RMS)으로 에너지·필터링 — 파형과 비례, 손실 완화
+BAND_ONSET_ENERGY_WINDOW_SEC = 0.03  # t ± 30ms 구간 RMS
 
 # TextureBlockMerger: mid/high burst → block
 BURST_IOI_SEC = 0.10  # 연속 IOI < 이 값이면 burst 후보 (80~120ms)

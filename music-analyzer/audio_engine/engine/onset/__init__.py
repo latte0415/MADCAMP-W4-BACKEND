@@ -37,27 +37,28 @@ from audio_engine.engine.onset.scoring import (
     assign_roles_by_band,
 )
 
-# Streams / Sections
-from audio_engine.engine.onset.streams import build_streams
-from audio_engine.engine.onset.sections import segment_sections
-
-# Drum band energy (stem 폴더 기반 low/mid/high onset 에너지)
-from audio_engine.engine.onset.drum_band_energy import (
-    compute_drum_band_energy,
-    compute_band_onset_energies,
+# Streams / Sections (메인 드럼 파이프라인에서는 미사용. 레거시·실험용.)
+from audio_engine.engine.onset.legacy import (
+    build_streams,
+    segment_sections,
+    assign_layer_to_streams,
+    simplify_shaker_clap_streams,
 )
-from audio_engine.engine.onset.key_onset_selector import select_key_onsets_by_band
-from audio_engine.engine.onset.texture_block_merge import merge_texture_blocks_by_band
-from audio_engine.engine.onset.madmom_drum_band import compute_madmom_drum_band_keypoints
-from audio_engine.engine.onset.cnn_band_onsets import compute_cnn_band_onsets
-from audio_engine.engine.onset.cnn_band_pipeline import compute_cnn_band_onsets_with_odf
-from audio_engine.engine.onset.stream_layer import assign_layer_to_streams
-from audio_engine.engine.onset.stream_simplify import simplify_shaker_clap_streams
-from audio_engine.engine.onset.band_onset_merge import (
+
+# Drum keypoint 파이프라인 (최종본): drum/ 서브패키지
+from audio_engine.engine.onset.drum import (
     merge_close_onsets,
     merge_close_band_onsets,
     filter_by_strength,
+    filter_transient_mid_high,
+    compute_drum_band_energy,
+    compute_band_onset_energies,
+    select_key_onsets_by_band,
+    merge_texture_blocks_by_band,
+    compute_cnn_band_onsets,
+    compute_cnn_band_onsets_with_odf,
 )
+from audio_engine.engine.onset.madmom_drum_band import compute_madmom_drum_band_keypoints
 
 # L5
 from audio_engine.engine.onset.export import (

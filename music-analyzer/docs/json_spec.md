@@ -1,22 +1,25 @@
 # JSON 추출 형식 (파일별)
 
-## 01_basic_test 폴더
+## explore/
 - **01_explore** → `onset_beats.json` (onset/beat/드럼 onset 시점)
 - **02_split_stem** → JSON 없음 (WAV 4개)
 - **03_visualize_point** → `onset_events.json` (이벤트: t, strength, texture)
 
-## 02_layered_onset_export 폴더
+## onset_layered/
 - **01_energy** → `onset_events_energy.json`
 - **02_clarity** → `onset_events_clarity.json`
 - **03_temporal** → `onset_events_temporal.json`
 - **04_spectral** → `onset_events_spectral.json`
 - **05_context** → `onset_events_context.json`
 - **06_layered_export** → `onset_events_layered.json`
-- **07_streams_sections** → `streams_sections.json`
-- **08_drum_band_energy** → (드럼 대역 에너지 JSON/시각화)
-- **09_madmom_drum_band** → (madmom 드럼 대역 키포인트 JSON)
-- **10_cnn_band_onsets** → (내부용, JSON 직접 출력 없음)
-- **11_cnn_streams_layers** → `streams_sections_cnn.json`
+
+## legacy/ (실행 비활성)
+- **streams_sections** → `streams_sections.json`
+- **drum_band_energy** → (드럼 대역 에너지 JSON/시각화)
+
+## export/run_stem_folder → streams_sections_cnn.json
+- **입력**: stem 폴더명. **흐름**: drum/run + bass/run(조건부) → write_streams_sections_json.
+- **스키마**: 아래 §10-2 참고 (streams/sections/keypoints 빈 배열, keypoints_by_band, texture_blocks_by_band, bass).
 
 ## Web
 - 수용 형식: `onset_times_sec`, `events[]`, 배열 직접
@@ -115,9 +118,9 @@
 
 ---
 
-## 10. 07_streams_sections.py → streams_sections.json
+## 10. legacy/streams_sections.py → streams_sections.json (LEGACY)
 
-**출력 경로**: `audio_engine/samples/streams_sections.json`
+**출력 경로**: `audio_engine/samples/streams_sections.json`. **실행**: 비활성(export/run_stem_folder 사용 권장).
 
 **스키마 (최상위)**: `source`, `sr`, `duration_sec`, `streams[]`, `sections[]`, `keypoints[]`, (선택) `events[]`.
 
@@ -129,13 +132,20 @@
 
 ---
 
-## 10-2. 11_cnn_streams_layers.py → streams_sections_cnn.json
+## 10-2. export/run_stem_folder → streams_sections_cnn.json
 
-**출력 경로**: `audio_engine/samples/streams_sections_cnn.json`
+**출력 경로**: `audio_engine/samples/streams_sections_cnn.json` (또는 지정 경로)
 
-**입력**: stem 폴더(drum_low.wav, drum_mid.wav, drum_high.wav). CNN+ODF band onset → merge_close_band_onsets(체인 클러스터링) · filter_transient_mid_high → build_streams → simplify_shaker_clap_streams → assign_layer_to_streams → segment_sections.
+**입력**: stem 폴더명. **흐름**: `drum/run.py`(CNN band onset → keypoints_by_band, texture_blocks_by_band, 스트림 미사용) + `bass/run.py`(bass.wav 있으면 run_bass_pipeline) → `write_streams_sections_json(..., bass=bass_dict)`.
 
-**스키마**: 07과 동일. `streams[]`에 `layer`(P0/P1/P2) 필드 포함. `events[]`에 `band`, `stream_id`, `layer`, `strength` 등.
+**스키마 (최상위)**:
+- `source`, `sr`, `duration_sec`
+- `streams`: [] (미사용)
+- `sections`: [] (미사용)
+- `keypoints`: [] (미사용)
+- `keypoints_by_band`: 드럼 대역별 키온셋 목록 (drum/run 출력)
+- `texture_blocks_by_band`: 드럼 대역별 질감 블록 (drum/run 출력)
+- `bass`: (선택) `{ "curve": [...], "keypoints": [...] }` — 베이스 피치 곡선·키포인트
 
 ---
 

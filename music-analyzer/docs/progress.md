@@ -77,7 +77,7 @@ flowchart LR
 
 ## 1. 진행 현황
 
-### 1.1 레이어링·JSON (02_layered_onset_export)
+### 1.1 레이어링·JSON (onset_layered/)
 
 **01_energy.ipynb**
 
@@ -115,7 +115,7 @@ flowchart LR
 
 - **Context Dependency** (layering.md 5) 구현. "혼자 있을 때만 들리는가? 다른 소리에 묻히는가?"
 - Local SNR: 이벤트 윈도우(±50ms) 에너지 vs 배경 윈도우(직전/직후 100ms) 에너지. `snr_db = 10*log10(E_event/E_bg)`
-- 대역별 마스킹: 이벤트/배경 스펙트럼을 Low(20-150Hz)/Mid(150-2kHz)/High(2k-10kHz) 대역별로 비교. `masking_ratio = E_bg/E_event`
+- 대역별 마스킹: 이벤트/배경 스펙트럼을 Low(20-200Hz)/Mid(200-3kHz)/High(3k-10kHz) 대역별로 비교. `masking_ratio = E_bg/E_event`
 - dependency_score = 1 - norm(SNR). SNR 낮을수록 의존성 높음.
 - **저장**: `onset_events_context.json`. `web/public` 복사.
 
@@ -232,19 +232,19 @@ flowchart LR
 | JSON texture | `textures` | min–max → 0~1. `texture_hz`는 원시 Hz |
 | 시각화 점 크기 | `strengths` | min–max 후 30~500 선형 매핑 |
 
-### 2.3 01_energy.ipynb (02_layered_onset_export)
+### 2.3 01_energy.ipynb (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
 | Onset | `onset_detect` (delta=0.07, wait=4) + `refine_onset_times` | ±80 ms, hop_refine=64 로컬 피크 → `onset_times`, `strengths` |
 | 구간 | 이벤트 i | `mid_prev`/`mid_next` = 인접 onset 시간의 중점. seg = y[start:end] |
 | RMS | seg | `rms = sqrt(mean(seg²))`. `log_rms = log(1e-10 + rms)` |
-| 대역 에너지 | seg, n_fft=2048 | rfft 절대값 제곱. Low 20–150, Mid 150–2k, High 2k–10k Hz 구간 합 |
+| 대역 에너지 | seg, n_fft=2048 | rfft 절대값 제곱. Low 20–200, Mid 200–3k, High 3k–10k Hz 구간 합 |
 | energy_score | rms | `robust_norm(log_rms)` → 0~1 (median/MAD, clip(0.5+z/6, 0, 1)) |
 | E_norm_* | band_energy | 각 대역별 `robust_norm` → 0~1 |
 | JSON | — | `strength`=energy_score, `texture`=E_norm_high. 원시·정규화 값 모두 포함 |
 
-### 2.4 02_clarity.ipynb (02_layered_onset_export)
+### 2.4 02_clarity.ipynb (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -259,7 +259,7 @@ flowchart LR
 | clarity_score | clarity_raw | percentile 1–99 정규화 → 0~1, 이후 상·하위 1% clip |
 | JSON | — | `attack_time_ms`, `clarity_score` 저장 |
 
-### 2.5 03_temporal.py (02_layered_onset_export)
+### 2.5 03_temporal.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -272,7 +272,7 @@ flowchart LR
 | temporal_score | — | `grid_align × repetition × strength_weight(0.85~1.0)`. robust_norm |
 | JSON | — | `grid_align_score`, `repetition_score`, `temporal_score`, `ioi_prev/next` |
 
-### 2.6 04_spectral.py (02_layered_onset_export)
+### 2.6 04_spectral.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -285,7 +285,7 @@ flowchart LR
 | focus_score | flatness, bandwidth | `1 - 0.5×norm(flat) - 0.5×norm(bw)`. robust_norm |
 | JSON | — | `spectral_centroid_hz`, `spectral_bandwidth_hz`, `spectral_flatness`, `focus_score` |
 
-### 2.7 05_context.py (02_layered_onset_export)
+### 2.7 05_context.py (onset_layered/)
 
 | 단계 | 값 | 가공 |
 |------|-----|------|
@@ -293,7 +293,7 @@ flowchart LR
 | 이벤트 윈도우 | onset ±50ms | `seg_event = y[ev_start:ev_end]` |
 | 배경 윈도우 | 직전/직후 100ms | `seg_bg = concat(seg_bg_prev, seg_bg_next)` |
 | Local SNR | E_event, E_bg | `snr_db = 10 * log10(E_event / E_bg)` |
-| 대역별 마스킹 | rfft, band_hz | Low(20-150Hz), Mid(150-2kHz), High(2k-10kHz). `masking = E_bg_band / E_event_band` |
+| 대역별 마스킹 | rfft, band_hz | Low(20-200Hz), Mid(200-3kHz), High(3k-10kHz). `masking = E_bg_band / E_event_band` |
 | dependency_score | snr_db | `1 - robust_norm(snr_db)`. SNR 낮을수록 의존성 높음 |
 | JSON | — | `snr_db`, `masking_low`, `masking_mid`, `masking_high`, `dependency_score` |
 
@@ -307,6 +307,20 @@ flowchart LR
 - **입력**: `build_context_with_band_evidence()` → `band_onset_times`, `band_onset_strengths`.
 - **흐름**: `build_streams(band_onset_times, band_onset_strengths)` → 스트림 목록. `segment_sections(streams, duration)` → 섹션 목록. 섹션 경계 + 스트림 accent → keypoints.
 - **저장**: `write_streams_sections_json(..., streams, sections, keypoints, events, ...)` → `streams_sections.json`. 작업 과정 상세는 [work_process.md](work_process.md) §1.3 참고.
+
+**08_drum_band_energy.py, 09_madmom_drum_band.py**
+
+- **08**: stem 폴더 기반 low/mid/high 대역 에너지. `compute_drum_band_energy`, `write_drum_band_energy_json`.
+- **09**: madmom 드럼 대역 키포인트. `compute_madmom_drum_band_keypoints`.
+
+**10_cnn_band_onsets.py**
+
+- CNN + ODF band onset/strength. `compute_cnn_band_onsets`, `compute_cnn_band_onsets_with_odf` 내부용.
+
+**export/run_stem_folder.py (드럼+베이스 통합)**
+
+- **입력**: stem 폴더명. **흐름**: drum/run(CNN band onset → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(조건부).
+- **저장**: `write_streams_sections_json(..., keypoints_by_band=..., texture_blocks_by_band=..., bass=bass_dict)` → `streams_sections_cnn.json`.
 
 ---
 
@@ -366,7 +380,7 @@ drums stem 확보 → 01_explore·03_visualize_point 드럼 입력으로 사용.
 
 ---
 
-### 3.4 01_energy.ipynb, 02_clarity.ipynb, 03_temporal.py, 04_spectral.py, 05_context.py (02_layered_onset_export)
+### 3.4 01_energy.ipynb, 02_clarity.ipynb, 03_temporal.py, 04_spectral.py, 05_context.py (onset_layered/)
 
 - **01_energy**: 구간별 RMS·대역 에너지 → energy_score, E_norm_* → JSON. §2.3 참고.
 - **02_clarity**: 구간별 Attack Time(10%→90%) → clarity_score → JSON. §2.4 참고.
@@ -409,7 +423,7 @@ drums stem 확보 → 01_explore·03_visualize_point 드럼 입력으로 사용.
 |------|------|
 | docs/README.md | 기록 정보 정리·분류·목차 |
 | docs/onset_module.md | onset 모듈 구조·공개 API·검증 |
-| docs/pipeline.md | 데이터 흐름·스크립트 01~07 |
+| docs/pipeline.md | 데이터 흐름·스크립트 01~11 |
 | docs/json_spec.md | 파일별 JSON 스키마·Web 수용 형식 |
 | docs/layering.md | band 기반 역할·레이어링 설계(assign_roles_by_band, bands) |
 | docs/work_process.md | 작업 과정 — 추출·안정화·점수·아키텍처 |

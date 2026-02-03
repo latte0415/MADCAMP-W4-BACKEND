@@ -8,7 +8,7 @@
 
 ### 1.1 공통 파이프라인 (L2)
 
-모든 레이어드 익스포트(01_energy ~ 07_streams_sections)는 **동일한 onset 파이프라인**을 사용합니다.
+레이어드 익스포트(onset_layered/01_energy ~ 06_layered_export)는 **librosa 기반 동일 onset 파이프라인**을 사용합니다. 메인 드럼·베이스 출력은 **export/run_stem_folder**가 **drum/run**(CNN band onset → keypoints_by_band, texture_blocks_by_band) + **bass/run**(run_bass_pipeline)을 호출하는 CNN+ODF·베이스 파이프라인을 사용하며, **스트림/섹션은 사용하지 않음**.
 
 | 단계 | 함수/방식 | 설명 |
 |------|-----------|------|
@@ -31,14 +31,12 @@
 | **Spectral** | 이벤트 i: [mid_prev, mid_next] (Energy와 동일) | STFT → centroid, bandwidth, flatness |
 | **Context** | 이벤트 윈도우: onset ±50ms. 배경: 직전/직후 각 100ms | Local SNR, 대역별 마스킹 |
 
-- **대역(Energy/Spectral/Context)**: BAND_HZ 기준 Low(20–150Hz), Mid(150–2kHz), High(2k–10kHz). (band_evidence·역할 할당은 동일 경계.)
+- **대역(Energy/Spectral/Context)**: BAND_HZ 기준 Low(20–200Hz), Mid(200–3kHz), High(3k–10kHz). (band_evidence·역할 할당은 동일 경계.)
 
-### 1.3 스트림·섹션 (07)
+### 1.3 스트림·섹션 (레거시, 메인 파이프라인 미사용)
 
-- **입력**: `build_context_with_band_evidence()`의 `band_onset_times`, `band_onset_strengths`.
-- **추출**: `build_streams(band_onset_times, band_onset_strengths)` — band별 IOI·시간 연속성으로 리듬 스트림 묶음.
-- **추출**: `segment_sections(streams, duration)` — 윈도우별 스트림 상태 벡터 변화점으로 파트 분할.
-- **키포인트**: 섹션 경계 + 스트림 accent 시점 → `streams_sections.json`의 `keypoints[]`.
+- **메인 출력**: **export/run_stem_folder** — drum/run(CNN → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(조건부) → `streams_sections_cnn.json`.
+- **legacy/streams_sections**: **입력** `build_context_with_band_evidence()`의 `band_onset_times`, `band_onset_strengths`. **추출** `build_streams` → `segment_sections`. **키포인트** 섹션 경계 + 스트림 accent → `streams_sections.json`. 실행 비활성.
 
 ---
 
@@ -85,7 +83,7 @@
 | **L3** | 이벤트별 피처 | `features/` — feature 간 참조 없음, OnsetContext만 입력 |
 | **L4** | 정규화·역할 할당 | `scoring.py` — normalize_metrics_per_track, assign_roles_by_band |
 | **L5** | JSON/파일 출력 | `export.py` — write_*_json, write_layered_json, write_streams_sections_json |
-| **L6** | 엔트리 스크립트 | `scripts/01_basic_test/`, `scripts/02_layered_onset_export/` — engine.onset만 사용 |
+| **L6** | 엔트리 스크립트 | `scripts/explore/`, `scripts/onset_layered/`, `scripts/drum/`, `scripts/bass/`, `scripts/export/` — 공용 `_common`, engine.onset·engine.bass 사용 |
 
 ### 4.2 Anchor + Band Evidence
 
@@ -102,9 +100,8 @@
 
 ### 4.4 스트림·섹션
 
-- **스트림**: band별 onset 시퀀스를 IOI·시간 연속성으로 묶은 단위. `build_streams(band_onset_times, band_onset_strengths)`.
-- **섹션**: 윈도우별 스트림 상태 벡터의 변화점으로 구간 분할. `segment_sections(streams, duration)`.
-- **키포인트**: 섹션 경계 + 스트림 accent → `keypoints[]`. JSON은 `write_streams_sections_json`으로 출력.
+- **스트림/섹션**: band별 onset → `build_streams` → `segment_sections` → `keypoints[]`. **메인 드럼 파이프라인에서는 미사용.** 레거시·실험용으로만 유지(legacy/streams_sections).
+- **메인 드럼**: drum/run은 CNN band onset → keypoints_by_band, texture_blocks_by_band만 출력. build_streams·segment_sections·extract_keypoints 호출 없음.
 
 ---
 

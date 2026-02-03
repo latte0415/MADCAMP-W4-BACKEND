@@ -77,6 +77,7 @@ for each event i:
 
 - 이벤트당 **역할 구성**: P0 대역 1개, P1 대역 0~N개(리스트, P0와 중복 가능), P2 대역 0~N개.  
 - JSON: `events[].bands` = `[{ band, roles: ["P0","P1"], role(호환용) }, ...]`. **layer**는 시각화 호환용(deprecated).
+- **스트림 기반 레이어(레거시)**: `assign_layer_to_streams(streams)`로 스트림별 P0/P1/P2 부여. **메인 파이프라인에서는 미사용.** 메인 출력은 export/run_stem_folder → drum/run(keypoints_by_band, texture_blocks_by_band) + bass/run.
 
 ---
 

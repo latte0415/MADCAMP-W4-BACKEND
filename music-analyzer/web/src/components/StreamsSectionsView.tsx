@@ -63,7 +63,7 @@ export function StreamsSectionsView({ audioUrl, data }: StreamsSectionsViewProps
   const [minPxPerSec, setMinPxPerSec] = useState(DEFAULT_MIN_PX_PER_SEC);
   const [visibleRange, setVisibleRange] = useState<[number, number]>([0, 1]);
   const [selectedBand, setSelectedBand] = useState<BandFilterOption>("all");
-  const [filteredCache, setFilteredCache] = useState<Record<BandId, string>>({});
+  const [filteredCache, setFilteredCache] = useState<Partial<Record<BandId, string>>>({});
   const [filterLoading, setFilterLoading] = useState(false);
   const blobUrlsRef = useRef<string[]>([]);
 

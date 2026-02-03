@@ -11,6 +11,7 @@ import { Tab07SpectralView } from "./components/Tab07SpectralView";
 import { Tab08ContextView } from "./components/Tab08ContextView";
 import { Tab09LayerView } from "./components/Tab09LayerView";
 import { StreamsSectionsView } from "./components/StreamsSectionsView";
+import { Tab13DrumKeypointsView } from "./components/Tab13DrumKeypointsView";
 import { LayerFilterPanel } from "./components/LayerFilterPanel";
 import type { EventPoint } from "./types/event";
 import type { EnergyJsonData } from "./types/energyEvent";
@@ -22,23 +23,30 @@ import type { StreamsSectionsData } from "./types/streamsSections";
 import type { DrumBandEnergyJsonData } from "./types/drumBandEnergy";
 import "./App.css";
 
-type MainMode = "legacy" | "streams";
-type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12";
+type MainMode = "final" | "test";
+type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13" | "streams";
 
-const TABS: { id: TabId; label: string; samplePath: string }[] = [
-  { id: "01", label: "01 Explore", samplePath: "/onset_beats.json" },
-  { id: "03", label: "03 Visualize", samplePath: "/onset_events.json" },
+/** 최종본: 메인 파이프라인 결과만 (드럼 키포인트 + 기존 분석 탭) */
+const TABS_FINAL: { id: TabId; label: string; samplePath: string }[] = [
+  { id: "13", label: "드럼 키포인트", samplePath: "/streams_sections_cnn.json" },
   { id: "04", label: "04 Energy", samplePath: "/onset_events_energy.json" },
-  { id: "04b", label: "Energy Bar (테스트)", samplePath: "/onset_events_energy.json" },
-  { id: "04c", label: "Drum Band Energy", samplePath: "/drum_band_energy.json" },
   { id: "05", label: "05 Clarity", samplePath: "/onset_events_clarity.json" },
   { id: "06", label: "06 Temporal", samplePath: "/onset_events_temporal.json" },
   { id: "07", label: "07 Spectral", samplePath: "/onset_events_spectral.json" },
   { id: "08", label: "08 Context", samplePath: "/onset_events_context.json" },
   { id: "09", label: "09 Layer (P0/P1/P2)", samplePath: "/onset_events_layered.json" },
+];
+
+/** 테스트·실험: 레거시·실험용 뷰 */
+const TABS_TEST: { id: TabId; label: string; samplePath: string }[] = [
+  { id: "01", label: "01 Explore", samplePath: "/onset_beats.json" },
+  { id: "03", label: "03 Visualize", samplePath: "/onset_events.json" },
+  { id: "04b", label: "04b Energy Bar (테스트)", samplePath: "/onset_events_energy.json" },
+  { id: "04c", label: "04c Drum Band Energy", samplePath: "/drum_band_energy.json" },
   { id: "10", label: "10 Madmom Drum Band", samplePath: "/drum_band_madmom.json" },
   { id: "11", label: "11 CNN Band Onsets", samplePath: "/cnn_band_onsets.json" },
   { id: "12", label: "12 CNN Streams/Layers", samplePath: "/streams_sections_cnn.json" },
+  { id: "streams", label: "스트림·파트 (레거시)", samplePath: "/streams_sections.json" },
 ];
 
 function getUniqueLayers(events: EventPoint[]): string[] {
@@ -46,10 +54,16 @@ function getUniqueLayers(events: EventPoint[]): string[] {
   return Array.from(set);
 }
 
+const TABS_BY_MODE: Record<MainMode, typeof TABS_FINAL> = {
+  final: TABS_FINAL,
+  test: TABS_TEST,
+};
+
 function App() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [mainMode, setMainMode] = useState<MainMode>("legacy");
-  const [activeTab, setActiveTab] = useState<TabId>("01");
+  const [mainMode, setMainMode] = useState<MainMode>("final");
+  const [activeTab, setActiveTab] = useState<TabId>("13");
+  const currentTabs = TABS_BY_MODE[mainMode];
   type TabEvents = Partial<Record<TabId, Array<EventPoint>>>;
   type TabLayers = Partial<Record<TabId, Set<string>>>;
   const [tabEvents, setTabEvents] = useState<TabEvents>({});
@@ -59,7 +73,6 @@ function App() {
   const [tabTemporalData, setTabTemporalData] = useState<Partial<Record<TabId, TemporalJsonData | null>>>({});
   const [tabSpectralData, setTabSpectralData] = useState<Partial<Record<TabId, SpectralJsonData | null>>>({});
   const [tabContextData, setTabContextData] = useState<Partial<Record<TabId, ContextJsonData | null>>>({});
-  const [streamsSectionsData, setStreamsSectionsData] = useState<StreamsSectionsData | null>(null);
   const [tabStreamsSectionsData, setTabStreamsSectionsData] = useState<Partial<Record<TabId, StreamsSectionsData | null>>>({});
   const [tabDrumBandData, setTabDrumBandData] = useState<Partial<Record<TabId, DrumBandEnergyJsonData | null>>>({});
 
@@ -109,10 +122,6 @@ function App() {
     [activeTab]
   );
 
-  const handleStreamsSectionsLoaded = useCallback((data: StreamsSectionsData | null) => {
-    setStreamsSectionsData(data);
-  }, []);
-
   const handleStreamsSectionsLoadedForTab = useCallback(
     (data: StreamsSectionsData | null) => {
       setTabStreamsSectionsData((prev) => ({ ...prev, [activeTab]: data }));
@@ -152,39 +161,29 @@ function App() {
         <div className="main-tabs-header">
           <button
             type="button"
-            className={`main-tab-btn ${mainMode === "legacy" ? "active" : ""}`}
-            onClick={() => setMainMode("legacy")}
+            className={`main-tab-btn ${mainMode === "final" ? "active" : ""}`}
+            onClick={() => {
+              setMainMode("final");
+              setActiveTab("13");
+            }}
           >
-            기존 분석
+            최종본
           </button>
           <button
             type="button"
-            className={`main-tab-btn ${mainMode === "streams" ? "active" : ""}`}
-            onClick={() => setMainMode("streams")}
+            className={`main-tab-btn ${mainMode === "test" ? "active" : ""}`}
+            onClick={() => {
+              setMainMode("test");
+              setActiveTab("01");
+            }}
           >
-            스트림·파트
+            테스트·실험
           </button>
         </div>
 
-        {mainMode === "streams" ? (
-          <div className="tab-panel active">
-            <div className="tab-upload">
-              <JsonUploader
-                onJsonLoaded={() => {}}
-                onStreamsSectionsLoaded={handleStreamsSectionsLoaded}
-                samplePath="/streams_sections.json"
-                sampleLabel="스트림·파트 샘플 로드"
-              />
-            </div>
-            <section className="controls-section">
-              <StreamsSectionsView audioUrl={audioUrl} data={streamsSectionsData} />
-            </section>
-          </div>
-        ) : (
-          <>
-            <section className="tabs-section">
-              <div className="tabs-header">
-                {TABS.map((tab) => (
+        <section className="tabs-section">
+          <div className="tabs-header">
+            {currentTabs.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
@@ -196,7 +195,7 @@ function App() {
                 ))}
               </div>
 
-              {TABS.map((tab) =>
+              {currentTabs.map((tab) =>
           activeTab === tab.id ? (
             <div key={tab.id} className="tab-panel active">
               <div className="tab-upload">
@@ -208,7 +207,7 @@ function App() {
                   onSpectralLoaded={tab.id === "07" ? handleSpectralLoaded : undefined}
                   onContextLoaded={tab.id === "08" ? handleContextLoaded : undefined}
                   onDrumBandEnergyLoaded={tab.id === "04c" || tab.id === "10" || tab.id === "11" ? handleDrumBandEnergyLoaded : undefined}
-                  onStreamsSectionsLoaded={tab.id === "12" ? handleStreamsSectionsLoadedForTab : undefined}
+                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" || tab.id === "streams" ? handleStreamsSectionsLoadedForTab : undefined}
                   samplePath={tab.samplePath}
                   sampleLabel={`${tab.label} 샘플 로드`}
                 />
@@ -270,6 +269,16 @@ function App() {
                     audioUrl={audioUrl}
                     data={tabStreamsSectionsData["12"] ?? null}
                   />
+                ) : tab.id === "streams" ? (
+                  <StreamsSectionsView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["streams"] ?? null}
+                  />
+                ) : tab.id === "13" ? (
+                  <Tab13DrumKeypointsView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["13"] ?? null}
+                  />
                 ) : (
                   <>
                     <WaveformWithOverlay
@@ -295,9 +304,7 @@ function App() {
             </div>
           ) : null
         )}
-            </section>
-          </>
-        )}
+        </section>
       </section>
     </div>
   );

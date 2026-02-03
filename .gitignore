@@ -12,12 +12,14 @@ outputs/
 
 # inputs (optional large media)
 inputs/*.mp4
+**/inputs/*.mp4
 
 # local cache
 .cache/
 
 # GPU weights
 weights/
+**/weights/
 
 # temp
 *.tmp

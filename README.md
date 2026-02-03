@@ -7,6 +7,10 @@
 - **Dance 모드:** Hit/Hold 기반 모션 이벤트
 - **Magic 모드:** Object vanish/appear 기반 이벤트 + (보조) strict hit/hold
 
+## 현재 저장소 구조 안내
+이 리포지토리는 상위에 **backend/**, **motion/**, **music-anaylzer/** 폴더가 있습니다.  
+아래 문서의 기존 경로(`pipelines/`, `gpu/` 등)는 **motion/** 하위 경로를 기준으로 이해하면 됩니다.
+
 ## 폴더 구조
 ```
 .

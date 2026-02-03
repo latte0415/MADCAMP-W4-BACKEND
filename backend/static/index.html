@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dance Lab Demo</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Dance Lab</div>
+      <div class="user">
+        <span id="user-name" class="user__name">게스트</span>
+        <button id="btn-login" class="btn">Google 로그인</button>
+        <button id="btn-logout" class="btn ghost hidden">로그아웃</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>대시보드</h2>
+        <div class="form">
+          <label>
+            작업명
+            <input id="title" type="text" placeholder="작업명을 입력하세요" />
+          </label>
+          <label>
+            모드
+            <select id="mode">
+              <option value="dance">Dance</option>
+              <option value="magic">Magic</option>
+            </select>
+          </label>
+          <label>
+            음악 업로드
+            <input id="audio" type="file" accept="audio/*" />
+          </label>
+          <label>
+            영상 업로드
+            <input id="video" type="file" accept="video/*" />
+          </label>
+          <button id="btn-submit" class="btn">분석 요청</button>
+        </div>
+        <div id="status" class="status">준비됨</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>라이브러리</h2>
+          <button id="btn-refresh" class="btn ghost">새로고침</button>
+        </div>
+        <div id="library" class="library"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

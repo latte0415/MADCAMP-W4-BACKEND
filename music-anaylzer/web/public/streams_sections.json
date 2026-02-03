@@ -1,0 +1,5382 @@
+{
+  "source": "drums.wav",
+  "sr": 22050,
+  "duration_sec": 42.0,
+  "streams": [
+    {
+      "id": "low_0",
+      "band": "low",
+      "start": 1.02,
+      "end": 4.0328,
+      "events": [
+        1.02,
+        1.3364,
+        1.5222,
+        1.6267,
+        1.8356,
+        2.0998,
+        2.2652,
+        2.4423,
+        2.5293,
+        2.7964,
+        2.8341,
+        3.1389,
+        3.3333,
+        3.4349,
+        3.7484,
+        3.9254,
+        4.0328
+      ],
+      "median_ioi": 0.1858,
+      "ioi_std": 0.0769,
+      "density": 5.6426,
+      "strength_median": 0.5501,
+      "accents": []
+    },
+    {
+      "id": "low_1",
+      "band": "low",
+      "start": 4.5146,
+      "end": 5.8266,
+      "events": [
+        4.5146,
+        4.6772,
+        4.8426,
+        4.9384,
+        5.1445,
+        5.2345,
+        5.5508,
+        5.8266
+      ],
+      "median_ioi": 0.1654,
+      "ioi_std": 0.0791,
+      "density": 6.0979,
+      "strength_median": 0.3685,
+      "accents": []
+    },
+    {
+      "id": "low_2",
+      "band": "low",
+      "start": 6.4245,
+      "end": 29.122,
+      "events": [
+        6.4245,
+        6.7409,
+        6.9034,
+        7.3301,
+        7.6348,
+        7.9106,
+        8.2298,
+        8.5694,
+        8.8336,
+        9.1296,
+        9.3067,
+        9.594,
+        9.7362,
+        10.0352,
+        10.3254,
+        10.6273,
+        11.2223,
+        11.6896,
+        12.1134,
+        12.421,
+        12.7055,
+        13.0132,
+        13.2976,
+        13.5995,
+        14.0,
+        14.0697,
+        14.4992,
+        14.8011,
+        15.1871,
+        15.3932,
+        15.9969,
+        16.3017,
+        16.4642,
+        16.8938,
+        17.1927,
+        17.4656,
+        17.7878,
+        18.3799,
+        18.7485,
+        18.853,
+        19.268,
+        19.5612,
+        20.0198,
+        20.1591,
+        20.7454,
+        21.2127,
+        21.6336,
+        21.9412,
+        22.2257,
+        22.5391,
+        22.8468,
+        23.14,
+        23.497,
+        23.5985,
+        24.0339,
+        24.3329,
+        24.6318,
+        24.8292,
+        25.2298,
+        25.5374,
+        25.7319,
+        26.0047,
+        26.1469,
+        26.3443,
+        26.6026,
+        26.7507,
+        26.9364,
+        27.0148,
+        27.1918,
+        27.4937,
+        27.6127,
+        27.9204,
+        28.1061,
+        28.3877,
+        28.5299,
+        28.8172,
+        28.9798,
+        29.122
+      ],
+      "median_ioi": 0.299,
+      "ioi_std": 0.1194,
+      "density": 3.4365,
+      "strength_median": 0.1106,
+      "accents": []
+    },
+    {
+      "id": "low_3",
+      "band": "low",
+      "start": 29.5777,
+      "end": 33.2929,
+      "events": [
+        29.5777,
+        29.8912,
+        30.0102,
+        30.3149,
+        30.5007,
+        30.7706,
+        30.9128,
+        31.0899,
+        31.3772,
+        31.5137,
+        31.6849,
+        31.7807,
+        31.9664,
+        32.2509,
+        32.396,
+        32.5847,
+        32.6979,
+        32.872,
+        32.9997,
+        33.2929
+      ],
+      "median_ioi": 0.1771,
+      "ioi_std": 0.0707,
+      "density": 5.3833,
+      "strength_median": 0.1013,
+      "accents": []
+    },
+    {
+      "id": "low_4",
+      "band": "low",
+      "start": 33.8966,
+      "end": 41.9249,
+      "events": [
+        33.8966,
+        34.3726,
+        34.8022,
+        35.104,
+        35.6903,
+        36.2824,
+        36.7556,
+        37.1735,
+        37.4754,
+        38.0617,
+        38.6538,
+        39.1269,
+        39.5507,
+        39.8525,
+        40.4272,
+        41.0367,
+        41.4982,
+        41.9249
+      ],
+      "median_ioi": 0.4731,
+      "ioi_std": 0.103,
+      "density": 2.2421,
+      "strength_median": 0.2666,
+      "accents": []
+    },
+    {
+      "id": "mid_0",
+      "band": "mid",
+      "start": 0.9968,
+      "end": 35.0953,
+      "events": [
+        0.9968,
+        1.3219,
+        1.5106,
+        1.618,
+        1.8008,
+        1.8966,
+        2.0969,
+        2.2362,
+        2.5235,
+        2.6803,
+        2.8341,
+        3.1302,
+        3.3188,
+        3.4262,
+        3.7223,
+        3.9051,
+        4.0241,
+        4.2012,
+        4.3289,
+        4.5059,
+        4.6453,
+        4.8165,
+        4.9297,
+        5.1068,
+        5.2345,
+        5.5421,
+        5.8208,
+        6.1284,
+        6.4187,
+        6.7263,
+        6.8947,
+        7.0369,
+        7.3272,
+        7.629,
+        7.9251,
+        8.1079,
+        8.224,
+        8.5172,
+        8.7088,
+        8.8278,
+        9.0048,
+        9.1151,
+        9.3009,
+        9.4402,
+        9.6056,
+        9.7304,
+        10.0294,
+        10.3196,
+        10.5112,
+        10.6215,
+        10.9176,
+        11.0946,
+        11.2165,
+        11.4023,
+        11.5097,
+        11.6838,
+        11.8173,
+        11.9944,
+        12.1105,
+        12.4152,
+        12.7113,
+        12.8971,
+        13.0073,
+        13.1873,
+        13.3063,
+        13.4834,
+        13.5966,
+        13.7823,
+        13.8984,
+        14.0639,
+        14.2003,
+        14.3744,
+        14.4934,
+        14.685,
+        14.7953,
+        15.0913,
+        15.2742,
+        15.3874,
+        15.7067,
+        15.9911,
+        16.2959,
+        16.4555,
+        16.6064,
+        16.8909,
+        17.184,
+        17.4801,
+        17.6629,
+        17.782,
+        18.0838,
+        18.258,
+        18.3741,
+        18.5511,
+        18.6643,
+        18.8472,
+        18.9749,
+        19.1461,
+        19.2622,
+        19.5554,
+        19.8456,
+        20.0314,
+        20.1533,
+        20.4435,
+        20.7425,
+        20.9254,
+        21.0327,
+        21.2098,
+        21.3404,
+        21.5146,
+        21.6307,
+        21.9354,
+        22.2286,
+        22.4143,
+        22.5333,
+        22.7162,
+        22.8236,
+        23.0122,
+        23.1341,
+        23.4186,
+        23.5956,
+        23.7263,
+        23.912,
+        24.031,
+        24.3271,
+        24.6289,
+        24.8234,
+        24.9453,
+        25.1137,
+        25.2239,
+        25.5345,
+        25.729,
+        25.8364,
+        25.9989,
+        26.1295,
+        26.3211,
+        26.4169,
+        26.5968,
+        26.7042,
+        26.9248,
+        27.0235,
+        27.1889,
+        27.3224,
+        27.4937,
+        27.6069,
+        27.9175,
+        28.1061,
+        28.2135,
+        28.3848,
+        28.5183,
+        28.7011,
+        28.7969,
+        28.974,
+        29.0843,
+        29.3136,
+        29.4064,
+        29.5748,
+        29.7112,
+        29.8883,
+        30.0073,
+        30.3062,
+        30.5036,
+        30.611,
+        30.7706,
+        30.907,
+        31.0899,
+        31.206,
+        31.3714,
+        31.4933,
+        31.682,
+        31.8039,
+        31.9635,
+        32.0825,
+        32.248,
+        32.3902,
+        32.6688,
+        32.9736,
+        33.2929,
+        33.4757,
+        33.6151,
+        33.7863,
+        33.8937,
+        34.2014,
+        34.3668,
+        34.5061,
+        34.7964,
+        35.0953
+      ],
+      "median_ioi": 0.1741,
+      "ioi_std": 0.0695,
+      "density": 5.4255,
+      "strength_median": 3.4798,
+      "accents": []
+    },
+    {
+      "id": "mid_1",
+      "band": "mid",
+      "start": 35.6874,
+      "end": 41.9191,
+      "events": [
+        35.6874,
+        35.9806,
+        36.2737,
+        36.5669,
+        36.7498,
+        36.8746,
+        37.1677,
+        37.4696,
+        38.0559,
+        38.3577,
+        38.6509,
+        38.944,
+        39.124,
+        39.5449,
+        39.8496,
+        40.4214,
+        40.7349,
+        41.028,
+        41.3328,
+        41.4924,
+        41.9191
+      ],
+      "median_ioi": 0.2932,
+      "ioi_std": 0.1147,
+      "density": 3.3699,
+      "strength_median": 4.4183,
+      "accents": []
+    },
+    {
+      "id": "high_0",
+      "band": "high",
+      "start": 0.9997,
+      "end": 41.9191,
+      "events": [
+        0.9997,
+        1.3219,
+        1.5077,
+        1.618,
+        1.8037,
+        1.8966,
+        2.094,
+        2.2362,
+        2.5206,
+        2.7006,
+        2.837,
+        3.1156,
+        3.3188,
+        3.4262,
+        3.7165,
+        3.908,
+        4.027,
+        4.2099,
+        4.3318,
+        4.5059,
+        4.6453,
+        4.8194,
+        4.9297,
+        5.1068,
+        5.2345,
+        5.545,
+        5.7366,
+        5.8208,
+        6.0152,
+        6.1284,
+        6.3258,
+        6.4158,
+        6.7234,
+        6.8947,
+        7.034,
+        7.3243,
+        7.6261,
+        7.8235,
+        7.9251,
+        8.1108,
+        8.224,
+        8.5172,
+        8.7146,
+        8.8249,
+        9.0077,
+        9.1151,
+        9.3009,
+        9.4373,
+        9.6056,
+        9.7275,
+        10.0265,
+        10.218,
+        10.3196,
+        10.5025,
+        10.6215,
+        10.8073,
+        10.9146,
+        11.0917,
+        11.2136,
+        11.3994,
+        11.5097,
+        11.6809,
+        11.8173,
+        11.9973,
+        12.1105,
+        12.4123,
+        12.6068,
+        12.7113,
+        12.9,
+        13.0102,
+        13.1902,
+        13.3063,
+        13.4834,
+        13.5966,
+        13.7852,
+        13.8926,
+        14.0639,
+        14.2003,
+        14.3744,
+        14.4905,
+        14.6821,
+        14.7924,
+        15.0884,
+        15.2713,
+        15.3874,
+        15.7212,
+        15.8895,
+        15.9911,
+        16.1769,
+        16.293,
+        16.4555,
+        16.6035,
+        16.8851,
+        17.1811,
+        17.4801,
+        17.6629,
+        17.782,
+        17.9677,
+        18.0838,
+        18.258,
+        18.3741,
+        18.5511,
+        18.6643,
+        18.8443,
+        18.972,
+        19.1461,
+        19.2477,
+        19.5525,
+        19.8456,
+        20.0314,
+        20.1533,
+        20.3274,
+        20.4406,
+        20.6322,
+        20.7396,
+        20.9224,
+        21.0327,
+        21.2098,
+        21.3375,
+        21.5146,
+        21.6278,
+        21.9354,
+        22.1241,
+        22.2286,
+        22.4143,
+        22.5333,
+        22.7133,
+        22.8236,
+        23.0093,
+        23.1312,
+        23.3025,
+        23.4186,
+        23.5956,
+        23.7263,
+        23.9091,
+        24.0281,
+        24.3271,
+        24.626,
+        24.8263,
+        24.9395,
+        25.1078,
+        25.2239,
+        25.5374,
+        25.7319,
+        25.8364,
+        25.9989,
+        26.1266,
+        26.3153,
+        26.4169,
+        26.5997,
+        26.7042,
+        26.9277,
+        27.0235,
+        27.1889,
+        27.3195,
+        27.4937,
+        27.6098,
+        27.9175,
+        28.1061,
+        28.2164,
+        28.3848,
+        28.5154,
+        28.6982,
+        28.7998,
+        28.974,
+        29.0872,
+        29.3078,
+        29.4064,
+        29.5719,
+        29.7083,
+        29.8883,
+        30.0102,
+        30.3062,
+        30.5036,
+        30.6139,
+        30.7793,
+        30.907,
+        31.0899,
+        31.206,
+        31.3714,
+        31.4933,
+        31.6849,
+        31.801,
+        31.9635,
+        32.0825,
+        32.248,
+        32.3902,
+        32.6688,
+        32.9736,
+        33.3016,
+        33.4757,
+        33.6151,
+        33.7863,
+        33.8937,
+        34.1985,
+        34.3668,
+        34.5061,
+        34.7964,
+        35.0953,
+        35.4001,
+        35.6874,
+        35.9806,
+        36.2737,
+        36.4595,
+        36.564,
+        36.7498,
+        36.8717,
+        37.1677,
+        37.4667,
+        38.0559,
+        38.3577,
+        38.648,
+        38.9411,
+        39.124,
+        39.5449,
+        39.8467,
+        40.1399,
+        40.4214,
+        40.7349,
+        41.028,
+        41.3328,
+        41.4953,
+        41.9191
+      ],
+      "median_ioi": 0.1741,
+      "ioi_std": 0.0764,
+      "density": 5.4497,
+      "strength_median": 2.8204,
+      "accents": []
+    }
+  ],
+  "sections": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 1.0,
+      "active_stream_ids": [
+        "mid_0",
+        "high_0"
+      ],
+      "summary": {
+        "density_low": 4.0,
+        "density_mid": 4.0,
+        "density_high": 4.0,
+        "dominant_band": "low",
+        "n_streams_low": 1,
+        "n_streams_mid": 1,
+        "n_streams_high": 1
+      }
+    },
+    {
+      "id": 1,
+      "start": 1.0,
+      "end": 42.0,
+      "active_stream_ids": [
+        "low_0",
+        "low_1",
+        "low_2",
+        "low_3",
+        "low_4",
+        "mid_0",
+        "mid_1",
+        "high_0"
+      ],
+      "summary": {
+        "density_low": 3.5,
+        "density_mid": 5.5,
+        "density_high": 6.5,
+        "dominant_band": "high",
+        "n_streams_low": 1,
+        "n_streams_mid": 1,
+        "n_streams_high": 1
+      }
+    }
+  ],
+  "keypoints": [
+    {
+      "time": 0.0,
+      "type": "section_boundary",
+      "section_id": 0,
+      "label": "섹션 시작"
+    },
+    {
+      "time": 1.0,
+      "type": "section_boundary",
+      "section_id": 0,
+      "label": "섹션 끝"
+    },
+    {
+      "time": 42.0,
+      "type": "section_boundary",
+      "section_id": 1,
+      "label": "섹션 끝"
+    }
+  ],
+  "events": [
+    {
+      "time": 0.9997,
+      "t": 0.9997,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.1642,
+      "color": "#2ecc71",
+      "energy_score": 0.5537,
+      "clarity_score": 0.2786,
+      "temporal_score": 0.1326,
+      "focus_score": 0.3167,
+      "dependency_score": 0.3513
+    },
+    {
+      "time": 1.3219,
+      "t": 1.3219,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.3073,
+      "color": "#2ecc71",
+      "energy_score": 0.4825,
+      "clarity_score": 0.1206,
+      "temporal_score": 0.3911,
+      "focus_score": 0.7253,
+      "dependency_score": 0.052
+    },
+    {
+      "time": 1.5077,
+      "t": 1.5077,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.3112,
+      "color": "#2ecc71",
+      "energy_score": 0.3509,
+      "clarity_score": 0.0187,
+      "temporal_score": 0.6026,
+      "focus_score": 0.6651,
+      "dependency_score": 0.8524
+    },
+    {
+      "time": 1.618,
+      "t": 1.618,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.1013,
+      "color": "#2ecc71",
+      "energy_score": 0.6375,
+      "clarity_score": 0.2085,
+      "temporal_score": 0.8363,
+      "focus_score": 0.9026,
+      "dependency_score": 0.2459
+    },
+    {
+      "time": 1.8037,
+      "t": 1.8037,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.8402,
+      "color": "#2ecc71",
+      "energy_score": 0.4975,
+      "clarity_score": 0.1237,
+      "temporal_score": 0.262,
+      "focus_score": 0.9341,
+      "dependency_score": 0.5907
+    },
+    {
+      "time": 1.8966,
+      "t": 1.8966,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0253,
+      "color": "#2ecc71",
+      "energy_score": 0.3966,
+      "clarity_score": 0.0018,
+      "temporal_score": 0.516,
+      "focus_score": 0.5332,
+      "dependency_score": 0.5433
+    },
+    {
+      "time": 2.0969,
+      "t": 2.0969,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.1307,
+      "color": "#2ecc71",
+      "energy_score": 0.6289,
+      "clarity_score": 0.137,
+      "temporal_score": 0.1878,
+      "focus_score": 0.86,
+      "dependency_score": 0.2303
+    },
+    {
+      "time": 2.2362,
+      "t": 2.2362,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.1485,
+      "color": "#2ecc71",
+      "energy_score": 0.5025,
+      "clarity_score": 0.2329,
+      "temporal_score": 0.6156,
+      "focus_score": 0.831,
+      "dependency_score": 0.5911
+    },
+    {
+      "time": 2.5235,
+      "t": 2.5235,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.5822,
+      "color": "#2ecc71",
+      "energy_score": 0.6192,
+      "clarity_score": 0.7391,
+      "temporal_score": 0.8843,
+      "focus_score": 0.8554,
+      "dependency_score": 0.2217
+    },
+    {
+      "time": 2.6832,
+      "t": 2.6832,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 3.4968,
+      "color": "#f39c12",
+      "energy_score": 0.5046,
+      "clarity_score": 0.2696,
+      "temporal_score": 0.7516,
+      "focus_score": 0.9297,
+      "dependency_score": 0.6121
+    },
+    {
+      "time": 2.8341,
+      "t": 2.8341,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 4.2843,
+      "color": "#f39c12",
+      "energy_score": 0.6216,
+      "clarity_score": 0.3115,
+      "temporal_score": 0.8513,
+      "focus_score": 0.8109,
+      "dependency_score": 0.1898
+    },
+    {
+      "time": 3.1156,
+      "t": 3.1156,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.0404,
+      "color": "#2ecc71",
+      "energy_score": 0.4826,
+      "clarity_score": 0.1443,
+      "temporal_score": 0.047,
+      "focus_score": 0.8187,
+      "dependency_score": 0.0897
+    },
+    {
+      "time": 3.3188,
+      "t": 3.3188,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.3487,
+      "color": "#2ecc71",
+      "energy_score": 0.3539,
+      "clarity_score": 0.0229,
+      "temporal_score": 0.3318,
+      "focus_score": 0.6919,
+      "dependency_score": 0.8528
+    },
+    {
+      "time": 3.4262,
+      "t": 3.4262,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.8276,
+      "color": "#2ecc71",
+      "energy_score": 0.6217,
+      "clarity_score": 0.6483,
+      "temporal_score": 0.3934,
+      "focus_score": 0.7775,
+      "dependency_score": 0.2589
+    },
+    {
+      "time": 3.7194,
+      "t": 3.7194,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.5339,
+      "color": "#2ecc71",
+      "energy_score": 0.4893,
+      "clarity_score": 0.4679,
+      "temporal_score": 0.0762,
+      "focus_score": 0.7665,
+      "dependency_score": 0.0391
+    },
+    {
+      "time": 3.9051,
+      "t": 3.9051,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.756,
+      "color": "#2ecc71",
+      "energy_score": 0.3364,
+      "clarity_score": 0.1811,
+      "temporal_score": 0.4397,
+      "focus_score": 0.6511,
+      "dependency_score": 0.8283
+    },
+    {
+      "time": 4.0241,
+      "t": 4.0241,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.1983,
+      "color": "#2ecc71",
+      "energy_score": 0.639,
+      "clarity_score": 0.014,
+      "temporal_score": 0.5268,
+      "focus_score": 0.8884,
+      "dependency_score": 0.2928
+    },
+    {
+      "time": 4.2012,
+      "t": 4.2012,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0095,
+      "color": "#2ecc71",
+      "energy_score": 0.503,
+      "clarity_score": 0.0004,
+      "temporal_score": 0.5722,
+      "focus_score": 0.9807,
+      "dependency_score": 0.6008
+    },
+    {
+      "time": 4.326,
+      "t": 4.326,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0482,
+      "color": "#2ecc71",
+      "energy_score": 0.4224,
+      "clarity_score": 0.0026,
+      "temporal_score": 0.494,
+      "focus_score": 0.5115,
+      "dependency_score": 0.5001
+    },
+    {
+      "time": 4.5059,
+      "t": 4.5059,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.4142,
+      "color": "#2ecc71",
+      "energy_score": 0.6328,
+      "clarity_score": 0.5316,
+      "temporal_score": 0.3753,
+      "focus_score": 0.7611,
+      "dependency_score": 0.2393
+    },
+    {
+      "time": 4.6482,
+      "t": 4.6482,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.1364,
+      "color": "#f39c12",
+      "energy_score": 0.5132,
+      "clarity_score": 0.2618,
+      "temporal_score": 0.5657,
+      "focus_score": 0.8577,
+      "dependency_score": 0.5983
+    },
+    {
+      "time": 4.8194,
+      "t": 4.8194,
+      "roles": {
+        "P0": [
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.0503,
+      "color": "#f39c12",
+      "energy_score": 0.3427,
+      "clarity_score": 0.1044,
+      "temporal_score": 0.3566,
+      "focus_score": 0.6609,
+      "dependency_score": 0.8872
+    },
+    {
+      "time": 4.9297,
+      "t": 4.9297,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.4413,
+      "color": "#2ecc71",
+      "energy_score": 0.6381,
+      "clarity_score": 0.4306,
+      "temporal_score": 0.855,
+      "focus_score": 0.7987,
+      "dependency_score": 0.2304
+    },
+    {
+      "time": 5.1068,
+      "t": 5.1068,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0897,
+      "color": "#2ecc71",
+      "energy_score": 0.5097,
+      "clarity_score": 0.007,
+      "temporal_score": 0.3719,
+      "focus_score": 0.8753,
+      "dependency_score": 0.6038
+    },
+    {
+      "time": 5.2345,
+      "t": 5.2345,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.4188,
+      "color": "#2ecc71",
+      "energy_score": 0.6198,
+      "clarity_score": 0.0438,
+      "temporal_score": 0.6598,
+      "focus_score": 0.8659,
+      "dependency_score": 0.2247
+    },
+    {
+      "time": 5.5421,
+      "t": 5.5421,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.3281,
+      "color": "#f39c12",
+      "energy_score": 0.4582,
+      "clarity_score": 0.382,
+      "temporal_score": 0.7981,
+      "focus_score": 0.6444,
+      "dependency_score": 0.1287
+    },
+    {
+      "time": 5.8208,
+      "t": 5.8208,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 4.0353,
+      "color": "#f39c12",
+      "energy_score": 0.5048,
+      "clarity_score": 0.2811,
+      "temporal_score": 0.1421,
+      "focus_score": 0.4841,
+      "dependency_score": 0.2165
+    },
+    {
+      "time": 5.8208,
+      "t": 5.8208,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.0353,
+      "color": "#2ecc71",
+      "energy_score": 0.6293,
+      "clarity_score": 0.2362,
+      "temporal_score": 0.1947,
+      "focus_score": 1.0,
+      "dependency_score": 0.2159
+    },
+    {
+      "time": 6.1284,
+      "t": 6.1284,
+      "roles": {
+        "P0": [
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.2467,
+      "color": "#f39c12",
+      "energy_score": 0.3862,
+      "clarity_score": 0.0171,
+      "temporal_score": 0.5859,
+      "focus_score": 0.5592,
+      "dependency_score": 0.0341
+    },
+    {
+      "time": 6.4187,
+      "t": 6.4187,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.1863,
+      "color": "#f39c12",
+      "energy_score": 0.6035,
+      "clarity_score": 0.1368,
+      "temporal_score": 0.2806,
+      "focus_score": 0.4476,
+      "dependency_score": 0.2061
+    },
+    {
+      "time": 6.7234,
+      "t": 6.7234,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.9258,
+      "color": "#f39c12",
+      "energy_score": 0.3815,
+      "clarity_score": 0.2388,
+      "temporal_score": 0.1094,
+      "focus_score": 0.9999,
+      "dependency_score": 0.1626
+    },
+    {
+      "time": 6.8947,
+      "t": 6.8947,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.2987,
+      "color": "#f39c12",
+      "energy_score": 0.6235,
+      "clarity_score": 0.0186,
+      "temporal_score": 0.5751,
+      "focus_score": 0.7999,
+      "dependency_score": 0.2531
+    },
+    {
+      "time": 7.0485,
+      "t": 7.0485,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 4.6617,
+      "color": "#3498db",
+      "energy_score": 0.4007,
+      "clarity_score": 0.3508,
+      "temporal_score": 0.659,
+      "focus_score": 0.5899,
+      "dependency_score": 0.8288
+    },
+    {
+      "time": 7.3243,
+      "t": 7.3243,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.4917,
+      "color": "#f39c12",
+      "energy_score": 0.6006,
+      "clarity_score": 0.1122,
+      "temporal_score": 0.5476,
+      "focus_score": 0.9813,
+      "dependency_score": 0.2317
+    },
+    {
+      "time": 7.629,
+      "t": 7.629,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 12.5474,
+      "color": "#f39c12",
+      "energy_score": 0.6025,
+      "clarity_score": 0.9443,
+      "temporal_score": 0.3858,
+      "focus_score": 0.8497,
+      "dependency_score": 0.2088
+    },
+    {
+      "time": 7.9251,
+      "t": 7.9251,
+      "roles": {
+        "P0": [
+          "high",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.667,
+      "color": "#f39c12",
+      "energy_score": 0.3651,
+      "clarity_score": 0.0159,
+      "temporal_score": 0.2443,
+      "focus_score": 0.379,
+      "dependency_score": 0.0857
+    },
+    {
+      "time": 8.1079,
+      "t": 8.1079,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.8426,
+      "color": "#2ecc71",
+      "energy_score": 0.343,
+      "clarity_score": 0.0201,
+      "temporal_score": 0.4342,
+      "focus_score": 0.1444,
+      "dependency_score": 0.8159
+    },
+    {
+      "time": 8.224,
+      "t": 8.224,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.387,
+      "color": "#2ecc71",
+      "energy_score": 0.6147,
+      "clarity_score": 0.2709,
+      "temporal_score": 0.51,
+      "focus_score": 0.6582,
+      "dependency_score": 0.2104
+    },
+    {
+      "time": 8.5172,
+      "t": 8.5172,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.3261,
+      "color": "#2ecc71",
+      "energy_score": 0.3576,
+      "clarity_score": 0.0818,
+      "temporal_score": 0.2035,
+      "focus_score": 0.8057,
+      "dependency_score": 0.0
+    },
+    {
+      "time": 8.7117,
+      "t": 8.7117,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.3485,
+      "color": "#2ecc71",
+      "energy_score": 0.2419,
+      "clarity_score": 0.0214,
+      "temporal_score": 0.2527,
+      "focus_score": 0.2593,
+      "dependency_score": 1.0
+    },
+    {
+      "time": 8.8307,
+      "t": 8.8307,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.4405,
+      "color": "#2ecc71",
+      "energy_score": 0.6279,
+      "clarity_score": 0.7629,
+      "temporal_score": 0.9935,
+      "focus_score": 0.6832,
+      "dependency_score": 0.199
+    },
+    {
+      "time": 9.0106,
+      "t": 9.0106,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.3136,
+      "color": "#2ecc71",
+      "energy_score": 0.3755,
+      "clarity_score": 0.2733,
+      "temporal_score": 0.4902,
+      "focus_score": 0.8245,
+      "dependency_score": 0.9622
+    },
+    {
+      "time": 9.1151,
+      "t": 9.1151,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.0718,
+      "color": "#2ecc71",
+      "energy_score": 0.4126,
+      "clarity_score": 0.5993,
+      "temporal_score": 0.3658,
+      "focus_score": 0.4074,
+      "dependency_score": 0.1099
+    },
+    {
+      "time": 9.3009,
+      "t": 9.3009,
+      "roles": {
+        "P0": [
+          "high",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 9.9668,
+      "color": "#f39c12",
+      "energy_score": 0.6199,
+      "clarity_score": 0.8683,
+      "temporal_score": 0.2955,
+      "focus_score": 0.5039,
+      "dependency_score": 0.2084
+    },
+    {
+      "time": 9.4518,
+      "t": 9.4518,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 3.8143,
+      "color": "#3498db",
+      "energy_score": 0.4144,
+      "clarity_score": 0.1393,
+      "temporal_score": 0.3695,
+      "focus_score": 0.6631,
+      "dependency_score": 0.8143
+    },
+    {
+      "time": 9.6056,
+      "t": 9.6056,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.3534,
+      "color": "#f39c12",
+      "energy_score": 0.3304,
+      "clarity_score": 0.0494,
+      "temporal_score": 0.3452,
+      "focus_score": 0.243,
+      "dependency_score": 0.7944
+    },
+    {
+      "time": 9.7304,
+      "t": 9.7304,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 12.8632,
+      "color": "#f39c12",
+      "energy_score": 0.6151,
+      "clarity_score": 0.9926,
+      "temporal_score": 0.313,
+      "focus_score": 0.825,
+      "dependency_score": 0.2148
+    },
+    {
+      "time": 10.0294,
+      "t": 10.0294,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.909,
+      "color": "#f39c12",
+      "energy_score": 0.6028,
+      "clarity_score": 0.2718,
+      "temporal_score": 0.9894,
+      "focus_score": 0.6856,
+      "dependency_score": 0.2134
+    },
+    {
+      "time": 10.3196,
+      "t": 10.3196,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.1735,
+      "color": "#f39c12",
+      "energy_score": 0.3679,
+      "clarity_score": 0.0133,
+      "temporal_score": 0.2018,
+      "focus_score": 0.4676,
+      "dependency_score": 0.0699
+    },
+    {
+      "time": 10.5083,
+      "t": 10.5083,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.427,
+      "color": "#2ecc71",
+      "energy_score": 0.3493,
+      "clarity_score": 0.3265,
+      "temporal_score": 0.3929,
+      "focus_score": 0.5278,
+      "dependency_score": 0.8203
+    },
+    {
+      "time": 10.6215,
+      "t": 10.6215,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.9976,
+      "color": "#2ecc71",
+      "energy_score": 0.615,
+      "clarity_score": 0.1186,
+      "temporal_score": 0.2121,
+      "focus_score": 0.6061,
+      "dependency_score": 0.2142
+    },
+    {
+      "time": 10.9176,
+      "t": 10.9176,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.6532,
+      "color": "#2ecc71",
+      "energy_score": 0.3781,
+      "clarity_score": 0.217,
+      "temporal_score": 0.5771,
+      "focus_score": 0.527,
+      "dependency_score": 0.0955
+    },
+    {
+      "time": 11.0917,
+      "t": 11.0917,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.2642,
+      "color": "#2ecc71",
+      "energy_score": 0.3451,
+      "clarity_score": 0.0156,
+      "temporal_score": 0.4364,
+      "focus_score": 0.3526,
+      "dependency_score": 0.7853
+    },
+    {
+      "time": 11.2165,
+      "t": 11.2165,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 12.529,
+      "color": "#2ecc71",
+      "energy_score": 0.6308,
+      "clarity_score": 0.2609,
+      "temporal_score": 0.3288,
+      "focus_score": 0.6965,
+      "dependency_score": 0.2108
+    },
+    {
+      "time": 11.4052,
+      "t": 11.4052,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.5993,
+      "color": "#2ecc71",
+      "energy_score": 0.3645,
+      "clarity_score": 0.1313,
+      "temporal_score": 0.347,
+      "focus_score": 0.8488,
+      "dependency_score": 0.9361
+    },
+    {
+      "time": 11.5097,
+      "t": 11.5097,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.981,
+      "color": "#2ecc71",
+      "energy_score": 0.4228,
+      "clarity_score": 0.2441,
+      "temporal_score": 0.4097,
+      "focus_score": 0.5492,
+      "dependency_score": 0.1046
+    },
+    {
+      "time": 11.6838,
+      "t": 11.6838,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.0738,
+      "color": "#f39c12",
+      "energy_score": 0.6261,
+      "clarity_score": 0.9993,
+      "temporal_score": 0.6366,
+      "focus_score": 0.5133,
+      "dependency_score": 0.213
+    },
+    {
+      "time": 11.8318,
+      "t": 11.8318,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 3.3257,
+      "color": "#3498db",
+      "energy_score": 0.426,
+      "clarity_score": 0.2723,
+      "temporal_score": 0.8619,
+      "focus_score": 0.5862,
+      "dependency_score": 0.8263
+    },
+    {
+      "time": 11.9944,
+      "t": 11.9944,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.1271,
+      "color": "#f39c12",
+      "energy_score": 0.2729,
+      "clarity_score": 0.0036,
+      "temporal_score": 0.3806,
+      "focus_score": 0.5134,
+      "dependency_score": 0.9519
+    },
+    {
+      "time": 12.1105,
+      "t": 12.1105,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.4667,
+      "color": "#2ecc71",
+      "energy_score": 0.6152,
+      "clarity_score": 0.3077,
+      "temporal_score": 0.2928,
+      "focus_score": 0.7616,
+      "dependency_score": 0.2022
+    },
+    {
+      "time": 12.4152,
+      "t": 12.4152,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 10.0489,
+      "color": "#f39c12",
+      "energy_score": 0.6011,
+      "clarity_score": 0.621,
+      "temporal_score": 0.8554,
+      "focus_score": 0.7531,
+      "dependency_score": 0.2192
+    },
+    {
+      "time": 12.7084,
+      "t": 12.7084,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.2997,
+      "color": "#f39c12",
+      "energy_score": 0.3535,
+      "clarity_score": 0.0184,
+      "temporal_score": 0.2268,
+      "focus_score": 0.4765,
+      "dependency_score": 0.0793
+    },
+    {
+      "time": 12.8971,
+      "t": 12.8971,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0,
+      "color": "#2ecc71",
+      "energy_score": 0.2934,
+      "clarity_score": 0.0,
+      "temporal_score": 0.4548,
+      "focus_score": 0.478,
+      "dependency_score": 0.941
+    },
+    {
+      "time": 13.0102,
+      "t": 13.0102,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.4663,
+      "color": "#2ecc71",
+      "energy_score": 0.6293,
+      "clarity_score": 0.206,
+      "temporal_score": 0.8988,
+      "focus_score": 0.6879,
+      "dependency_score": 0.1942
+    },
+    {
+      "time": 13.196,
+      "t": 13.196,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.7192,
+      "color": "#2ecc71",
+      "energy_score": 0.3703,
+      "clarity_score": 0.1371,
+      "temporal_score": 0.5484,
+      "focus_score": 0.7603,
+      "dependency_score": 0.9482
+    },
+    {
+      "time": 13.3063,
+      "t": 13.3063,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.7082,
+      "color": "#2ecc71",
+      "energy_score": 0.4047,
+      "clarity_score": 0.2204,
+      "temporal_score": 0.3253,
+      "focus_score": 0.5174,
+      "dependency_score": 0.1207
+    },
+    {
+      "time": 13.4834,
+      "t": 13.4834,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.8597,
+      "color": "#2ecc71",
+      "energy_score": 0.3695,
+      "clarity_score": 0.0455,
+      "temporal_score": 0.4133,
+      "focus_score": 0.1614,
+      "dependency_score": 0.7941
+    },
+    {
+      "time": 13.5966,
+      "t": 13.5966,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.1086,
+      "color": "#2ecc71",
+      "energy_score": 0.6261,
+      "clarity_score": 0.2556,
+      "temporal_score": 0.4154,
+      "focus_score": 0.7655,
+      "dependency_score": 0.1984
+    },
+    {
+      "time": 13.7823,
+      "t": 13.7823,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.7541,
+      "color": "#2ecc71",
+      "energy_score": 0.3823,
+      "clarity_score": 0.0211,
+      "temporal_score": 0.3921,
+      "focus_score": 0.8745,
+      "dependency_score": 1.0
+    },
+    {
+      "time": 13.8955,
+      "t": 13.8955,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.3393,
+      "color": "#2ecc71",
+      "energy_score": 0.4071,
+      "clarity_score": 0.0096,
+      "temporal_score": 0.3138,
+      "focus_score": 0.528,
+      "dependency_score": 0.0611
+    },
+    {
+      "time": 14.0639,
+      "t": 14.0639,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 3.9213,
+      "color": "#f39c12",
+      "energy_score": 0.6222,
+      "clarity_score": 0.1127,
+      "temporal_score": 0.699,
+      "focus_score": 0.6249,
+      "dependency_score": 0.2332
+    },
+    {
+      "time": 14.209,
+      "t": 14.209,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 4.833,
+      "color": "#3498db",
+      "energy_score": 0.4359,
+      "clarity_score": 0.2194,
+      "temporal_score": 0.8702,
+      "focus_score": 0.6223,
+      "dependency_score": 0.773
+    },
+    {
+      "time": 14.3744,
+      "t": 14.3744,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.2399,
+      "color": "#f39c12",
+      "energy_score": 0.3193,
+      "clarity_score": 0.1016,
+      "temporal_score": 0.4388,
+      "focus_score": 0.5799,
+      "dependency_score": 0.8486
+    },
+    {
+      "time": 14.4934,
+      "t": 14.4934,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.4963,
+      "color": "#2ecc71",
+      "energy_score": 0.6196,
+      "clarity_score": 0.823,
+      "temporal_score": 0.7313,
+      "focus_score": 0.7167,
+      "dependency_score": 0.1994
+    },
+    {
+      "time": 14.6879,
+      "t": 14.6879,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.1567,
+      "color": "#2ecc71",
+      "energy_score": 0.3595,
+      "clarity_score": 0.1727,
+      "temporal_score": 0.6402,
+      "focus_score": 0.8466,
+      "dependency_score": 1.0
+    },
+    {
+      "time": 14.7953,
+      "t": 14.7953,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.6146,
+      "color": "#2ecc71",
+      "energy_score": 0.6162,
+      "clarity_score": 0.7704,
+      "temporal_score": 0.4848,
+      "focus_score": 0.7979,
+      "dependency_score": 0.2114
+    },
+    {
+      "time": 15.0884,
+      "t": 15.0884,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.4186,
+      "color": "#2ecc71",
+      "energy_score": 0.3679,
+      "clarity_score": 0.0334,
+      "temporal_score": 0.4029,
+      "focus_score": 0.402,
+      "dependency_score": 0.0
+    },
+    {
+      "time": 15.2713,
+      "t": 15.2713,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.5626,
+      "color": "#2ecc71",
+      "energy_score": 0.3246,
+      "clarity_score": 0.0451,
+      "temporal_score": 0.2756,
+      "focus_score": 0.3026,
+      "dependency_score": 0.8542
+    },
+    {
+      "time": 15.3874,
+      "t": 15.3874,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.8951,
+      "color": "#2ecc71",
+      "energy_score": 0.6137,
+      "clarity_score": 0.0711,
+      "temporal_score": 0.7375,
+      "focus_score": 0.5439,
+      "dependency_score": 0.2515
+    },
+    {
+      "time": 15.7067,
+      "t": 15.7067,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.9837,
+      "color": "#f39c12",
+      "energy_score": 0.4011,
+      "clarity_score": 0.0776,
+      "temporal_score": 0.5761,
+      "focus_score": 0.6118,
+      "dependency_score": 0.3732
+    },
+    {
+      "time": 15.9911,
+      "t": 15.9911,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.0161,
+      "color": "#f39c12",
+      "energy_score": 0.6138,
+      "clarity_score": 0.3638,
+      "temporal_score": 0.5245,
+      "focus_score": 0.4769,
+      "dependency_score": 0.2249
+    },
+    {
+      "time": 16.1856,
+      "t": 16.1856,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.7774,
+      "color": "#2ecc71",
+      "energy_score": 0.3797,
+      "clarity_score": 0.1404,
+      "temporal_score": 0.3609,
+      "focus_score": 0.8431,
+      "dependency_score": 0.9756
+    },
+    {
+      "time": 16.2959,
+      "t": 16.2959,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.9786,
+      "color": "#2ecc71",
+      "energy_score": 0.4137,
+      "clarity_score": 0.1596,
+      "temporal_score": 0.5276,
+      "focus_score": 0.5348,
+      "dependency_score": 0.2456
+    },
+    {
+      "time": 16.4555,
+      "t": 16.4555,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 4.4307,
+      "color": "#f39c12",
+      "energy_score": 0.6228,
+      "clarity_score": 0.3575,
+      "temporal_score": 0.1785,
+      "focus_score": 0.8793,
+      "dependency_score": 0.2353
+    },
+    {
+      "time": 16.6122,
+      "t": 16.6122,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 4.1066,
+      "color": "#3498db",
+      "energy_score": 0.4085,
+      "clarity_score": 0.3132,
+      "temporal_score": 0.53,
+      "focus_score": 0.6468,
+      "dependency_score": 0.8066
+    },
+    {
+      "time": 16.8909,
+      "t": 16.8909,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.5763,
+      "color": "#f39c12",
+      "energy_score": 0.6006,
+      "clarity_score": 0.5016,
+      "temporal_score": 0.8243,
+      "focus_score": 0.8954,
+      "dependency_score": 0.1987
+    },
+    {
+      "time": 17.184,
+      "t": 17.184,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 11.6271,
+      "color": "#f39c12",
+      "energy_score": 0.6008,
+      "clarity_score": 0.887,
+      "temporal_score": 0.42,
+      "focus_score": 0.9892,
+      "dependency_score": 0.2073
+    },
+    {
+      "time": 17.4801,
+      "t": 17.4801,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.3746,
+      "color": "#f39c12",
+      "energy_score": 0.3964,
+      "clarity_score": 0.1805,
+      "temporal_score": 0.2708,
+      "focus_score": 0.5733,
+      "dependency_score": 0.0
+    },
+    {
+      "time": 17.66,
+      "t": 17.66,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.5107,
+      "color": "#2ecc71",
+      "energy_score": 0.3799,
+      "clarity_score": 0.343,
+      "temporal_score": 0.5031,
+      "focus_score": 0.2925,
+      "dependency_score": 0.7304
+    },
+    {
+      "time": 17.782,
+      "t": 17.782,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.8637,
+      "color": "#2ecc71",
+      "energy_score": 0.6136,
+      "clarity_score": 0.0656,
+      "temporal_score": 0.6463,
+      "focus_score": 0.6662,
+      "dependency_score": 0.1992
+    },
+    {
+      "time": 18.0809,
+      "t": 18.0809,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.9018,
+      "color": "#2ecc71",
+      "energy_score": 0.3554,
+      "clarity_score": 0.0521,
+      "temporal_score": 0.1768,
+      "focus_score": 0.4834,
+      "dependency_score": 0.1195
+    },
+    {
+      "time": 18.2551,
+      "t": 18.2551,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.193,
+      "color": "#2ecc71",
+      "energy_score": 0.3086,
+      "clarity_score": 0.069,
+      "temporal_score": 0.43,
+      "focus_score": 0.6413,
+      "dependency_score": 0.8819
+    },
+    {
+      "time": 18.3741,
+      "t": 18.3741,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.1772,
+      "color": "#2ecc71",
+      "energy_score": 0.6311,
+      "clarity_score": 0.2998,
+      "temporal_score": 0.2008,
+      "focus_score": 0.7693,
+      "dependency_score": 0.2213
+    },
+    {
+      "time": 18.554,
+      "t": 18.554,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.6066,
+      "color": "#2ecc71",
+      "energy_score": 0.3932,
+      "clarity_score": 0.0711,
+      "temporal_score": 0.1162,
+      "focus_score": 0.8002,
+      "dependency_score": 0.8946
+    },
+    {
+      "time": 18.6643,
+      "t": 18.6643,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.9334,
+      "color": "#2ecc71",
+      "energy_score": 0.4114,
+      "clarity_score": 0.0183,
+      "temporal_score": 0.4943,
+      "focus_score": 0.4391,
+      "dependency_score": 0.1882
+    },
+    {
+      "time": 18.8472,
+      "t": 18.8472,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.6752,
+      "color": "#2ecc71",
+      "energy_score": 0.6231,
+      "clarity_score": 0.1908,
+      "temporal_score": 0.4059,
+      "focus_score": 0.3897,
+      "dependency_score": 0.2187
+    },
+    {
+      "time": 18.9836,
+      "t": 18.9836,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 4.73,
+      "color": "#f39c12",
+      "energy_score": 0.4549,
+      "clarity_score": 0.2804,
+      "temporal_score": 0.0319,
+      "focus_score": 0.6568,
+      "dependency_score": 0.769
+    },
+    {
+      "time": 19.1432,
+      "t": 19.1432,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.001,
+      "color": "#f39c12",
+      "energy_score": 0.2628,
+      "clarity_score": 0.0,
+      "temporal_score": 0.0,
+      "focus_score": 0.4196,
+      "dependency_score": 0.9708
+    },
+    {
+      "time": 19.2622,
+      "t": 19.2622,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 12.222,
+      "color": "#2ecc71",
+      "energy_score": 0.6155,
+      "clarity_score": 0.9928,
+      "temporal_score": 0.2698,
+      "focus_score": 0.6648,
+      "dependency_score": 0.2052
+    },
+    {
+      "time": 19.5554,
+      "t": 19.5554,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 9.1921,
+      "color": "#f39c12",
+      "energy_score": 0.6026,
+      "clarity_score": 0.7466,
+      "temporal_score": 0.0286,
+      "focus_score": 0.9295,
+      "dependency_score": 0.2244
+    },
+    {
+      "time": 19.8456,
+      "t": 19.8456,
+      "roles": {
+        "P0": [
+          "high",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.4855,
+      "color": "#f39c12",
+      "energy_score": 0.3456,
+      "clarity_score": 0.0801,
+      "temporal_score": 0.3321,
+      "focus_score": 0.5037,
+      "dependency_score": 0.0239
+    },
+    {
+      "time": 20.0314,
+      "t": 20.0314,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.6244,
+      "color": "#2ecc71",
+      "energy_score": 0.4067,
+      "clarity_score": 0.0336,
+      "temporal_score": 0.0413,
+      "focus_score": 0.4777,
+      "dependency_score": 0.6877
+    },
+    {
+      "time": 20.1533,
+      "t": 20.1533,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.0776,
+      "color": "#2ecc71",
+      "energy_score": 0.6304,
+      "clarity_score": 0.0451,
+      "temporal_score": 1.0,
+      "focus_score": 0.5742,
+      "dependency_score": 0.2069
+    },
+    {
+      "time": 20.3274,
+      "t": 20.3274,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0664,
+      "color": "#2ecc71",
+      "energy_score": 0.4037,
+      "clarity_score": 0.0045,
+      "temporal_score": 0.4207,
+      "focus_score": 0.8846,
+      "dependency_score": 0.8432
+    },
+    {
+      "time": 20.4435,
+      "t": 20.4435,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.6686,
+      "color": "#2ecc71",
+      "energy_score": 0.3816,
+      "clarity_score": 0.0463,
+      "temporal_score": 0.234,
+      "focus_score": 0.6185,
+      "dependency_score": 0.2661
+    },
+    {
+      "time": 20.7425,
+      "t": 20.7425,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.2934,
+      "color": "#2ecc71",
+      "energy_score": 0.6069,
+      "clarity_score": 0.2284,
+      "temporal_score": 0.5401,
+      "focus_score": 0.4398,
+      "dependency_score": 0.2083
+    },
+    {
+      "time": 20.9254,
+      "t": 20.9254,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.6879,
+      "color": "#2ecc71",
+      "energy_score": 0.381,
+      "clarity_score": 0.1437,
+      "temporal_score": 0.3293,
+      "focus_score": 0.7817,
+      "dependency_score": 0.9052
+    },
+    {
+      "time": 21.0327,
+      "t": 21.0327,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.7188,
+      "color": "#2ecc71",
+      "energy_score": 0.4013,
+      "clarity_score": 0.1356,
+      "temporal_score": 0.393,
+      "focus_score": 0.5058,
+      "dependency_score": 0.1892
+    },
+    {
+      "time": 21.2098,
+      "t": 21.2098,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.978,
+      "color": "#2ecc71",
+      "energy_score": 0.6243,
+      "clarity_score": 0.156,
+      "temporal_score": 0.2267,
+      "focus_score": 0.2467,
+      "dependency_score": 0.2048
+    },
+    {
+      "time": 21.352,
+      "t": 21.352,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.321,
+      "color": "#f39c12",
+      "energy_score": 0.4477,
+      "clarity_score": 0.3476,
+      "temporal_score": 1.0,
+      "focus_score": 0.6619,
+      "dependency_score": 0.7597
+    },
+    {
+      "time": 21.5117,
+      "t": 21.5117,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.0029,
+      "color": "#f39c12",
+      "energy_score": 0.2673,
+      "clarity_score": 0.0,
+      "temporal_score": 0.3477,
+      "focus_score": 0.3546,
+      "dependency_score": 0.9608
+    },
+    {
+      "time": 21.6307,
+      "t": 21.6307,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 12.947,
+      "color": "#2ecc71",
+      "energy_score": 0.6142,
+      "clarity_score": 0.3219,
+      "temporal_score": 0.3254,
+      "focus_score": 0.8116,
+      "dependency_score": 0.1988
+    },
+    {
+      "time": 21.9354,
+      "t": 21.9354,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 12.5825,
+      "color": "#f39c12",
+      "energy_score": 0.6048,
+      "clarity_score": 0.3128,
+      "temporal_score": 0.8861,
+      "focus_score": 0.6829,
+      "dependency_score": 0.2166
+    },
+    {
+      "time": 22.2286,
+      "t": 22.2286,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.2651,
+      "color": "#f39c12",
+      "energy_score": 0.367,
+      "clarity_score": 0.0106,
+      "temporal_score": 0.2418,
+      "focus_score": 0.3402,
+      "dependency_score": 0.0628
+    },
+    {
+      "time": 22.4143,
+      "t": 22.4143,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0963,
+      "color": "#2ecc71",
+      "energy_score": 0.3721,
+      "clarity_score": 0.0038,
+      "temporal_score": 0.4494,
+      "focus_score": 0.3337,
+      "dependency_score": 0.7657
+    },
+    {
+      "time": 22.5333,
+      "t": 22.5333,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.7724,
+      "color": "#2ecc71",
+      "energy_score": 0.6296,
+      "clarity_score": 0.0321,
+      "temporal_score": 0.4126,
+      "focus_score": 0.6287,
+      "dependency_score": 0.2131
+    },
+    {
+      "time": 22.7104,
+      "t": 22.7104,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.4637,
+      "color": "#2ecc71",
+      "energy_score": 0.3806,
+      "clarity_score": 0.0781,
+      "temporal_score": 0.4762,
+      "focus_score": 0.8033,
+      "dependency_score": 0.9601
+    },
+    {
+      "time": 22.8236,
+      "t": 22.8236,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.5942,
+      "color": "#2ecc71",
+      "energy_score": 0.4171,
+      "clarity_score": 0.0247,
+      "temporal_score": 0.4043,
+      "focus_score": 0.5142,
+      "dependency_score": 0.1052
+    },
+    {
+      "time": 23.0093,
+      "t": 23.0093,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0309,
+      "color": "#2ecc71",
+      "energy_score": 0.287,
+      "clarity_score": 0.0007,
+      "temporal_score": 0.3417,
+      "focus_score": 0.5783,
+      "dependency_score": 0.8701
+    },
+    {
+      "time": 23.1371,
+      "t": 23.1371,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.0354,
+      "color": "#2ecc71",
+      "energy_score": 0.6281,
+      "clarity_score": 0.1127,
+      "temporal_score": 1.0,
+      "focus_score": 0.7498,
+      "dependency_score": 0.1947
+    },
+    {
+      "time": 23.3083,
+      "t": 23.3083,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.6749,
+      "color": "#2ecc71",
+      "energy_score": 0.3898,
+      "clarity_score": 0.0284,
+      "temporal_score": 0.3045,
+      "focus_score": 0.6722,
+      "dependency_score": 0.9833
+    },
+    {
+      "time": 23.4186,
+      "t": 23.4186,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.6442,
+      "color": "#2ecc71",
+      "energy_score": 0.4275,
+      "clarity_score": 0.3095,
+      "temporal_score": 0.3509,
+      "focus_score": 0.5141,
+      "dependency_score": 0.0817
+    },
+    {
+      "time": 23.5956,
+      "t": 23.5956,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.7448,
+      "color": "#2ecc71",
+      "energy_score": 0.6137,
+      "clarity_score": 0.1505,
+      "temporal_score": 0.2362,
+      "focus_score": 0.5242,
+      "dependency_score": 0.1984
+    },
+    {
+      "time": 23.735,
+      "t": 23.735,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 6.2434,
+      "color": "#2ecc71",
+      "energy_score": 0.4401,
+      "clarity_score": 0.2924,
+      "temporal_score": 0.6857,
+      "focus_score": 0.6472,
+      "dependency_score": 0.7274
+    },
+    {
+      "time": 23.9091,
+      "t": 23.9091,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.6934,
+      "color": "#2ecc71",
+      "energy_score": 0.3187,
+      "clarity_score": 0.0166,
+      "temporal_score": 0.4546,
+      "focus_score": 0.5232,
+      "dependency_score": 0.8379
+    },
+    {
+      "time": 24.031,
+      "t": 24.031,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.7019,
+      "color": "#2ecc71",
+      "energy_score": 0.6064,
+      "clarity_score": 0.0889,
+      "temporal_score": 0.715,
+      "focus_score": 0.6725,
+      "dependency_score": 0.1909
+    },
+    {
+      "time": 24.3271,
+      "t": 24.3271,
+      "roles": {
+        "P0": [
+          "high",
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.1429,
+      "color": "#f39c12",
+      "energy_score": 0.5906,
+      "clarity_score": 0.1693,
+      "temporal_score": 0.7958,
+      "focus_score": 0.5539,
+      "dependency_score": 0.1973
+    },
+    {
+      "time": 24.6289,
+      "t": 24.6289,
+      "roles": {
+        "P0": [
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.5096,
+      "color": "#f39c12",
+      "energy_score": 0.5394,
+      "clarity_score": 0.5455,
+      "temporal_score": 0.253,
+      "focus_score": 0.5218,
+      "dependency_score": 0.0976
+    },
+    {
+      "time": 24.8263,
+      "t": 24.8263,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.5659,
+      "color": "#2ecc71",
+      "energy_score": 0.6162,
+      "clarity_score": 0.2988,
+      "temporal_score": 0.216,
+      "focus_score": 0.5458,
+      "dependency_score": 0.1718
+    },
+    {
+      "time": 24.954,
+      "t": 24.954,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.204,
+      "color": "#f39c12",
+      "energy_score": 0.4402,
+      "clarity_score": 0.3056,
+      "temporal_score": 0.8295,
+      "focus_score": 0.5645,
+      "dependency_score": 0.7648
+    },
+    {
+      "time": 25.1107,
+      "t": 25.1107,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.6491,
+      "color": "#f39c12",
+      "energy_score": 0.3594,
+      "clarity_score": 0.038,
+      "temporal_score": 0.3827,
+      "focus_score": 0.5776,
+      "dependency_score": 0.8074
+    },
+    {
+      "time": 25.2268,
+      "t": 25.2268,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.4456,
+      "color": "#2ecc71",
+      "energy_score": 0.6113,
+      "clarity_score": 0.1981,
+      "temporal_score": 0.1306,
+      "focus_score": 0.7324,
+      "dependency_score": 0.1945
+    },
+    {
+      "time": 25.5345,
+      "t": 25.5345,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.805,
+      "color": "#2ecc71",
+      "energy_score": 0.5441,
+      "clarity_score": 0.3894,
+      "temporal_score": 0.3269,
+      "focus_score": 0.6715,
+      "dependency_score": 0.1353
+    },
+    {
+      "time": 25.7319,
+      "t": 25.7319,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.7969,
+      "color": "#2ecc71",
+      "energy_score": 0.4531,
+      "clarity_score": 0.262,
+      "temporal_score": 0.4382,
+      "focus_score": 0.5348,
+      "dependency_score": 0.3674
+    },
+    {
+      "time": 25.8335,
+      "t": 25.8335,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.9639,
+      "color": "#2ecc71",
+      "energy_score": 0.4543,
+      "clarity_score": 0.1072,
+      "temporal_score": 0.5604,
+      "focus_score": 0.5534,
+      "dependency_score": 0.3662
+    },
+    {
+      "time": 25.9989,
+      "t": 25.9989,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.4329,
+      "color": "#f39c12",
+      "energy_score": 0.6036,
+      "clarity_score": 0.1328,
+      "temporal_score": 0.5056,
+      "focus_score": 0.6613,
+      "dependency_score": 0.3002
+    },
+    {
+      "time": 26.1382,
+      "t": 26.1382,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 14.4708,
+      "color": "#f39c12",
+      "energy_score": 0.6188,
+      "clarity_score": 0.9993,
+      "temporal_score": 0.683,
+      "focus_score": 0.9362,
+      "dependency_score": 0.332
+    },
+    {
+      "time": 26.3298,
+      "t": 26.3298,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.0025,
+      "color": "#2ecc71",
+      "energy_score": 0.4115,
+      "clarity_score": 0.2088,
+      "temporal_score": 0.224,
+      "focus_score": 0.7819,
+      "dependency_score": 0.5879
+    },
+    {
+      "time": 26.4169,
+      "t": 26.4169,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.227,
+      "color": "#2ecc71",
+      "energy_score": 0.4392,
+      "clarity_score": 0.0848,
+      "temporal_score": 0.2366,
+      "focus_score": 0.5729,
+      "dependency_score": 0.303
+    },
+    {
+      "time": 26.5997,
+      "t": 26.5997,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.6051,
+      "color": "#2ecc71",
+      "energy_score": 0.6208,
+      "clarity_score": 0.6499,
+      "temporal_score": 0.774,
+      "focus_score": 0.7275,
+      "dependency_score": 0.268
+    },
+    {
+      "time": 26.7071,
+      "t": 26.7071,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.9908,
+      "color": "#2ecc71",
+      "energy_score": 0.5661,
+      "clarity_score": 0.3671,
+      "temporal_score": 0.1555,
+      "focus_score": 0.8735,
+      "dependency_score": 0.4737
+    },
+    {
+      "time": 26.9248,
+      "t": 26.9248,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.7468,
+      "color": "#2ecc71",
+      "energy_score": 0.3838,
+      "clarity_score": 0.2908,
+      "temporal_score": 0.1496,
+      "focus_score": 0.3718,
+      "dependency_score": 0.4689
+    },
+    {
+      "time": 27.0206,
+      "t": 27.0206,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.7089,
+      "color": "#2ecc71",
+      "energy_score": 0.4251,
+      "clarity_score": 0.1397,
+      "temporal_score": 0.2559,
+      "focus_score": 0.616,
+      "dependency_score": 0.2867
+    },
+    {
+      "time": 27.1889,
+      "t": 27.1889,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.3366,
+      "color": "#f39c12",
+      "energy_score": 0.6191,
+      "clarity_score": 0.1092,
+      "temporal_score": 0.5217,
+      "focus_score": 0.6052,
+      "dependency_score": 0.1963
+    },
+    {
+      "time": 27.3312,
+      "t": 27.3312,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 4.3178,
+      "color": "#3498db",
+      "energy_score": 0.4254,
+      "clarity_score": 0.3531,
+      "temporal_score": 0.1916,
+      "focus_score": 0.6571,
+      "dependency_score": 0.8032
+    },
+    {
+      "time": 27.4937,
+      "t": 27.4937,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 9.2673,
+      "color": "#f39c12",
+      "energy_score": 0.5253,
+      "clarity_score": 0.8216,
+      "temporal_score": 0.7179,
+      "focus_score": 0.6555,
+      "dependency_score": 0.5192
+    },
+    {
+      "time": 27.6069,
+      "t": 27.6069,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.0788,
+      "color": "#2ecc71",
+      "energy_score": 0.6092,
+      "clarity_score": 0.0069,
+      "temporal_score": 0.2947,
+      "focus_score": 0.6708,
+      "dependency_score": 0.2335
+    },
+    {
+      "time": 27.9117,
+      "t": 27.9117,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.4559,
+      "color": "#2ecc71",
+      "energy_score": 0.5342,
+      "clarity_score": 0.4233,
+      "temporal_score": 0.153,
+      "focus_score": 0.6359,
+      "dependency_score": 0.1308
+    },
+    {
+      "time": 28.1061,
+      "t": 28.1061,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.4769,
+      "color": "#2ecc71",
+      "energy_score": 0.4932,
+      "clarity_score": 0.0369,
+      "temporal_score": 0.6236,
+      "focus_score": 0.6414,
+      "dependency_score": 0.2781
+    },
+    {
+      "time": 28.2135,
+      "t": 28.2135,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.5589,
+      "color": "#2ecc71",
+      "energy_score": 0.4347,
+      "clarity_score": 0.2032,
+      "temporal_score": 0.3354,
+      "focus_score": 0.5628,
+      "dependency_score": 0.4732
+    },
+    {
+      "time": 28.3848,
+      "t": 28.3848,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.1778,
+      "color": "#2ecc71",
+      "energy_score": 0.6084,
+      "clarity_score": 0.0935,
+      "temporal_score": 0.5446,
+      "focus_score": 0.8232,
+      "dependency_score": 0.2734
+    },
+    {
+      "time": 28.5212,
+      "t": 28.5212,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 6.5157,
+      "color": "#2ecc71",
+      "energy_score": 0.6151,
+      "clarity_score": 0.511,
+      "temporal_score": 0.2225,
+      "focus_score": 0.9703,
+      "dependency_score": 0.3561
+    },
+    {
+      "time": 28.7011,
+      "t": 28.7011,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.5561,
+      "color": "#2ecc71",
+      "energy_score": 0.3725,
+      "clarity_score": 0.199,
+      "temporal_score": 0.5674,
+      "focus_score": 0.8663,
+      "dependency_score": 0.83
+    },
+    {
+      "time": 28.794,
+      "t": 28.794,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.7455,
+      "color": "#2ecc71",
+      "energy_score": 0.421,
+      "clarity_score": 0.2657,
+      "temporal_score": 0.2128,
+      "focus_score": 0.5159,
+      "dependency_score": 0.216
+    },
+    {
+      "time": 28.974,
+      "t": 28.974,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.4926,
+      "color": "#2ecc71",
+      "energy_score": 0.6178,
+      "clarity_score": 0.0436,
+      "temporal_score": 0.4616,
+      "focus_score": 0.6085,
+      "dependency_score": 0.2893
+    },
+    {
+      "time": 29.1046,
+      "t": 29.1046,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.8872,
+      "color": "#2ecc71",
+      "energy_score": 0.5565,
+      "clarity_score": 0.7088,
+      "temporal_score": 0.2622,
+      "focus_score": 0.85,
+      "dependency_score": 0.4715
+    },
+    {
+      "time": 29.3107,
+      "t": 29.3107,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.2132,
+      "color": "#2ecc71",
+      "energy_score": 0.3511,
+      "clarity_score": 0.0789,
+      "temporal_score": 0.2798,
+      "focus_score": 0.433,
+      "dependency_score": 0.5289
+    },
+    {
+      "time": 29.4035,
+      "t": 29.4035,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.5211,
+      "color": "#2ecc71",
+      "energy_score": 0.4305,
+      "clarity_score": 0.1191,
+      "temporal_score": 0.2142,
+      "focus_score": 0.4419,
+      "dependency_score": 0.2193
+    },
+    {
+      "time": 29.5748,
+      "t": 29.5748,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.2372,
+      "color": "#f39c12",
+      "energy_score": 0.6154,
+      "clarity_score": 0.4102,
+      "temporal_score": 0.6192,
+      "focus_score": 0.6418,
+      "dependency_score": 0.1978
+    },
+    {
+      "time": 29.7228,
+      "t": 29.7228,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid",
+          "high"
+        ]
+      },
+      "layer": "P2",
+      "strength": 4.4958,
+      "color": "#3498db",
+      "energy_score": 0.4063,
+      "clarity_score": 0.3521,
+      "temporal_score": 0.5826,
+      "focus_score": 0.6509,
+      "dependency_score": 0.8
+    },
+    {
+      "time": 29.8883,
+      "t": 29.8883,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 6.0706,
+      "color": "#f39c12",
+      "energy_score": 0.5174,
+      "clarity_score": 0.2972,
+      "temporal_score": 0.3928,
+      "focus_score": 0.7137,
+      "dependency_score": 0.4988
+    },
+    {
+      "time": 30.0102,
+      "t": 30.0102,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.2867,
+      "color": "#2ecc71",
+      "energy_score": 0.6076,
+      "clarity_score": 0.0166,
+      "temporal_score": 0.2267,
+      "focus_score": 0.7048,
+      "dependency_score": 0.2101
+    },
+    {
+      "time": 30.3033,
+      "t": 30.3033,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 5.3835,
+      "color": "#2ecc71",
+      "energy_score": 0.5334,
+      "clarity_score": 0.2636,
+      "temporal_score": 0.2205,
+      "focus_score": 0.6935,
+      "dependency_score": 0.0921
+    },
+    {
+      "time": 30.5036,
+      "t": 30.5036,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.7483,
+      "color": "#2ecc71",
+      "energy_score": 0.3704,
+      "clarity_score": 0.1599,
+      "temporal_score": 0.6269,
+      "focus_score": 0.5162,
+      "dependency_score": 0.3978
+    },
+    {
+      "time": 30.6168,
+      "t": 30.6168,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.6753,
+      "color": "#2ecc71",
+      "energy_score": 0.3761,
+      "clarity_score": 0.1571,
+      "temporal_score": 0.1921,
+      "focus_score": 0.5743,
+      "dependency_score": 0.4163
+    },
+    {
+      "time": 30.7735,
+      "t": 30.7735,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.9115,
+      "color": "#f39c12",
+      "energy_score": 0.6012,
+      "clarity_score": 0.0688,
+      "temporal_score": 0.6255,
+      "focus_score": 0.7044,
+      "dependency_score": 0.2884
+    },
+    {
+      "time": 30.9128,
+      "t": 30.9128,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 11.151,
+      "color": "#f39c12",
+      "energy_score": 0.6217,
+      "clarity_score": 0.8429,
+      "temporal_score": 0.4594,
+      "focus_score": 0.9068,
+      "dependency_score": 0.3301
+    },
+    {
+      "time": 31.0899,
+      "t": 31.0899,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.9463,
+      "color": "#2ecc71",
+      "energy_score": 0.4319,
+      "clarity_score": 0.0261,
+      "temporal_score": 0.4769,
+      "focus_score": 0.8612,
+      "dependency_score": 0.6925
+    },
+    {
+      "time": 31.206,
+      "t": 31.206,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.2366,
+      "color": "#2ecc71",
+      "energy_score": 0.4053,
+      "clarity_score": 0.0064,
+      "temporal_score": 0.5355,
+      "focus_score": 0.4836,
+      "dependency_score": 0.3933
+    },
+    {
+      "time": 31.3743,
+      "t": 31.3743,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 4.4641,
+      "color": "#f39c12",
+      "energy_score": 0.6195,
+      "clarity_score": 0.1835,
+      "temporal_score": 0.3551,
+      "focus_score": 0.7149,
+      "dependency_score": 0.2675
+    },
+    {
+      "time": 31.5078,
+      "t": 31.5078,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 11.5083,
+      "color": "#f39c12",
+      "energy_score": 0.5514,
+      "clarity_score": 0.4731,
+      "temporal_score": 0.9951,
+      "focus_score": 0.8515,
+      "dependency_score": 0.4889
+    },
+    {
+      "time": 31.682,
+      "t": 31.682,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.6344,
+      "color": "#2ecc71",
+      "energy_score": 0.4755,
+      "clarity_score": 0.026,
+      "temporal_score": 0.4468,
+      "focus_score": 0.6593,
+      "dependency_score": 0.3156
+    },
+    {
+      "time": 31.801,
+      "t": 31.801,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.7433,
+      "color": "#2ecc71",
+      "energy_score": 0.4287,
+      "clarity_score": 0.2908,
+      "temporal_score": 0.3078,
+      "focus_score": 0.3865,
+      "dependency_score": 0.4532
+    },
+    {
+      "time": 31.9664,
+      "t": 31.9664,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 8.9699,
+      "color": "#2ecc71",
+      "energy_score": 0.621,
+      "clarity_score": 0.6969,
+      "temporal_score": 0.3873,
+      "focus_score": 0.5746,
+      "dependency_score": 0.1897
+    },
+    {
+      "time": 32.0912,
+      "t": 32.0912,
+      "roles": {
+        "P0": [
+          "high",
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid"
+        ]
+      },
+      "layer": "P2",
+      "strength": 6.0639,
+      "color": "#3498db",
+      "energy_score": 0.4578,
+      "clarity_score": 0.2141,
+      "temporal_score": 0.3173,
+      "focus_score": 0.7253,
+      "dependency_score": 0.6977
+    },
+    {
+      "time": 32.248,
+      "t": 32.248,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.6459,
+      "color": "#f39c12",
+      "energy_score": 0.5269,
+      "clarity_score": 0.0227,
+      "temporal_score": 0.907,
+      "focus_score": 0.5527,
+      "dependency_score": 0.331
+    },
+    {
+      "time": 32.3902,
+      "t": 32.3902,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.2475,
+      "color": "#f39c12",
+      "energy_score": 0.5893,
+      "clarity_score": 0.0556,
+      "temporal_score": 0.7281,
+      "focus_score": 0.7501,
+      "dependency_score": 0.2341
+    },
+    {
+      "time": 32.6688,
+      "t": 32.6688,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.5925,
+      "color": "#2ecc71",
+      "energy_score": 0.6059,
+      "clarity_score": 0.0263,
+      "temporal_score": 0.2138,
+      "focus_score": 0.9999,
+      "dependency_score": 0.3584
+    },
+    {
+      "time": 32.6717,
+      "t": 32.6717,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.5386,
+      "color": "#2ecc71",
+      "energy_score": 0.5524,
+      "clarity_score": 0.3366,
+      "temporal_score": 0.2603,
+      "focus_score": 0.6479,
+      "dependency_score": 0.3883
+    },
+    {
+      "time": 32.9823,
+      "t": 32.9823,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 7.212,
+      "color": "#f39c12",
+      "energy_score": 0.5792,
+      "clarity_score": 0.2303,
+      "temporal_score": 0.736,
+      "focus_score": 0.9609,
+      "dependency_score": 0.4444
+    },
+    {
+      "time": 33.2929,
+      "t": 33.2929,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.0061,
+      "color": "#f39c12",
+      "energy_score": 0.6054,
+      "clarity_score": 0.0405,
+      "temporal_score": 0.0,
+      "focus_score": 0.6492,
+      "dependency_score": 0.1756
+    },
+    {
+      "time": 33.4728,
+      "t": 33.4728,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.667,
+      "color": "#2ecc71",
+      "energy_score": 0.3966,
+      "clarity_score": 0.2231,
+      "temporal_score": 0.0283,
+      "focus_score": 0.6334,
+      "dependency_score": 0.7841
+    },
+    {
+      "time": 33.6151,
+      "t": 33.6151,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.0427,
+      "color": "#f39c12",
+      "energy_score": 0.2084,
+      "clarity_score": 0.042,
+      "temporal_score": 0.408,
+      "focus_score": 0.3884,
+      "dependency_score": 0.6018
+    },
+    {
+      "time": 33.7834,
+      "t": 33.7834,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.1319,
+      "color": "#f39c12",
+      "energy_score": 0.3251,
+      "clarity_score": 0.0079,
+      "temporal_score": 0.4858,
+      "focus_score": 0.491,
+      "dependency_score": 0.8995
+    },
+    {
+      "time": 33.8937,
+      "t": 33.8937,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 6.3905,
+      "color": "#2ecc71",
+      "energy_score": 0.6174,
+      "clarity_score": 0.2845,
+      "temporal_score": 0.5778,
+      "focus_score": 0.8397,
+      "dependency_score": 0.2015
+    },
+    {
+      "time": 34.1985,
+      "t": 34.1985,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.2138,
+      "color": "#2ecc71",
+      "energy_score": 0.3067,
+      "clarity_score": 0.143,
+      "temporal_score": 0.1382,
+      "focus_score": 0.8004,
+      "dependency_score": 0.1508
+    },
+    {
+      "time": 34.3668,
+      "t": 34.3668,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 9.4959,
+      "color": "#f39c12",
+      "energy_score": 0.6183,
+      "clarity_score": 0.4228,
+      "temporal_score": 0.4913,
+      "focus_score": 0.8194,
+      "dependency_score": 0.2165
+    },
+    {
+      "time": 34.5177,
+      "t": 34.5177,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": [
+          "mid"
+        ]
+      },
+      "layer": "P2",
+      "strength": 7.5055,
+      "color": "#3498db",
+      "energy_score": 0.4056,
+      "clarity_score": 0.4057,
+      "temporal_score": 0.3576,
+      "focus_score": 0.6918,
+      "dependency_score": 0.7678
+    },
+    {
+      "time": 34.7964,
+      "t": 34.7964,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 10.1016,
+      "color": "#f39c12",
+      "energy_score": 0.6,
+      "clarity_score": 0.8491,
+      "temporal_score": 0.6779,
+      "focus_score": 0.5114,
+      "dependency_score": 0.2161
+    },
+    {
+      "time": 35.0953,
+      "t": 35.0953,
+      "roles": {
+        "P0": [
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.7096,
+      "color": "#f39c12",
+      "energy_score": 0.5842,
+      "clarity_score": 0.2277,
+      "temporal_score": 0.4076,
+      "focus_score": 0.9599,
+      "dependency_score": 0.2166
+    },
+    {
+      "time": 35.6874,
+      "t": 35.6874,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.8227,
+      "color": "#2ecc71",
+      "energy_score": 0.5816,
+      "clarity_score": 0.2247,
+      "temporal_score": 0.4223,
+      "focus_score": 0.4969,
+      "dependency_score": 0.1909
+    },
+    {
+      "time": 35.9806,
+      "t": 35.9806,
+      "roles": {
+        "P0": [
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.9407,
+      "color": "#f39c12",
+      "energy_score": 0.3274,
+      "clarity_score": 0.2341,
+      "temporal_score": 0.1975,
+      "focus_score": 0.5361,
+      "dependency_score": 0.0221
+    },
+    {
+      "time": 36.2737,
+      "t": 36.2737,
+      "roles": {
+        "P0": [
+          "high"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.4587,
+      "color": "#f39c12",
+      "energy_score": 0.6011,
+      "clarity_score": 0.1617,
+      "temporal_score": 0.7676,
+      "focus_score": 0.0086,
+      "dependency_score": 0.2478
+    },
+    {
+      "time": 36.564,
+      "t": 36.564,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.903,
+      "color": "#f39c12",
+      "energy_score": 0.3852,
+      "clarity_score": 0.1805,
+      "temporal_score": 0.2571,
+      "focus_score": 0.6197,
+      "dependency_score": 0.1248
+    },
+    {
+      "time": 36.7498,
+      "t": 36.7498,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 2.3435,
+      "color": "#2ecc71",
+      "energy_score": 0.6208,
+      "clarity_score": 0.2223,
+      "temporal_score": 0.2652,
+      "focus_score": 0.7294,
+      "dependency_score": 0.2169
+    },
+    {
+      "time": 36.8862,
+      "t": 36.8862,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 4.3677,
+      "color": "#2ecc71",
+      "energy_score": 0.429,
+      "clarity_score": 0.4333,
+      "temporal_score": 0.2156,
+      "focus_score": 0.661,
+      "dependency_score": 0.8079
+    },
+    {
+      "time": 37.1677,
+      "t": 37.1677,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.8985,
+      "color": "#f39c12",
+      "energy_score": 0.5991,
+      "clarity_score": 0.5852,
+      "temporal_score": 0.7728,
+      "focus_score": 0.6938,
+      "dependency_score": 0.2174
+    },
+    {
+      "time": 37.4696,
+      "t": 37.4696,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 5.7183,
+      "color": "#f39c12",
+      "energy_score": 0.5864,
+      "clarity_score": 0.5159,
+      "temporal_score": 0.2863,
+      "focus_score": 0.8909,
+      "dependency_score": 0.2119
+    },
+    {
+      "time": 38.0559,
+      "t": 38.0559,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 2.2178,
+      "color": "#f39c12",
+      "energy_score": 0.5705,
+      "clarity_score": 0.1847,
+      "temporal_score": 0.6333,
+      "focus_score": 0.1504,
+      "dependency_score": 0.2353
+    },
+    {
+      "time": 38.6509,
+      "t": 38.6509,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 12.9296,
+      "color": "#f39c12",
+      "energy_score": 0.5841,
+      "clarity_score": 0.9993,
+      "temporal_score": 0.3304,
+      "focus_score": 0.3257,
+      "dependency_score": 0.1958
+    },
+    {
+      "time": 38.944,
+      "t": 38.944,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 1.9482,
+      "color": "#2ecc71",
+      "energy_score": 0.3402,
+      "clarity_score": 0.1556,
+      "temporal_score": 0.3133,
+      "focus_score": 0.9258,
+      "dependency_score": 0.0382
+    },
+    {
+      "time": 39.124,
+      "t": 39.124,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 0.203,
+      "color": "#2ecc71",
+      "energy_score": 0.5942,
+      "clarity_score": 0.0161,
+      "temporal_score": 0.3307,
+      "focus_score": 0.6483,
+      "dependency_score": 0.1924
+    },
+    {
+      "time": 39.5449,
+      "t": 39.5449,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 10.7268,
+      "color": "#2ecc71",
+      "energy_score": 0.5896,
+      "clarity_score": 0.857,
+      "temporal_score": 0.0,
+      "focus_score": 0.3622,
+      "dependency_score": 0.2095
+    },
+    {
+      "time": 39.8467,
+      "t": 39.8467,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.8161,
+      "color": "#2ecc71",
+      "energy_score": 0.5859,
+      "clarity_score": 0.8916,
+      "temporal_score": 0.7041,
+      "focus_score": 0.9196,
+      "dependency_score": 0.2425
+    },
+    {
+      "time": 40.4214,
+      "t": 40.4214,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 3.2431,
+      "color": "#2ecc71",
+      "energy_score": 0.5872,
+      "clarity_score": 0.2562,
+      "temporal_score": 0.4118,
+      "focus_score": 0.3797,
+      "dependency_score": 0.2169
+    },
+    {
+      "time": 40.732,
+      "t": 40.732,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.4698,
+      "color": "#f39c12",
+      "energy_score": 0.2728,
+      "clarity_score": 0.0475,
+      "temporal_score": 0.6299,
+      "focus_score": 0.6535,
+      "dependency_score": 0.063
+    },
+    {
+      "time": 41.028,
+      "t": 41.028,
+      "roles": {
+        "P0": [
+          "mid"
+        ],
+        "P1": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 1.0649,
+      "color": "#f39c12",
+      "energy_score": 0.5989,
+      "clarity_score": 0.0709,
+      "temporal_score": 0.9253,
+      "focus_score": 0.6913,
+      "dependency_score": 0.2184
+    },
+    {
+      "time": 41.3299,
+      "t": 41.3299,
+      "roles": {
+        "P0": [
+          "low"
+        ],
+        "P1": [
+          "high",
+          "mid"
+        ],
+        "P2": []
+      },
+      "layer": "P1",
+      "strength": 0.0959,
+      "color": "#f39c12",
+      "energy_score": 0.3094,
+      "clarity_score": 0.0071,
+      "temporal_score": 0.0791,
+      "focus_score": 0.8038,
+      "dependency_score": 0.0737
+    },
+    {
+      "time": 41.4953,
+      "t": 41.4953,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.5852,
+      "color": "#2ecc71",
+      "energy_score": 0.596,
+      "clarity_score": 0.7256,
+      "temporal_score": 0.5316,
+      "focus_score": 0.5656,
+      "dependency_score": 0.1971
+    },
+    {
+      "time": 41.9191,
+      "t": 41.9191,
+      "roles": {
+        "P0": [
+          "high",
+          "low",
+          "mid"
+        ],
+        "P1": [],
+        "P2": []
+      },
+      "layer": "P0",
+      "strength": 9.0153,
+      "color": "#2ecc71",
+      "energy_score": 0.601,
+      "clarity_score": 0.7808,
+      "temporal_score": 0.5681,
+      "focus_score": 0.6465,
+      "dependency_score": 0.2274
+    }
+  ]
+}

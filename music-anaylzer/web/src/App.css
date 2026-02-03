@@ -1,0 +1,798 @@
+.app {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.app h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.upload-section {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.main-tabs-section {
+  margin-top: 1rem;
+}
+
+.main-tabs-header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border, #444);
+}
+
+.main-tab-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  cursor: pointer;
+}
+
+.main-tab-btn:hover {
+  color: #fff;
+}
+
+.main-tab-btn.active {
+  color: #5a9fd4;
+  border-bottom-color: #5a9fd4;
+}
+
+.tabs-section {
+  margin-top: 1rem;
+}
+
+.tabs-header {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border, #444);
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  color: #fff;
+}
+
+.tab-btn.active {
+  color: #5a9fd4;
+  border-bottom-color: #5a9fd4;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.tab-upload {
+  margin-bottom: 1rem;
+}
+
+.upload-section .uploader button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.upload-section .uploader .uploader-error,
+.uploader .uploader-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.uploader .uploader-loaded {
+  color: #27ae60;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.controls-section {
+  margin-bottom: 1rem;
+}
+
+.waveform-placeholder {
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  color: #888;
+}
+
+.waveform-with-overlay {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.waveform-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.band-filter-label {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.band-filter-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.band-filter-btn {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  background: var(--bg-soft, #2a2a2a);
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+}
+
+.band-filter-btn:hover:not(:disabled) {
+  color: #fff;
+  border-color: #666;
+}
+
+.band-filter-btn.active {
+  color: #5a9fd4;
+  border-color: #5a9fd4;
+  background: rgba(90, 159, 212, 0.15);
+}
+
+.band-filter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.filter-loading {
+  font-size: 0.85rem;
+  color: #f39c12;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.zoom-controls button {
+  min-width: 2rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.waveform-controls button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.time-display {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.waveform-visual {
+  position: relative;
+  width: 100%;
+  min-height: 120px;
+}
+
+.waveform-visual .waveform-container {
+  display: block;
+}
+
+.waveform-container {
+  width: 100%;
+  height: 120px;
+}
+
+.overlay-svg-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Tab 09: 레이어별 분리 뷰 */
+.tab09-layer-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab09-waveform-section {
+  margin-bottom: 1rem;
+}
+
+.tab09-waveform-section .waveform-controls {
+  margin-bottom: 0.5rem;
+}
+
+.tab09-waveform-container {
+  width: 100%;
+  height: 100px;
+  display: block;
+}
+
+.tab09-layer-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.layer-timeline-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.layer-timeline-strip:last-child {
+  border-bottom: none;
+}
+
+.layer-timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.layer-timeline-label {
+  font-weight: 500;
+  color: #aaa;
+}
+
+.layer-timeline-svg-wrap {
+  width: 100%;
+  min-height: 44px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.streams-sections-view .layer-timeline-svg-wrap {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.layer-timeline-count {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.filter-section {
+  margin-top: 0.75rem;
+}
+
+.events-count {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.layer-filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+.layer-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.layer-toggle input {
+  cursor: pointer;
+}
+
+.height-range-slider {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.height-range-label {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.height-range-inputs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.height-range-slider input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+  height: 6px;
+  accent-color: #5a9fd4;
+}
+
+.height-range-value {
+  font-size: 0.8rem;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+  min-width: 5rem;
+}
+
+/* 04 Energy 다중 트랙 뷰 */
+.tab04-energy-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab04-energy-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab04-energy-view .energy-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab04-energy-view .energy-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab04-energy-view .energy-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+}
+
+.tab04-energy-view .energy-track-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-width: 10rem;
+}
+
+.tab04-energy-view .energy-track-visual {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* Energy Bar (테스트) 막대그래프 뷰 */
+.tab-energy-bar-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab-energy-bar-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab-energy-bar-view .energy-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.tab-energy-bar-view .energy-bar-chart-wrap {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.tab-energy-bar-view .energy-bar-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.tab-energy-bar-view .energy-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 56px;
+  margin-bottom: 0.25rem;
+}
+
+.tab-energy-bar-view .energy-bar-row-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 4rem;
+}
+
+.tab-energy-bar-view .energy-bar-row-chart {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.tab-energy-bar-view .energy-bar-chart {
+  min-width: 100%;
+}
+
+.tab-energy-bar-view .energy-bar-hint {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* 05 Clarity 다중 트랙 뷰 */
+.tab05-clarity-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab05-clarity-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab05-clarity-view .clarity-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab05-clarity-view .clarity-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab05-clarity-view .clarity-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+}
+
+.tab05-clarity-view .clarity-track-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-width: 14rem;
+}
+
+.tab05-clarity-view .clarity-track-visual {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* 06 Temporal 다중 트랙 뷰 */
+.tab06-temporal-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab06-temporal-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab06-temporal-view .temporal-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab06-temporal-view .temporal-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab06-temporal-view .temporal-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+}
+
+.tab06-temporal-view .temporal-track-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-width: 16rem;
+}
+
+.tab06-temporal-view .temporal-track-visual {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* 07 Spectral 다중 트랙 뷰 */
+.tab07-spectral-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab07-spectral-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab07-spectral-view .spectral-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab07-spectral-view .spectral-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab07-spectral-view .spectral-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+}
+
+.tab07-spectral-view .spectral-track-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-width: 16rem;
+}
+
+.tab07-spectral-view .spectral-track-visual {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* 08 Context 다중 트랙 뷰 */
+.tab08-context-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.tab08-context-view .waveform-visual {
+  min-height: 100px;
+}
+
+.tab08-context-view .context-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab08-context-view .context-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab08-context-view .context-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+}
+
+.tab08-context-view .context-track-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-width: 18rem;
+}
+
+.tab08-context-view .context-track-visual {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* 스트림·파트 뷰 */
+.streams-sections-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.streams-sections-view .placeholder {
+  color: #888;
+  padding: 2rem;
+  text-align: center;
+}
+
+.streams-sections-view .streams-sections-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.5rem;
+}
+
+.streams-sections-view .band-filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.streams-sections-view .band-filter-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.streams-sections-view .band-filter-btns {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.streams-sections-view .band-filter-btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: #ccc;
+  cursor: pointer;
+}
+
+.streams-sections-view .band-filter-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.streams-sections-view .band-filter-btn.active {
+  background: rgba(90, 159, 212, 0.35);
+  border-color: rgba(90, 159, 212, 0.6);
+  color: #fff;
+}
+
+.streams-sections-view .band-filter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.streams-sections-view .band-filter-loading {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.streams-sections-view .sections-ruler {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.streams-sections-view .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.streams-sections-view .detail-grid h4 {
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+  color: #aaa;
+}
+
+.streams-sections-view .detail-grid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 스트림 시각화 타임라인 */
+.streams-sections-view .streams-visual-wrap {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.streams-timeline-strip {
+  font-size: 12px;
+}
+
+.streams-timeline-strip .streams-timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: #aaa;
+}
+
+.streams-timeline-strip .streams-timeline-label {
+  font-weight: 500;
+}
+
+.streams-timeline-strip .streams-timeline-count {
+  color: #888;
+  font-size: 11px;
+}
+
+.streams-timeline-strip .streams-timeline-body {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.streams-timeline-strip .streams-timeline-legend {
+  flex-shrink: 0;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.streams-timeline-strip .streams-timeline-row-legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 0;
+}
+
+.streams-timeline-strip .streams-timeline-row-legend:last-child {
+  border-bottom: none;
+}
+
+.streams-timeline-strip .streams-timeline-stream-id {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.streams-timeline-strip .streams-timeline-stream-meta {
+  font-size: 10px;
+  color: #888;
+}
+
+.streams-timeline-strip .streams-timeline-svg-wrap {
+  position: relative;
+  min-width: 0;
+  overflow: auto;
+}

@@ -1,0 +1,1143 @@
+{
+  "metadata": {
+    "source": "sample_ropes_short.mp3",
+    "sr": 22050,
+    "duration_sec": 31.1118,
+    "hop_length": 256,
+    "n_fft": 2048,
+    "bpm": 89.1,
+    "total_events": 113
+  },
+  "events": [
+    {
+      "index": 0,
+      "time": 0.058,
+      "frame": 5,
+      "strength": 3.0798,
+      "spectral_centroid_hz": 2530.33,
+      "spectral_bandwidth_hz": 1800.45,
+      "spectral_flatness": 0.3336,
+      "focus_score": 0.3332
+    },
+    {
+      "index": 1,
+      "time": 0.724,
+      "frame": 62,
+      "strength": 0.0,
+      "spectral_centroid_hz": 927.37,
+      "spectral_bandwidth_hz": 1146.43,
+      "spectral_flatness": 0.819,
+      "focus_score": 0.2323
+    },
+    {
+      "index": 2,
+      "time": 1.3916,
+      "frame": 119,
+      "strength": 0.0,
+      "spectral_centroid_hz": 0.0,
+      "spectral_bandwidth_hz": 0.0,
+      "spectral_flatness": 1.0,
+      "focus_score": 0.5
+    },
+    {
+      "index": 3,
+      "time": 2.0562,
+      "frame": 177,
+      "strength": 0.0179,
+      "spectral_centroid_hz": 944.77,
+      "spectral_bandwidth_hz": 1160.02,
+      "spectral_flatness": 0.8228,
+      "focus_score": 0.2262
+    },
+    {
+      "index": 4,
+      "time": 2.7267,
+      "frame": 234,
+      "strength": 0.0,
+      "spectral_centroid_hz": 0.0,
+      "spectral_bandwidth_hz": 0.0,
+      "spectral_flatness": 1.0,
+      "focus_score": 0.5
+    },
+    {
+      "index": 5,
+      "time": 3.3914,
+      "frame": 292,
+      "strength": 3.0183,
+      "spectral_centroid_hz": 912.02,
+      "spectral_bandwidth_hz": 1133.79,
+      "spectral_flatness": 0.8202,
+      "focus_score": 0.2357
+    },
+    {
+      "index": 6,
+      "time": 4.059,
+      "frame": 349,
+      "strength": 0.0,
+      "spectral_centroid_hz": 0.0,
+      "spectral_bandwidth_hz": 0.0,
+      "spectral_flatness": 1.0,
+      "focus_score": 0.5
+    },
+    {
+      "index": 7,
+      "time": 5.4318,
+      "frame": 467,
+      "strength": 2.8239,
+      "spectral_centroid_hz": 0.0,
+      "spectral_bandwidth_hz": 0.0,
+      "spectral_flatness": 1.0,
+      "focus_score": 0.5
+    },
+    {
+      "index": 8,
+      "time": 6.0298,
+      "frame": 519,
+      "strength": 6.4689,
+      "spectral_centroid_hz": 155.64,
+      "spectral_bandwidth_hz": 218.48,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9317
+    },
+    {
+      "index": 9,
+      "time": 6.2649,
+      "frame": 539,
+      "strength": 3.9473,
+      "spectral_centroid_hz": 294.19,
+      "spectral_bandwidth_hz": 250.52,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9217
+    },
+    {
+      "index": 10,
+      "time": 6.3868,
+      "frame": 550,
+      "strength": 3.314,
+      "spectral_centroid_hz": 556.01,
+      "spectral_bandwidth_hz": 1029.25,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6785
+    },
+    {
+      "index": 11,
+      "time": 6.6044,
+      "frame": 568,
+      "strength": 0.4923,
+      "spectral_centroid_hz": 243.49,
+      "spectral_bandwidth_hz": 249.71,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.922
+    },
+    {
+      "index": 12,
+      "time": 6.7205,
+      "frame": 578,
+      "strength": 0.248,
+      "spectral_centroid_hz": 404.52,
+      "spectral_bandwidth_hz": 985.31,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6922
+    },
+    {
+      "index": 13,
+      "time": 7.0514,
+      "frame": 607,
+      "strength": 6.4785,
+      "spectral_centroid_hz": 154.83,
+      "spectral_bandwidth_hz": 238.1,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9256
+    },
+    {
+      "index": 14,
+      "time": 7.3591,
+      "frame": 633,
+      "strength": 0.0858,
+      "spectral_centroid_hz": 252.15,
+      "spectral_bandwidth_hz": 196.68,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9386
+    },
+    {
+      "index": 15,
+      "time": 7.6087,
+      "frame": 655,
+      "strength": 5.7179,
+      "spectral_centroid_hz": 128.45,
+      "spectral_bandwidth_hz": 108.2,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9662
+    },
+    {
+      "index": 16,
+      "time": 7.7306,
+      "frame": 665,
+      "strength": 3.5894,
+      "spectral_centroid_hz": 183.63,
+      "spectral_bandwidth_hz": 561.43,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8246
+    },
+    {
+      "index": 17,
+      "time": 8.0441,
+      "frame": 692,
+      "strength": 0.1035,
+      "spectral_centroid_hz": 166.88,
+      "spectral_bandwidth_hz": 181.24,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9434
+    },
+    {
+      "index": 18,
+      "time": 8.3866,
+      "frame": 722,
+      "strength": 5.153,
+      "spectral_centroid_hz": 202.47,
+      "spectral_bandwidth_hz": 246.53,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.923
+    },
+    {
+      "index": 19,
+      "time": 8.5985,
+      "frame": 740,
+      "strength": 4.3648,
+      "spectral_centroid_hz": 188.87,
+      "spectral_bandwidth_hz": 249.77,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.922
+    },
+    {
+      "index": 20,
+      "time": 8.7,
+      "frame": 749,
+      "strength": 4.9216,
+      "spectral_centroid_hz": 1087.78,
+      "spectral_bandwidth_hz": 1495.42,
+      "spectral_flatness": 0.0005,
+      "focus_score": 0.5326
+    },
+    {
+      "index": 21,
+      "time": 8.9322,
+      "frame": 769,
+      "strength": 5.902,
+      "spectral_centroid_hz": 207.15,
+      "spectral_bandwidth_hz": 290.57,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9092
+    },
+    {
+      "index": 22,
+      "time": 9.0454,
+      "frame": 779,
+      "strength": 0.8837,
+      "spectral_centroid_hz": 521.75,
+      "spectral_bandwidth_hz": 1159.87,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6376
+    },
+    {
+      "index": 23,
+      "time": 9.2805,
+      "frame": 799,
+      "strength": 6.2752,
+      "spectral_centroid_hz": 302.28,
+      "spectral_bandwidth_hz": 232.49,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9274
+    },
+    {
+      "index": 24,
+      "time": 9.3966,
+      "frame": 809,
+      "strength": 3.527,
+      "spectral_centroid_hz": 631.03,
+      "spectral_bandwidth_hz": 1236.98,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6136
+    },
+    {
+      "index": 25,
+      "time": 9.7159,
+      "frame": 836,
+      "strength": 0.9173,
+      "spectral_centroid_hz": 308.95,
+      "spectral_bandwidth_hz": 254.35,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9205
+    },
+    {
+      "index": 26,
+      "time": 10.0265,
+      "frame": 863,
+      "strength": 1.2523,
+      "spectral_centroid_hz": 331.71,
+      "spectral_bandwidth_hz": 115.04,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9641
+    },
+    {
+      "index": 27,
+      "time": 10.2761,
+      "frame": 885,
+      "strength": 6.3227,
+      "spectral_centroid_hz": 83.59,
+      "spectral_bandwidth_hz": 114.69,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9642
+    },
+    {
+      "index": 28,
+      "time": 10.3951,
+      "frame": 895,
+      "strength": 3.8128,
+      "spectral_centroid_hz": 99.61,
+      "spectral_bandwidth_hz": 314.98,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9016
+    },
+    {
+      "index": 29,
+      "time": 10.7144,
+      "frame": 922,
+      "strength": 2.2814,
+      "spectral_centroid_hz": 90.89,
+      "spectral_bandwidth_hz": 122.63,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9617
+    },
+    {
+      "index": 30,
+      "time": 11.0424,
+      "frame": 951,
+      "strength": 1.8092,
+      "spectral_centroid_hz": 159.97,
+      "spectral_bandwidth_hz": 239.86,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9251
+    },
+    {
+      "index": 31,
+      "time": 11.2688,
+      "frame": 970,
+      "strength": 3.9972,
+      "spectral_centroid_hz": 189.23,
+      "spectral_bandwidth_hz": 210.99,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9341
+    },
+    {
+      "index": 32,
+      "time": 11.3703,
+      "frame": 979,
+      "strength": 7.4257,
+      "spectral_centroid_hz": 1132.55,
+      "spectral_bandwidth_hz": 1566.67,
+      "spectral_flatness": 0.0006,
+      "focus_score": 0.5102
+    },
+    {
+      "index": 33,
+      "time": 11.5996,
+      "frame": 999,
+      "strength": 5.1981,
+      "spectral_centroid_hz": 458.65,
+      "spectral_bandwidth_hz": 437.49,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8633
+    },
+    {
+      "index": 34,
+      "time": 11.7128,
+      "frame": 1008,
+      "strength": 0.0357,
+      "spectral_centroid_hz": 651.62,
+      "spectral_bandwidth_hz": 1217.1,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6198
+    },
+    {
+      "index": 35,
+      "time": 11.9392,
+      "frame": 1028,
+      "strength": 3.0794,
+      "spectral_centroid_hz": 279.76,
+      "spectral_bandwidth_hz": 258.04,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9194
+    },
+    {
+      "index": 36,
+      "time": 12.0553,
+      "frame": 1038,
+      "strength": 2.3052,
+      "spectral_centroid_hz": 543.21,
+      "spectral_bandwidth_hz": 1156.07,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6388
+    },
+    {
+      "index": 37,
+      "time": 12.3833,
+      "frame": 1066,
+      "strength": 2.8298,
+      "spectral_centroid_hz": 217.46,
+      "spectral_bandwidth_hz": 165.46,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9483
+    },
+    {
+      "index": 38,
+      "time": 12.691,
+      "frame": 1093,
+      "strength": 5.8327,
+      "spectral_centroid_hz": 319.33,
+      "spectral_bandwidth_hz": 235.01,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9266
+    },
+    {
+      "index": 39,
+      "time": 12.9348,
+      "frame": 1114,
+      "strength": 5.4921,
+      "spectral_centroid_hz": 344.99,
+      "spectral_bandwidth_hz": 216.48,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9324
+    },
+    {
+      "index": 40,
+      "time": 13.048,
+      "frame": 1123,
+      "strength": 0.0486,
+      "spectral_centroid_hz": 871.48,
+      "spectral_bandwidth_hz": 1452.17,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.5463
+    },
+    {
+      "index": 41,
+      "time": 13.376,
+      "frame": 1152,
+      "strength": 5.333,
+      "spectral_centroid_hz": 305.46,
+      "spectral_bandwidth_hz": 249.12,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9222
+    },
+    {
+      "index": 42,
+      "time": 13.7156,
+      "frame": 1181,
+      "strength": 3.6581,
+      "spectral_centroid_hz": 159.39,
+      "spectral_bandwidth_hz": 200.8,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9373
+    },
+    {
+      "index": 43,
+      "time": 13.9361,
+      "frame": 1200,
+      "strength": 5.0641,
+      "spectral_centroid_hz": 155.47,
+      "spectral_bandwidth_hz": 240.17,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.925
+    },
+    {
+      "index": 44,
+      "time": 14.0319,
+      "frame": 1208,
+      "strength": 0.9508,
+      "spectral_centroid_hz": 1174.16,
+      "spectral_bandwidth_hz": 1572.84,
+      "spectral_flatness": 0.0008,
+      "focus_score": 0.5082
+    },
+    {
+      "index": 45,
+      "time": 14.267,
+      "frame": 1228,
+      "strength": 3.8861,
+      "spectral_centroid_hz": 192.45,
+      "spectral_bandwidth_hz": 236.61,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9261
+    },
+    {
+      "index": 46,
+      "time": 14.3918,
+      "frame": 1239,
+      "strength": 3.3879,
+      "spectral_centroid_hz": 429.47,
+      "spectral_bandwidth_hz": 917.45,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7134
+    },
+    {
+      "index": 47,
+      "time": 14.6095,
+      "frame": 1258,
+      "strength": 4.7596,
+      "spectral_centroid_hz": 367.73,
+      "spectral_bandwidth_hz": 432.54,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8649
+    },
+    {
+      "index": 48,
+      "time": 14.7227,
+      "frame": 1268,
+      "strength": 3.0797,
+      "spectral_centroid_hz": 338.91,
+      "spectral_bandwidth_hz": 833.77,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7395
+    },
+    {
+      "index": 49,
+      "time": 15.0536,
+      "frame": 1296,
+      "strength": 5.4692,
+      "spectral_centroid_hz": 91.09,
+      "spectral_bandwidth_hz": 183.26,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9427
+    },
+    {
+      "index": 50,
+      "time": 15.3032,
+      "frame": 1318,
+      "strength": 9.812,
+      "spectral_centroid_hz": 86.29,
+      "spectral_bandwidth_hz": 116.34,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9637
+    },
+    {
+      "index": 51,
+      "time": 15.3526,
+      "frame": 1322,
+      "strength": 4.0616,
+      "spectral_centroid_hz": 791.04,
+      "spectral_bandwidth_hz": 1375.5,
+      "spectral_flatness": 0.0002,
+      "focus_score": 0.5702
+    },
+    {
+      "index": 52,
+      "time": 15.5877,
+      "frame": 1342,
+      "strength": 6.3482,
+      "spectral_centroid_hz": 105.17,
+      "spectral_bandwidth_hz": 193.17,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9397
+    },
+    {
+      "index": 53,
+      "time": 15.6951,
+      "frame": 1351,
+      "strength": 0.1875,
+      "spectral_centroid_hz": 294.8,
+      "spectral_bandwidth_hz": 914.16,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7144
+    },
+    {
+      "index": 54,
+      "time": 16.0201,
+      "frame": 1379,
+      "strength": 0.1194,
+      "spectral_centroid_hz": 204.41,
+      "spectral_bandwidth_hz": 300.12,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9062
+    },
+    {
+      "index": 55,
+      "time": 16.3684,
+      "frame": 1409,
+      "strength": 4.9113,
+      "spectral_centroid_hz": 215.04,
+      "spectral_bandwidth_hz": 259.87,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9188
+    },
+    {
+      "index": 56,
+      "time": 16.5774,
+      "frame": 1427,
+      "strength": 3.4495,
+      "spectral_centroid_hz": 153.32,
+      "spectral_bandwidth_hz": 242.45,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9243
+    },
+    {
+      "index": 57,
+      "time": 16.6761,
+      "frame": 1436,
+      "strength": 4.0722,
+      "spectral_centroid_hz": 1033.88,
+      "spectral_bandwidth_hz": 1472.19,
+      "spectral_flatness": 0.0004,
+      "focus_score": 0.5399
+    },
+    {
+      "index": 58,
+      "time": 16.9112,
+      "frame": 1456,
+      "strength": 4.8891,
+      "spectral_centroid_hz": 265.07,
+      "spectral_bandwidth_hz": 340.39,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8937
+    },
+    {
+      "index": 59,
+      "time": 17.0244,
+      "frame": 1466,
+      "strength": 0.6377,
+      "spectral_centroid_hz": 613.61,
+      "spectral_bandwidth_hz": 1097.19,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6572
+    },
+    {
+      "index": 60,
+      "time": 17.2537,
+      "frame": 1486,
+      "strength": 6.4803,
+      "spectral_centroid_hz": 275.52,
+      "spectral_bandwidth_hz": 219.33,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9315
+    },
+    {
+      "index": 61,
+      "time": 17.3698,
+      "frame": 1496,
+      "strength": 3.2997,
+      "spectral_centroid_hz": 462.0,
+      "spectral_bandwidth_hz": 1057.54,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6696
+    },
+    {
+      "index": 62,
+      "time": 17.6949,
+      "frame": 1524,
+      "strength": 8.3191,
+      "spectral_centroid_hz": 152.6,
+      "spectral_bandwidth_hz": 194.85,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9391
+    },
+    {
+      "index": 63,
+      "time": 18.0025,
+      "frame": 1550,
+      "strength": 0.6768,
+      "spectral_centroid_hz": 260.83,
+      "spectral_bandwidth_hz": 234.46,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9268
+    },
+    {
+      "index": 64,
+      "time": 18.2522,
+      "frame": 1572,
+      "strength": 5.9557,
+      "spectral_centroid_hz": 129.65,
+      "spectral_bandwidth_hz": 78.88,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9754
+    },
+    {
+      "index": 65,
+      "time": 18.3595,
+      "frame": 1581,
+      "strength": 1.0536,
+      "spectral_centroid_hz": 202.16,
+      "spectral_bandwidth_hz": 630.05,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8032
+    },
+    {
+      "index": 66,
+      "time": 18.6875,
+      "frame": 1609,
+      "strength": 1.0098,
+      "spectral_centroid_hz": 196.52,
+      "spectral_bandwidth_hz": 245.39,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9233
+    },
+    {
+      "index": 67,
+      "time": 19.0329,
+      "frame": 1639,
+      "strength": 5.2487,
+      "spectral_centroid_hz": 190.92,
+      "spectral_bandwidth_hz": 268.35,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9162
+    },
+    {
+      "index": 68,
+      "time": 19.2419,
+      "frame": 1657,
+      "strength": 4.7466,
+      "spectral_centroid_hz": 180.7,
+      "spectral_bandwidth_hz": 289.57,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9095
+    },
+    {
+      "index": 69,
+      "time": 19.3435,
+      "frame": 1666,
+      "strength": 8.0152,
+      "spectral_centroid_hz": 1214.35,
+      "spectral_bandwidth_hz": 1604.26,
+      "spectral_flatness": 0.0007,
+      "focus_score": 0.4997
+    },
+    {
+      "index": 70,
+      "time": 19.5757,
+      "frame": 1686,
+      "strength": 5.7018,
+      "spectral_centroid_hz": 209.73,
+      "spectral_bandwidth_hz": 310.45,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.903
+    },
+    {
+      "index": 71,
+      "time": 19.6947,
+      "frame": 1696,
+      "strength": 1.9541,
+      "spectral_centroid_hz": 491.38,
+      "spectral_bandwidth_hz": 1072.29,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.665
+    },
+    {
+      "index": 72,
+      "time": 19.9182,
+      "frame": 1715,
+      "strength": 3.7419,
+      "spectral_centroid_hz": 320.53,
+      "spectral_bandwidth_hz": 360.17,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8875
+    },
+    {
+      "index": 73,
+      "time": 20.0256,
+      "frame": 1724,
+      "strength": 0.0865,
+      "spectral_centroid_hz": 686.85,
+      "spectral_bandwidth_hz": 1265.95,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6045
+    },
+    {
+      "index": 74,
+      "time": 20.3594,
+      "frame": 1753,
+      "strength": 2.2531,
+      "spectral_centroid_hz": 308.74,
+      "spectral_bandwidth_hz": 252.91,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.921
+    },
+    {
+      "index": 75,
+      "time": 20.667,
+      "frame": 1780,
+      "strength": 5.3076,
+      "spectral_centroid_hz": 348.57,
+      "spectral_bandwidth_hz": 208.8,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9348
+    },
+    {
+      "index": 76,
+      "time": 20.9195,
+      "frame": 1801,
+      "strength": 4.2193,
+      "spectral_centroid_hz": 93.3,
+      "spectral_bandwidth_hz": 188.35,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9412
+    },
+    {
+      "index": 77,
+      "time": 21.0356,
+      "frame": 1811,
+      "strength": 2.2405,
+      "spectral_centroid_hz": 105.2,
+      "spectral_bandwidth_hz": 351.37,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8902
+    },
+    {
+      "index": 78,
+      "time": 21.3549,
+      "frame": 1839,
+      "strength": 4.9385,
+      "spectral_centroid_hz": 101.69,
+      "spectral_bandwidth_hz": 193.52,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9395
+    },
+    {
+      "index": 79,
+      "time": 21.6945,
+      "frame": 1868,
+      "strength": 3.1875,
+      "spectral_centroid_hz": 145.57,
+      "spectral_bandwidth_hz": 217.38,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9321
+    },
+    {
+      "index": 80,
+      "time": 21.9122,
+      "frame": 1887,
+      "strength": 4.4282,
+      "spectral_centroid_hz": 171.43,
+      "spectral_bandwidth_hz": 230.92,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9279
+    },
+    {
+      "index": 81,
+      "time": 22.0109,
+      "frame": 1895,
+      "strength": 0.4296,
+      "spectral_centroid_hz": 1064.82,
+      "spectral_bandwidth_hz": 1507.01,
+      "spectral_flatness": 0.0005,
+      "focus_score": 0.5289
+    },
+    {
+      "index": 82,
+      "time": 22.2431,
+      "frame": 1915,
+      "strength": 3.0118,
+      "spectral_centroid_hz": 343.39,
+      "spectral_bandwidth_hz": 363.22,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8865
+    },
+    {
+      "index": 83,
+      "time": 22.365,
+      "frame": 1926,
+      "strength": 2.9712,
+      "spectral_centroid_hz": 499.91,
+      "spectral_bandwidth_hz": 968.86,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6973
+    },
+    {
+      "index": 84,
+      "time": 22.5885,
+      "frame": 1945,
+      "strength": 4.1025,
+      "spectral_centroid_hz": 341.79,
+      "spectral_bandwidth_hz": 341.63,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8933
+    },
+    {
+      "index": 85,
+      "time": 22.7017,
+      "frame": 1955,
+      "strength": 3.043,
+      "spectral_centroid_hz": 542.5,
+      "spectral_bandwidth_hz": 1161.94,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.637
+    },
+    {
+      "index": 86,
+      "time": 23.0297,
+      "frame": 1983,
+      "strength": 4.7569,
+      "spectral_centroid_hz": 231.67,
+      "spectral_bandwidth_hz": 236.83,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.926
+    },
+    {
+      "index": 87,
+      "time": 23.3344,
+      "frame": 2009,
+      "strength": 0.339,
+      "spectral_centroid_hz": 311.75,
+      "spectral_bandwidth_hz": 208.92,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9347
+    },
+    {
+      "index": 88,
+      "time": 23.5782,
+      "frame": 2030,
+      "strength": 0.7821,
+      "spectral_centroid_hz": 356.82,
+      "spectral_bandwidth_hz": 228.1,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9287
+    },
+    {
+      "index": 89,
+      "time": 23.6972,
+      "frame": 2041,
+      "strength": 3.303,
+      "spectral_centroid_hz": 950.47,
+      "spectral_bandwidth_hz": 1561.58,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.5121
+    },
+    {
+      "index": 90,
+      "time": 24.0194,
+      "frame": 2068,
+      "strength": 0.0781,
+      "spectral_centroid_hz": 313.39,
+      "spectral_bandwidth_hz": 300.4,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9062
+    },
+    {
+      "index": 91,
+      "time": 25.2152,
+      "frame": 2171,
+      "strength": 2.8442,
+      "spectral_centroid_hz": 183.21,
+      "spectral_bandwidth_hz": 226.59,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9292
+    },
+    {
+      "index": 92,
+      "time": 26.6868,
+      "frame": 2298,
+      "strength": 1.3132,
+      "spectral_centroid_hz": 320.11,
+      "spectral_bandwidth_hz": 225.92,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9294
+    },
+    {
+      "index": 93,
+      "time": 27.0264,
+      "frame": 2327,
+      "strength": 0.9487,
+      "spectral_centroid_hz": 221.39,
+      "spectral_bandwidth_hz": 271.58,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9152
+    },
+    {
+      "index": 94,
+      "time": 27.2412,
+      "frame": 2346,
+      "strength": 3.9238,
+      "spectral_centroid_hz": 201.91,
+      "spectral_bandwidth_hz": 272.2,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.915
+    },
+    {
+      "index": 95,
+      "time": 27.3428,
+      "frame": 2355,
+      "strength": 6.696,
+      "spectral_centroid_hz": 1171.84,
+      "spectral_bandwidth_hz": 1538.68,
+      "spectral_flatness": 0.0008,
+      "focus_score": 0.5189
+    },
+    {
+      "index": 96,
+      "time": 27.5808,
+      "frame": 2375,
+      "strength": 4.165,
+      "spectral_centroid_hz": 359.07,
+      "spectral_bandwidth_hz": 379.99,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.8813
+    },
+    {
+      "index": 97,
+      "time": 27.694,
+      "frame": 2385,
+      "strength": 1.6639,
+      "spectral_centroid_hz": 389.31,
+      "spectral_bandwidth_hz": 654.61,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7955
+    },
+    {
+      "index": 98,
+      "time": 27.9262,
+      "frame": 2405,
+      "strength": 5.8712,
+      "spectral_centroid_hz": 329.09,
+      "spectral_bandwidth_hz": 299.82,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9063
+    },
+    {
+      "index": 99,
+      "time": 28.0249,
+      "frame": 2413,
+      "strength": 0.3536,
+      "spectral_centroid_hz": 390.21,
+      "spectral_bandwidth_hz": 799.39,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7503
+    },
+    {
+      "index": 100,
+      "time": 28.3673,
+      "frame": 2443,
+      "strength": 8.3894,
+      "spectral_centroid_hz": 192.45,
+      "spectral_bandwidth_hz": 176.23,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9449
+    },
+    {
+      "index": 101,
+      "time": 28.6692,
+      "frame": 2469,
+      "strength": 3.4008,
+      "spectral_centroid_hz": 245.88,
+      "spectral_bandwidth_hz": 158.1,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9506
+    },
+    {
+      "index": 102,
+      "time": 28.9275,
+      "frame": 2491,
+      "strength": 4.7585,
+      "spectral_centroid_hz": 163.81,
+      "spectral_bandwidth_hz": 216.36,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9324
+    },
+    {
+      "index": 103,
+      "time": 29.0407,
+      "frame": 2501,
+      "strength": 3.8,
+      "spectral_centroid_hz": 192.41,
+      "spectral_bandwidth_hz": 547.52,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.829
+    },
+    {
+      "index": 104,
+      "time": 29.3542,
+      "frame": 2528,
+      "strength": 3.6085,
+      "spectral_centroid_hz": 184.51,
+      "spectral_bandwidth_hz": 199.31,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9377
+    },
+    {
+      "index": 105,
+      "time": 29.688,
+      "frame": 2557,
+      "strength": 2.8682,
+      "spectral_centroid_hz": 223.37,
+      "spectral_bandwidth_hz": 249.06,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9222
+    },
+    {
+      "index": 106,
+      "time": 29.9086,
+      "frame": 2576,
+      "strength": 5.2264,
+      "spectral_centroid_hz": 245.11,
+      "spectral_bandwidth_hz": 371.18,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.884
+    },
+    {
+      "index": 107,
+      "time": 30.0073,
+      "frame": 2584,
+      "strength": 0.501,
+      "spectral_centroid_hz": 1126.78,
+      "spectral_bandwidth_hz": 1469.87,
+      "spectral_flatness": 0.0009,
+      "focus_score": 0.5403
+    },
+    {
+      "index": 108,
+      "time": 30.2424,
+      "frame": 2604,
+      "strength": 3.0735,
+      "spectral_centroid_hz": 272.68,
+      "spectral_bandwidth_hz": 185.28,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9421
+    },
+    {
+      "index": 109,
+      "time": 30.3614,
+      "frame": 2615,
+      "strength": 2.9277,
+      "spectral_centroid_hz": 364.33,
+      "spectral_bandwidth_hz": 705.25,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.7797
+    },
+    {
+      "index": 110,
+      "time": 30.5878,
+      "frame": 2634,
+      "strength": 5.4726,
+      "spectral_centroid_hz": 373.13,
+      "spectral_bandwidth_hz": 299.95,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.9063
+    },
+    {
+      "index": 111,
+      "time": 30.7039,
+      "frame": 2644,
+      "strength": 2.9673,
+      "spectral_centroid_hz": 553.69,
+      "spectral_bandwidth_hz": 1081.34,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.6622
+    },
+    {
+      "index": 112,
+      "time": 31.0289,
+      "frame": 2672,
+      "strength": 4.4704,
+      "spectral_centroid_hz": 305.8,
+      "spectral_bandwidth_hz": 179.35,
+      "spectral_flatness": 0.0,
+      "focus_score": 0.944
+    }
+  ]
+}

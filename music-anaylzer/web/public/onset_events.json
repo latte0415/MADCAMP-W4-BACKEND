@@ -1,0 +1,1017 @@
+{
+  "source": "drums.wav",
+  "sr": 22050,
+  "duration_sec": 31.11,
+  "texture_min_hz": 639.4,
+  "texture_max_hz": 6245.7,
+  "events": [
+    {
+      "t": 0.0464,
+      "strength": 0.0,
+      "texture": 0.4359,
+      "texture_hz": 3083.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 0.6502,
+      "strength": 0.0,
+      "texture": 0.3382,
+      "texture_hz": 2535.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 1.2771,
+      "strength": 0.0,
+      "texture": 0.3824,
+      "texture_hz": 2783.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 2.0085,
+      "strength": 0.0,
+      "texture": 0.3704,
+      "texture_hz": 2715.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 2.6703,
+      "strength": 0.0017,
+      "texture": 0.397,
+      "texture_hz": 2865.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 3.3321,
+      "strength": 0.0,
+      "texture": 0.3326,
+      "texture_hz": 2504.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 3.9938,
+      "strength": 0.0008,
+      "texture": 0.419,
+      "texture_hz": 2988.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 5.9559,
+      "strength": 0.0056,
+      "texture": 0.3393,
+      "texture_hz": 2541.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 6.2113,
+      "strength": 0.0032,
+      "texture": 0.0735,
+      "texture_hz": 1051.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 6.3623,
+      "strength": 0.001,
+      "texture": 0.8534,
+      "texture_hz": 5423.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 6.5132,
+      "strength": 0.0,
+      "texture": 0.616,
+      "texture_hz": 4092.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 6.6873,
+      "strength": 0.0,
+      "texture": 0.7205,
+      "texture_hz": 4678.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 6.9195,
+      "strength": 0.0055,
+      "texture": 0.0296,
+      "texture_hz": 805.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 7.024,
+      "strength": 0.0155,
+      "texture": 0.2697,
+      "texture_hz": 2151.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 7.2795,
+      "strength": 0.0,
+      "texture": 0.3859,
+      "texture_hz": 2802.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 7.5233,
+      "strength": 0.0,
+      "texture": 0.5833,
+      "texture_hz": 3909.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 7.6858,
+      "strength": 0.0065,
+      "texture": 0.7224,
+      "texture_hz": 4689.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 8.0225,
+      "strength": 0.0201,
+      "texture": 0.2088,
+      "texture_hz": 1810.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 8.3592,
+      "strength": 0.0178,
+      "texture": 0.9748,
+      "texture_hz": 6104.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 8.5449,
+      "strength": 0.0236,
+      "texture": 0.0624,
+      "texture_hz": 989.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 8.6727,
+      "strength": 0.0023,
+      "texture": 0.3684,
+      "texture_hz": 2704.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 8.8816,
+      "strength": 0.0,
+      "texture": 0.0555,
+      "texture_hz": 950.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.021,
+      "strength": 0.0,
+      "texture": 0.7842,
+      "texture_hz": 5035.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.2183,
+      "strength": 0.0011,
+      "texture": 0.1378,
+      "texture_hz": 1411.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.3576,
+      "strength": 0.0,
+      "texture": 0.7465,
+      "texture_hz": 4824.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.5782,
+      "strength": 0.0205,
+      "texture": 0.0781,
+      "texture_hz": 1077.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.6943,
+      "strength": 0.0029,
+      "texture": 0.2521,
+      "texture_hz": 2052.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 9.9614,
+      "strength": 0.0068,
+      "texture": 0.3061,
+      "texture_hz": 2355.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 10.182,
+      "strength": 0.0,
+      "texture": 0.553,
+      "texture_hz": 3739.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 10.3677,
+      "strength": 0.0,
+      "texture": 0.8592,
+      "texture_hz": 5456.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 10.5999,
+      "strength": 0.0067,
+      "texture": 0.0507,
+      "texture_hz": 923.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 10.6812,
+      "strength": 0.0043,
+      "texture": 0.2438,
+      "texture_hz": 2006.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.0295,
+      "strength": 0.0171,
+      "texture": 0.9952,
+      "texture_hz": 6218.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.2152,
+      "strength": 0.0195,
+      "texture": 0.0465,
+      "texture_hz": 899.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.3429,
+      "strength": 0.0002,
+      "texture": 0.39,
+      "texture_hz": 2825.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.5519,
+      "strength": 0.0,
+      "texture": 0.052,
+      "texture_hz": 931.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.6912,
+      "strength": 0.0,
+      "texture": 0.8296,
+      "texture_hz": 5290.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 11.8654,
+      "strength": 0.0014,
+      "texture": 0.5981,
+      "texture_hz": 3992.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 12.0279,
+      "strength": 0.0,
+      "texture": 0.801,
+      "texture_hz": 5130.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 12.2485,
+      "strength": 0.0,
+      "texture": 0.0501,
+      "texture_hz": 920.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 12.3646,
+      "strength": 0.0011,
+      "texture": 0.2345,
+      "texture_hz": 1953.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 12.6317,
+      "strength": 0.0016,
+      "texture": 0.3204,
+      "texture_hz": 2435.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 12.8987,
+      "strength": 0.0135,
+      "texture": 0.0398,
+      "texture_hz": 862.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 13.0264,
+      "strength": 0.0001,
+      "texture": 0.8085,
+      "texture_hz": 5172.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 13.2354,
+      "strength": 0.0018,
+      "texture": 0.1464,
+      "texture_hz": 1460.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 13.3515,
+      "strength": 0.0157,
+      "texture": 0.2235,
+      "texture_hz": 1892.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 13.6766,
+      "strength": 0.0219,
+      "texture": 0.9759,
+      "texture_hz": 6110.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 13.8739,
+      "strength": 0.0131,
+      "texture": 0.0812,
+      "texture_hz": 1094.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.0132,
+      "strength": 0.0007,
+      "texture": 0.4127,
+      "texture_hz": 2953.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.2106,
+      "strength": 0.0,
+      "texture": 0.08,
+      "texture_hz": 1087.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.3615,
+      "strength": 0.0,
+      "texture": 0.8693,
+      "texture_hz": 5512.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.5589,
+      "strength": 0.0146,
+      "texture": 0.0735,
+      "texture_hz": 1051.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.6982,
+      "strength": 0.0,
+      "texture": 0.8537,
+      "texture_hz": 5425.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 14.9304,
+      "strength": 0.0347,
+      "texture": 0.0347,
+      "texture_hz": 833.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.0233,
+      "strength": 0.0077,
+      "texture": 0.2823,
+      "texture_hz": 2222.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.2439,
+      "strength": 0.0005,
+      "texture": 0.4046,
+      "texture_hz": 2907.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.3368,
+      "strength": 1.0,
+      "texture": 0.4535,
+      "texture_hz": 3181.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.5341,
+      "strength": 0.0,
+      "texture": 0.0604,
+      "texture_hz": 978.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.6735,
+      "strength": 0.0,
+      "texture": 0.8459,
+      "texture_hz": 5381.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.836,
+      "strength": 0.0,
+      "texture": 0.7465,
+      "texture_hz": 4824.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 15.9985,
+      "strength": 0.0032,
+      "texture": 0.2109,
+      "texture_hz": 1821.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 16.3352,
+      "strength": 0.0199,
+      "texture": 0.985,
+      "texture_hz": 6161.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 16.521,
+      "strength": 0.0156,
+      "texture": 0.0669,
+      "texture_hz": 1014.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 16.6487,
+      "strength": 0.0029,
+      "texture": 0.3711,
+      "texture_hz": 2719.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 16.8461,
+      "strength": 0.0,
+      "texture": 0.1777,
+      "texture_hz": 1635.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 16.997,
+      "strength": 0.0032,
+      "texture": 0.7709,
+      "texture_hz": 4961.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 17.1712,
+      "strength": 0.0,
+      "texture": 0.4707,
+      "texture_hz": 3278.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 17.3453,
+      "strength": 0.0,
+      "texture": 0.8545,
+      "texture_hz": 5430.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 17.5311,
+      "strength": 0.0,
+      "texture": 0.5472,
+      "texture_hz": 3707.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 17.6704,
+      "strength": 0.0126,
+      "texture": 0.253,
+      "texture_hz": 2057.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 17.949,
+      "strength": 0.0,
+      "texture": 0.3054,
+      "texture_hz": 2351.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 18.2044,
+      "strength": 0.0157,
+      "texture": 0.0508,
+      "texture_hz": 924.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 18.3322,
+      "strength": 0.0004,
+      "texture": 0.7714,
+      "texture_hz": 4964.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 18.576,
+      "strength": 0.0296,
+      "texture": 0.0,
+      "texture_hz": 639.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 18.6688,
+      "strength": 0.0062,
+      "texture": 0.2091,
+      "texture_hz": 1811.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.0055,
+      "strength": 0.034,
+      "texture": 0.9973,
+      "texture_hz": 6230.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.1797,
+      "strength": 0.0016,
+      "texture": 0.1318,
+      "texture_hz": 1378.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.319,
+      "strength": 0.0,
+      "texture": 0.3827,
+      "texture_hz": 2784.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.528,
+      "strength": 0.0,
+      "texture": 0.0474,
+      "texture_hz": 905.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.6673,
+      "strength": 0.0,
+      "texture": 0.8197,
+      "texture_hz": 5234.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 19.8647,
+      "strength": 0.0006,
+      "texture": 0.0948,
+      "texture_hz": 1170.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 20.0156,
+      "strength": 0.0,
+      "texture": 0.8628,
+      "texture_hz": 5476.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 20.2362,
+      "strength": 0.0,
+      "texture": 0.0036,
+      "texture_hz": 659.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 20.3407,
+      "strength": 0.0055,
+      "texture": 0.2362,
+      "texture_hz": 1963.5,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 20.6193,
+      "strength": 0.0195,
+      "texture": 0.2652,
+      "texture_hz": 2126.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 20.8399,
+      "strength": 0.0,
+      "texture": 0.4894,
+      "texture_hz": 3383.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.0024,
+      "strength": 0.0,
+      "texture": 0.7951,
+      "texture_hz": 5096.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.2463,
+      "strength": 0.0207,
+      "texture": 0.0101,
+      "texture_hz": 696.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.3275,
+      "strength": 0.0,
+      "texture": 0.2294,
+      "texture_hz": 1925.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.6642,
+      "strength": 0.0258,
+      "texture": 1.0,
+      "texture_hz": 6245.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.85,
+      "strength": 0.0166,
+      "texture": 0.0867,
+      "texture_hz": 1125.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 21.9893,
+      "strength": 0.0,
+      "texture": 0.4035,
+      "texture_hz": 2901.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.1867,
+      "strength": 0.0,
+      "texture": 0.0839,
+      "texture_hz": 1109.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.3376,
+      "strength": 0.0003,
+      "texture": 0.8429,
+      "texture_hz": 5364.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.535,
+      "strength": 0.0087,
+      "texture": 0.0747,
+      "texture_hz": 1057.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.6743,
+      "strength": 0.0,
+      "texture": 0.8298,
+      "texture_hz": 5291.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.8949,
+      "strength": 0.0058,
+      "texture": 0.0042,
+      "texture_hz": 663.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 22.9994,
+      "strength": 0.0052,
+      "texture": 0.2803,
+      "texture_hz": 2210.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 23.2664,
+      "strength": 0.0037,
+      "texture": 0.345,
+      "texture_hz": 2573.6,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 23.5334,
+      "strength": 0.0039,
+      "texture": 0.063,
+      "texture_hz": 992.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 23.6727,
+      "strength": 0.0,
+      "texture": 0.8299,
+      "texture_hz": 5292.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 23.8701,
+      "strength": 0.0013,
+      "texture": 0.4268,
+      "texture_hz": 3032.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 23.9978,
+      "strength": 0.0086,
+      "texture": 0.2086,
+      "texture_hz": 1809.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 26.6449,
+      "strength": 0.0024,
+      "texture": 0.2761,
+      "texture_hz": 2187.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 26.9816,
+      "strength": 0.0058,
+      "texture": 0.9532,
+      "texture_hz": 5983.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 27.1325,
+      "strength": 0.0,
+      "texture": 0.7795,
+      "texture_hz": 5009.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 27.3183,
+      "strength": 0.0,
+      "texture": 0.3779,
+      "texture_hz": 2757.7,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 27.5273,
+      "strength": 0.0031,
+      "texture": 0.0565,
+      "texture_hz": 956.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 27.6666,
+      "strength": 0.0,
+      "texture": 0.8212,
+      "texture_hz": 5243.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 27.8175,
+      "strength": 0.0,
+      "texture": 0.6554,
+      "texture_hz": 4313.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.0033,
+      "strength": 0.0,
+      "texture": 0.794,
+      "texture_hz": 5090.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.2122,
+      "strength": 0.0078,
+      "texture": 0.3318,
+      "texture_hz": 2499.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.34,
+      "strength": 0.0101,
+      "texture": 0.2446,
+      "texture_hz": 2010.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.6186,
+      "strength": 0.0053,
+      "texture": 0.2767,
+      "texture_hz": 2190.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.8624,
+      "strength": 0.0119,
+      "texture": 0.0871,
+      "texture_hz": 1127.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 28.9901,
+      "strength": 0.0013,
+      "texture": 0.6574,
+      "texture_hz": 4325.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 29.3268,
+      "strength": 0.0028,
+      "texture": 0.2163,
+      "texture_hz": 1852.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 29.6635,
+      "strength": 0.0324,
+      "texture": 0.9735,
+      "texture_hz": 6097.3,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 29.8493,
+      "strength": 0.0084,
+      "texture": 0.088,
+      "texture_hz": 1132.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 29.977,
+      "strength": 0.0026,
+      "texture": 0.3411,
+      "texture_hz": 2551.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.1976,
+      "strength": 0.0065,
+      "texture": 0.0422,
+      "texture_hz": 876.0,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.3253,
+      "strength": 0.0,
+      "texture": 0.7022,
+      "texture_hz": 4576.4,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.5226,
+      "strength": 0.0207,
+      "texture": 0.2029,
+      "texture_hz": 1776.9,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.6736,
+      "strength": 0.0,
+      "texture": 0.7991,
+      "texture_hz": 5119.2,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.9058,
+      "strength": 0.0172,
+      "texture": 0.0026,
+      "texture_hz": 653.8,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    },
+    {
+      "t": 30.9986,
+      "strength": 0.0079,
+      "texture": 0.2832,
+      "texture_hz": 2227.1,
+      "layer": "onset",
+      "color": "#5a9fd4"
+    }
+  ]
+}

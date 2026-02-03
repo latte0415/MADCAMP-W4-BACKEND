@@ -1,0 +1,22 @@
+# Core audio processing
+librosa>=0.10.0
+soundfile>=0.12.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Jupyter
+jupyter>=1.0.0
+ipykernel>=6.25.0
+
+# Data handling
+pandas>=2.0.0
+
+# Onset detection (madmom; Cython needed for build: pip install Cython && pip install madmom --no-build-isolation)
+madmom>=0.16.0
+
+# Optional: Stem separation (나중에 필요하면)
+# demucs>=4.0.0
+# spleeter>=2.3.0

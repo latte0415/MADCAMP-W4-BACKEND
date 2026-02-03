@@ -1,0 +1,32 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Audio samples (큰 파일)
+audio_engine/samples/*.mp3
+audio_engine/samples/*.wav
+audio_engine/samples/*.flac
+!audio_engine/samples/.gitkeep
+
+# 개인 작업 팡리
+docs/personal.md

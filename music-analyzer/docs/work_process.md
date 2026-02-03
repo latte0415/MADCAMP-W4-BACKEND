@@ -8,7 +8,7 @@
 
 ### 1.1 공통 파이프라인 (L2)
 
-모든 레이어드 익스포트(01_energy ~ 07_streams_sections)는 **동일한 onset 파이프라인**을 사용합니다.
+레이어드 익스포트(01_energy ~ 07_streams_sections)는 **librosa 기반 동일 onset 파이프라인**을 사용합니다. **11_cnn_streams_layers**는 별도 CNN+ODF band onset 파이프라인(compute_cnn_band_onsets_with_odf)을 사용합니다.
 
 | 단계 | 함수/방식 | 설명 |
 |------|-----------|------|
@@ -31,14 +31,12 @@
 | **Spectral** | 이벤트 i: [mid_prev, mid_next] (Energy와 동일) | STFT → centroid, bandwidth, flatness |
 | **Context** | 이벤트 윈도우: onset ±50ms. 배경: 직전/직후 각 100ms | Local SNR, 대역별 마스킹 |
 
-- **대역(Energy/Spectral/Context)**: BAND_HZ 기준 Low(20–150Hz), Mid(150–2kHz), High(2k–10kHz). (band_evidence·역할 할당은 동일 경계.)
+- **대역(Energy/Spectral/Context)**: BAND_HZ 기준 Low(20–200Hz), Mid(200–3kHz), High(3k–10kHz). (band_evidence·역할 할당은 동일 경계.)
 
-### 1.3 스트림·섹션 (07)
+### 1.3 스트림·섹션 (07, 11)
 
-- **입력**: `build_context_with_band_evidence()`의 `band_onset_times`, `band_onset_strengths`.
-- **추출**: `build_streams(band_onset_times, band_onset_strengths)` — band별 IOI·시간 연속성으로 리듬 스트림 묶음.
-- **추출**: `segment_sections(streams, duration)` — 윈도우별 스트림 상태 벡터 변화점으로 파트 분할.
-- **키포인트**: 섹션 경계 + 스트림 accent 시점 → `streams_sections.json`의 `keypoints[]`.
+- **07_streams_sections**: **입력** `build_context_with_band_evidence()`의 `band_onset_times`, `band_onset_strengths`. **추출** `build_streams` → `segment_sections`. **키포인트** 섹션 경계 + 스트림 accent → `streams_sections.json`의 `keypoints[]`.
+- **11_cnn_streams_layers**: **입력** stem 폴더(drum_low/mid/high.wav). **추출** `compute_cnn_band_onsets_with_odf`(CNN+ODF → `merge_close_band_onsets`·체인 클러스터링, `filter_transient_mid_high`) → `build_streams` → `simplify_shaker_clap_streams`(mid/high 고밀도 스트림 temporal pooling) → `assign_layer_to_streams` → `segment_sections`. **출력** `streams_sections_cnn.json`.
 
 ---
 
@@ -105,6 +103,7 @@
 - **스트림**: band별 onset 시퀀스를 IOI·시간 연속성으로 묶은 단위. `build_streams(band_onset_times, band_onset_strengths)`.
 - **섹션**: 윈도우별 스트림 상태 벡터의 변화점으로 구간 분할. `segment_sections(streams, duration)`.
 - **키포인트**: 섹션 경계 + 스트림 accent → `keypoints[]`. JSON은 `write_streams_sections_json`으로 출력.
+- **CNN 스트림**: 11_cnn_streams_layers에서 `simplify_shaker_clap_streams`로 mid/high 고밀도 스트림을 temporal pooling하여 쉐이커·클랩 과검출을 압축. `assign_layer_to_streams`로 스트림별 P0/P1/P2 레이어 부여.
 
 ---
 

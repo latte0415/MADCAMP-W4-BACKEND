@@ -7,7 +7,7 @@
 | 구분 | 기록할 내용 |
 |------|-------------|
 | **아키텍처** | onset 모듈 L1~L6 레이어, 파일 경로, **공개 API 목록**(`__init__.py` 기준), 상수(hop_length, BAND_HZ 등), OnsetContext 필드, 검증 방법 |
-| **파이프라인** | 전체 흐름(탐색→스템→시각화→레이어드 익스포트→웹), 스크립트 01~07 실행 순서, 엔트리 포인트와 engine.onset 연동, `06_layered_export.py` → `onset_events_layered.json`, `07_streams_sections.py` → `streams_sections.json` |
+| **파이프라인** | 전체 흐름(탐색→스템→시각화→레이어드 익스포트→웹), 스크립트 01~11 실행 순서, 엔트리 포인트와 engine.onset 연동. `06_layered_export.py` → `onset_events_layered.json`, `07_streams_sections.py` → `streams_sections.json`, `11_cnn_streams_layers.py` → `streams_sections_cnn.json` (CNN+ODF 드럼 대역·쉐이커/클랩 병합) |
 | **사양(spec)** | JSON 파일별 스키마(onset_beats, onset_events, onset_events_energy/clarity/temporal/spectral/context, **onset_events_layered**), Web 수용 형식 |
 | **설계(design)** | 5개 지표 개념·점수화, P0/P1/P2 역할(이벤트×대역), band 기반 역할 할당(`assign_roles_by_band`), `normalize_metrics_per_track`, JSON `bands`·호환용 `layer` |
 | **작업 과정(work_process)** | 포인트 추출 방식(레이어별), 안정화 방식, 점수 책정 방식, 아키텍처 전략(L1~L6, anchor+band_evidence, 스트림/섹션) |
@@ -35,7 +35,7 @@
 ## 3. 목차 (빠른 참조)
 
 - **모듈 구조·API·검증** → [onset_module.md](onset_module.md)
-- **전체 흐름·스크립트 01~06** → [pipeline.md](pipeline.md)
+- **전체 흐름·스크립트 01~11** → [pipeline.md](pipeline.md)
 - **JSON 필드·Web 형식** → [json_spec.md](json_spec.md)
 - **band 기반 역할·레이어링 설계** → [layering.md](layering.md)
 - **작업 과정(추출·안정화·점수·아키텍처)** → [work_process.md](work_process.md)

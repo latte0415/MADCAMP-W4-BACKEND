@@ -19,7 +19,7 @@ interface StreamsTimelineStripProps {
 
 export function StreamsTimelineStrip({
   streams,
-  durationSec,
+  durationSec: _durationSec,
   visibleRange,
   currentTime,
   bandsFilter,
@@ -76,7 +76,7 @@ export function StreamsTimelineStrip({
       </div>
       <div className="streams-timeline-body">
         <div className="streams-timeline-legend" style={{ height: totalHeight }}>
-          {orderedStreams.map((stream, rowIndex) => (
+          {orderedStreams.map((stream) => (
             <div
               key={stream.id}
               className="streams-timeline-row-legend"

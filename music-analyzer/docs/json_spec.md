@@ -12,6 +12,11 @@
 - **04_spectral** → `onset_events_spectral.json`
 - **05_context** → `onset_events_context.json`
 - **06_layered_export** → `onset_events_layered.json`
+- **07_streams_sections** → `streams_sections.json`
+- **08_drum_band_energy** → (드럼 대역 에너지 JSON/시각화)
+- **09_madmom_drum_band** → (madmom 드럼 대역 키포인트 JSON)
+- **10_cnn_band_onsets** → (내부용, JSON 직접 출력 없음)
+- **11_cnn_streams_layers** → `streams_sections_cnn.json`
 
 ## Web
 - 수용 형식: `onset_times_sec`, `events[]`, 배열 직접
@@ -114,13 +119,23 @@
 
 **출력 경로**: `audio_engine/samples/streams_sections.json`
 
-**스키마 (최상위)**: `source`, `sr`, `duration_sec`, `streams[]`, `sections[]`, `keypoints[]`.
+**스키마 (최상위)**: `source`, `sr`, `duration_sec`, `streams[]`, `sections[]`, `keypoints[]`, (선택) `events[]`.
 
 **streams[]**: band별 IOI·시간 연속성으로 묶은 리듬 스트림. `id`, `band`, `start`, `end`, `events`, `median_ioi`, `ioi_std`, `density`, `strength_median`, `accents`.
 
 **sections[]**: 윈도우별 스트림 상태 벡터 변화점에서 나눈 파트. `id`, `start`, `end`, `active_stream_ids`, `summary`.
 
 **keypoints[]**: 섹션 경계 + 스트림 accent. `time`, `type` ("section_boundary" | "accent"), `section_id`?, `stream_id`?, `label`.
+
+---
+
+## 10-2. 11_cnn_streams_layers.py → streams_sections_cnn.json
+
+**출력 경로**: `audio_engine/samples/streams_sections_cnn.json`
+
+**입력**: stem 폴더(drum_low.wav, drum_mid.wav, drum_high.wav). CNN+ODF band onset → merge_close_band_onsets(체인 클러스터링) · filter_transient_mid_high → build_streams → simplify_shaker_clap_streams → assign_layer_to_streams → segment_sections.
+
+**스키마**: 07과 동일. `streams[]`에 `layer`(P0/P1/P2) 필드 포함. `events[]`에 `band`, `stream_id`, `layer`, `strength` 등.
 
 ---
 

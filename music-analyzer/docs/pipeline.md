@@ -14,6 +14,9 @@
     → 레이어드 익스포트 (01_energy ~ 05_context) → onset_events_energy|clarity|temporal|spectral|context.json
     → 레이어 통합 (06_layered_export)  → onset_events_layered.json
     → 스트림·섹션 (07_streams_sections) → streams_sections.json (streams, sections, keypoints)
+    → (선택) 드럼 대역 에너지/키포인트 (08_drum_band_energy, 09_madmom_drum_band)
+    → (선택) CNN 대역 onset (10_cnn_band_onsets)
+    → (선택) CNN 스트림·레이어·섹션 (11_cnn_streams_layers) → streams_sections_cnn.json
     → Web (JsonUploader, parseEvents) → 파형 위 이벤트/레이어 표시
 ```
 
@@ -40,6 +43,10 @@
 | 05_context | `audio_engine/scripts/02_layered_onset_export/05_context.py` | Context(dependency) | `onset_events_context.json` |
 | **06_layered_export** | `audio_engine/scripts/02_layered_onset_export/06_layered_export.py` | 5개 피처 + band 기반 역할(P0/P1/P2) 할당 | `onset_events_layered.json` |
 | **07_streams_sections** | `audio_engine/scripts/02_layered_onset_export/07_streams_sections.py` | band_onset_times → build_streams → segment_sections → 키포인트 → JSON | `streams_sections.json` |
+| 08_drum_band_energy | `audio_engine/scripts/02_layered_onset_export/08_drum_band_energy.py` | stem 폴더 기반 low/mid/high 에너지 | (JSON/시각화) |
+| 09_madmom_drum_band | `audio_engine/scripts/02_layered_onset_export/09_madmom_drum_band.py` | madmom 드럼 대역 키포인트 | (JSON) |
+| 10_cnn_band_onsets | `audio_engine/scripts/02_layered_onset_export/10_cnn_band_onsets.py` | CNN + ODF band onset/stength | (내부용) |
+| **11_cnn_streams_layers** | `audio_engine/scripts/02_layered_onset_export/11_cnn_streams_layers.py` | compute_cnn_band_onsets_with_odf → build_streams → simplify_shaker_clap_streams → assign_layer_to_streams → segment_sections → JSON | `streams_sections_cnn.json` |
 
 02_layered_onset_export 스크립트는 모두 `audio_engine.engine.onset`만 사용합니다.
 

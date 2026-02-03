@@ -11,6 +11,7 @@ import { Tab07SpectralView } from "./components/Tab07SpectralView";
 import { Tab08ContextView } from "./components/Tab08ContextView";
 import { Tab09LayerView } from "./components/Tab09LayerView";
 import { StreamsSectionsView } from "./components/StreamsSectionsView";
+import { Tab13DrumKeypointsView } from "./components/Tab13DrumKeypointsView";
 import { LayerFilterPanel } from "./components/LayerFilterPanel";
 import type { EventPoint } from "./types/event";
 import type { EnergyJsonData } from "./types/energyEvent";
@@ -23,7 +24,7 @@ import type { DrumBandEnergyJsonData } from "./types/drumBandEnergy";
 import "./App.css";
 
 type MainMode = "legacy" | "streams";
-type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12";
+type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13";
 
 const TABS: { id: TabId; label: string; samplePath: string }[] = [
   { id: "01", label: "01 Explore", samplePath: "/onset_beats.json" },
@@ -39,6 +40,7 @@ const TABS: { id: TabId; label: string; samplePath: string }[] = [
   { id: "10", label: "10 Madmom Drum Band", samplePath: "/drum_band_madmom.json" },
   { id: "11", label: "11 CNN Band Onsets", samplePath: "/cnn_band_onsets.json" },
   { id: "12", label: "12 CNN Streams/Layers", samplePath: "/streams_sections_cnn.json" },
+  { id: "13", label: "13 Drum Keypoints", samplePath: "/streams_sections_cnn.json" },
 ];
 
 function getUniqueLayers(events: EventPoint[]): string[] {
@@ -208,7 +210,7 @@ function App() {
                   onSpectralLoaded={tab.id === "07" ? handleSpectralLoaded : undefined}
                   onContextLoaded={tab.id === "08" ? handleContextLoaded : undefined}
                   onDrumBandEnergyLoaded={tab.id === "04c" || tab.id === "10" || tab.id === "11" ? handleDrumBandEnergyLoaded : undefined}
-                  onStreamsSectionsLoaded={tab.id === "12" ? handleStreamsSectionsLoadedForTab : undefined}
+                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" ? handleStreamsSectionsLoadedForTab : undefined}
                   samplePath={tab.samplePath}
                   sampleLabel={`${tab.label} 샘플 로드`}
                 />
@@ -269,6 +271,11 @@ function App() {
                   <StreamsSectionsView
                     audioUrl={audioUrl}
                     data={tabStreamsSectionsData["12"] ?? null}
+                  />
+                ) : tab.id === "13" ? (
+                  <Tab13DrumKeypointsView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["13"] ?? null}
                   />
                 ) : (
                   <>

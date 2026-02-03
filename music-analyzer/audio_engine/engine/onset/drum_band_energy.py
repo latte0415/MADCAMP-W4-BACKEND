@@ -18,6 +18,49 @@ from audio_engine.engine.onset.types import OnsetContext
 from audio_engine.engine.onset.utils import robust_norm
 
 
+def compute_band_onset_energies(
+    times: np.ndarray,
+    band_audio_path: Path,
+    sr: int,
+    duration: float,
+) -> np.ndarray:
+    """
+    임의의 onset times + band wav에 대해 안정형 에너지(onset 구간 mid_prev~mid_next RMS) 적용.
+    KeyOnsetSelector 입력용. energy.py의 구간 정의와 동일.
+
+    Returns:
+        energy_scores: 0~1 정규화된 에너지 점수 배열 (len(times)).
+    """
+    import librosa
+
+    if len(times) == 0:
+        return np.array([])
+    times = np.asarray(times, dtype=float)
+    y, _ = librosa.load(str(band_audio_path), sr=sr, mono=True)
+    n = len(y)
+    rms_per_event: list[float] = []
+    for i in range(len(times)):
+        mid_prev = (
+            0.0
+            if i == 0
+            else (times[i - 1] + times[i]) / 2
+        )
+        mid_next = (
+            duration
+            if i == len(times) - 1
+            else (times[i] + times[i + 1]) / 2
+        )
+        start_sample = max(0, int(round(mid_prev * sr)))
+        end_sample = min(n, int(round(mid_next * sr)))
+        seg = y[start_sample:end_sample]
+        rms = float(np.sqrt(np.mean(seg ** 2))) if len(seg) > 0 else 0.0
+        rms_per_event.append(rms)
+    rms_arr = np.array(rms_per_event)
+    log_rms = np.log(1e-10 + rms_arr)
+    energy_score = robust_norm(log_rms, method="median_mad")
+    return energy_score
+
+
 def _band_onset_energies(audio_path: Path) -> tuple[np.ndarray, np.ndarray, float, int]:
     """
     단일 대역 파일에서 onset 검출 후, 각 onset 구간의 RMS(에너지) 반환.

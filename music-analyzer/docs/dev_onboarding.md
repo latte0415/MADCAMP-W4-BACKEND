@@ -14,8 +14,8 @@
 
 ## 2. 디렉터리·샘플 오디오
 
-- **프로젝트 루트**: `music-anaylzer/` (또는 저장소 루트).
-- **샘플 오디오**: `audio_engine/samples/stems/htdemucs/sample_ropes_short/drums.wav` 등.  
+- **프로젝트 루트**: `music-analyzer/` (또는 저장소 루트).
+- **샘플 오디오**: `audio_engine/samples/stems/htdemucs/{트랙명}/drums.wav` 또는 CNN용 `drum_low.wav`, `drum_mid.wav`, `drum_high.wav` 등.  
   없으면 먼저 02_split_stem으로 스템 분리하거나, 다른 WAV 경로를 스크립트에서 지정.
 
 ---
@@ -36,13 +36,19 @@
    python audio_engine/scripts/02_layered_onset_export/06_layered_export.py
    ```
 
-3. **(선택) 스트림·섹션 JSON**  
+3. **(선택) 스트림·섹션 JSON (librosa)**  
    ```bash
    python audio_engine/scripts/02_layered_onset_export/07_streams_sections.py
    ```
    - `build_context_with_band_evidence` 필요. 산출: `streams_sections.json`.
 
-- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, (선택) `streams_sections.json`.  
+4. **(선택) CNN 스트림·레이어·섹션 JSON**  
+   ```bash
+   python audio_engine/scripts/02_layered_onset_export/11_cnn_streams_layers.py
+   ```
+   - stem 폴더(drum_low/mid/high.wav) 필요. madmom·soundfile 의존. 산출: `streams_sections_cnn.json`.
+
+- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, (선택) `streams_sections.json`, (선택) `streams_sections_cnn.json`.  
 - `web/public/` 이 있으면 동일 파일이 복사됨.
 
 ---
@@ -51,12 +57,13 @@
 
 **공개 API import**:
 ```bash
-cd /path/to/music-anaylzer
+cd /path/to/music-analyzer
 python -c "
 from audio_engine.engine.onset import (
     build_context, build_context_with_band_evidence,
     compute_energy, compute_clarity, compute_temporal, compute_spectral, compute_context_dependency,
     assign_roles_by_band, write_layered_json,
+    build_streams, segment_sections, compute_cnn_band_onsets_with_odf, simplify_shaker_clap_streams, assign_layer_to_streams,
 )
 print('OK: 공개 API import 성공')
 "
@@ -76,7 +83,7 @@ python audio_engine/scripts/02_layered_onset_export/06_layered_export.py
 |------|------|
 | [README.md](README.md) | 기록 정보 정리·분류·목차 |
 | [onset_module.md](onset_module.md) | 모듈 구조·API·검증 |
-| [pipeline.md](pipeline.md) | 데이터 흐름·스크립트 01~06 |
+| [pipeline.md](pipeline.md) | 데이터 흐름·스크립트 01~11 |
 | [json_spec.md](json_spec.md) | JSON 스키마 |
 | [layering.md](layering.md) | band 기반 역할·레이어링 설계 |
 | [onset_stability.md](onset_stability.md) | 안정화 계획 |

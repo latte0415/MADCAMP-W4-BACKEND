@@ -1,9 +1,11 @@
 """
 11. CNN + ODF 기반 스트림·레이어(P0/P1/P2)·섹션
 compute_cnn_band_onsets_with_odf → build_streams → assign_layer_to_streams → segment_sections
++ KeyOnsetSelector → TextureBlockMerger → keypoints_by_band, texture_blocks_by_band
 """
 import sys
 import os
+from pathlib import Path
 
 
 def find_project_root():
@@ -27,6 +29,8 @@ from audio_engine.engine.onset import (
     segment_sections,
     assign_layer_to_streams,
     write_streams_sections_json,
+    select_key_onsets_by_band,
+    merge_texture_blocks_by_band,
 )
 
 STEM_FOLDER_NAME = "sample_animal_spirits_3_45"
@@ -96,6 +100,24 @@ sections = segment_sections(streams, duration)
 keypoints = extract_keypoints(streams, sections)
 print(f"스트림: {len(streams)}개, 섹션: {len(sections)}개, 키포인트: {len(keypoints)}개")
 
+# 대역별 핵심 타격 + 텍스처 블록 (드럼 MVP)
+folder = Path(stems_base_dir) / STEM_FOLDER_NAME
+band_audio_paths = {
+    "low": folder / "drum_low.wav",
+    "mid": folder / "drum_mid.wav",
+    "high": folder / "drum_high.wav",
+}
+keypoints_by_band = select_key_onsets_by_band(
+    band_onsets,
+    band_strengths,
+    duration,
+    sr,
+    band_audio_paths=band_audio_paths,
+)
+texture_blocks_by_band = merge_texture_blocks_by_band(band_onsets, band_strengths)
+print(f"  keypoints_by_band: low={len(keypoints_by_band.get('low', []))}, mid={len(keypoints_by_band.get('mid', []))}, high={len(keypoints_by_band.get('high', []))}")
+print(f"  texture_blocks_by_band: mid={len(texture_blocks_by_band.get('mid', []))}, high={len(texture_blocks_by_band.get('high', []))}")
+
 events_out = []
 for s in streams:
     layer = s.get("layer", "P2")
@@ -127,5 +149,7 @@ write_streams_sections_json(
     keypoints=keypoints,
     project_root=project_root,
     events=events_out,
+    keypoints_by_band=keypoints_by_band,
+    texture_blocks_by_band=texture_blocks_by_band,
 )
 print(f"저장 완료: {json_path}")

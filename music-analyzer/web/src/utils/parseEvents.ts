@@ -339,8 +339,19 @@ export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | n
   if (!Array.isArray(obj.streams) || !Array.isArray(obj.sections) || !Array.isArray(obj.keypoints))
     return null;
   const events = Array.isArray(obj.events)
-    ? (obj.events as Record<string, unknown>[]).map((item) => normalizeEvent(item))
+    ? (obj.events as unknown[])
+        .filter((item): item is Record<string, unknown> => item != null && typeof item === "object")
+        .map((item) => normalizeEvent(item))
     : undefined;
+  const keypoints_by_band =
+    obj.keypoints_by_band && typeof obj.keypoints_by_band === "object"
+      ? (obj.keypoints_by_band as StreamsSectionsData["keypoints_by_band"])
+      : undefined;
+  const texture_blocks_by_band =
+    obj.texture_blocks_by_band && typeof obj.texture_blocks_by_band === "object"
+      ? (obj.texture_blocks_by_band as StreamsSectionsData["texture_blocks_by_band"])
+      : undefined;
+
   return {
     source: String(obj.source ?? ""),
     sr: Number(obj.sr ?? 22050),
@@ -349,6 +360,8 @@ export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | n
     sections: obj.sections as StreamsSectionsData["sections"],
     keypoints: obj.keypoints as StreamsSectionsData["keypoints"],
     events,
+    keypoints_by_band,
+    texture_blocks_by_band,
   };
 }
 

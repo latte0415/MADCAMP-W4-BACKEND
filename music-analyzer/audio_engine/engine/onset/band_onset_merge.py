@@ -47,6 +47,7 @@ def merge_close_onsets(
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     min_separation_sec 내에 있는 onset들을 하나로 병합.
+    체인 클러스터링: 각 onset은 직전 onset과의 간격만 검사하여, 연속된 근접 피크(쉐이커/클랩 롤)를 한 덩어리로 묶음.
 
     keep="strongest": 클러스터 내 strength 최대인 onset 시점·strength 사용
     keep="first": 클러스터 내 첫 onset 시점, 해당 strength 사용
@@ -67,10 +68,10 @@ def merge_close_onsets(
     merged_s: list[float] = []
     i = 0
     while i < len(times):
-        t0 = times[i]
         cluster = [i]
         j = i + 1
-        while j < len(times) and times[j] - t0 <= min_separation_sec:
+        # 체인 클러스터링: 이전 onset과의 간격만 검사 (쉐이커/롤처럼 연속된 피크를 한 덩어리로)
+        while j < len(times) and times[j] - times[cluster[-1]] <= min_separation_sec:
             cluster.append(j)
             j += 1
         if keep == "strongest":

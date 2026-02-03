@@ -81,5 +81,13 @@ MIN_SECTION_SEC = 4.0
 SECTION_DEBOUNCE_WINDOWS = 2
 SECTION_MERGE_NEAR_SEC = 1.0
 
+# KeyOnsetSelector: 대역별 핵심 타격 선택
+KEY_ONSET_MIN_SEP_SEC = 0.08  # 키포인트끼리 최소 간격 (60~120ms)
+ENERGY_PERCENTILE_THRESHOLD = 70  # 이 percentile 이상만 유지 (상위 30%)
+
+# TextureBlockMerger: mid/high burst → block
+BURST_IOI_SEC = 0.10  # 연속 IOI < 이 값이면 burst 후보 (80~120ms)
+MIN_ONSETS_IN_BURST = 3  # 최소 K개 onset이 한 burst
+
 # Export
 DEFAULT_POINT_COLOR = "#5a9fd4"

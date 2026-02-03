@@ -42,7 +42,12 @@ from audio_engine.engine.onset.streams import build_streams
 from audio_engine.engine.onset.sections import segment_sections
 
 # Drum band energy (stem 폴더 기반 low/mid/high onset 에너지)
-from audio_engine.engine.onset.drum_band_energy import compute_drum_band_energy
+from audio_engine.engine.onset.drum_band_energy import (
+    compute_drum_band_energy,
+    compute_band_onset_energies,
+)
+from audio_engine.engine.onset.key_onset_selector import select_key_onsets_by_band
+from audio_engine.engine.onset.texture_block_merge import merge_texture_blocks_by_band
 from audio_engine.engine.onset.madmom_drum_band import compute_madmom_drum_band_keypoints
 from audio_engine.engine.onset.cnn_band_onsets import compute_cnn_band_onsets
 from audio_engine.engine.onset.cnn_band_pipeline import compute_cnn_band_onsets_with_odf
@@ -107,4 +112,7 @@ __all__ = [
     "merge_close_band_onsets",
     "filter_by_strength",
     "write_drum_band_energy_json",
+    "compute_band_onset_energies",
+    "select_key_onsets_by_band",
+    "merge_texture_blocks_by_band",
 ]

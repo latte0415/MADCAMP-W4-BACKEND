@@ -80,7 +80,8 @@ export function JsonUploader({
         processLoadedData(data, onJsonLoaded, onEnergyLoaded, onClarityLoaded, onTemporalLoaded, onSpectralLoaded, onContextLoaded, onStreamsSectionsLoaded, onDrumBandEnergyLoaded);
         setLoadedInfo({ source: file.name, eventCount: events.length });
       } catch (err) {
-        console.error("JSON 파싱 실패:", err);
+        console.error("JSON 파싱/처리 실패:", err);
+        setSampleError(err instanceof Error ? err.message : "JSON 처리 실패");
         setLoadedInfo(null);
       }
     };
@@ -95,9 +96,15 @@ export function JsonUploader({
         return res.json();
       })
       .then((data) => {
-        const events = parseEventsFromJson(data);
-        processLoadedData(data, onJsonLoaded, onEnergyLoaded, onClarityLoaded, onTemporalLoaded, onSpectralLoaded, onContextLoaded, onStreamsSectionsLoaded, onDrumBandEnergyLoaded);
-        setLoadedInfo({ source: `샘플 (${samplePath.replace(/^\//, "")})`, eventCount: events.length });
+        try {
+          const events = parseEventsFromJson(data);
+          processLoadedData(data, onJsonLoaded, onEnergyLoaded, onClarityLoaded, onTemporalLoaded, onSpectralLoaded, onContextLoaded, onStreamsSectionsLoaded, onDrumBandEnergyLoaded);
+          setLoadedInfo({ source: `샘플 (${samplePath.replace(/^\//, "")})`, eventCount: events.length });
+        } catch (err) {
+          console.error("샘플 데이터 처리 실패:", err);
+          setSampleError(err instanceof Error ? err.message : "데이터 처리 실패");
+          setLoadedInfo(null);
+        }
       })
       .catch((err) => {
         setSampleError(err instanceof Error ? err.message : "로드 실패");

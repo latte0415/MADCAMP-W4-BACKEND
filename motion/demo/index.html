@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Motion x Music Match Lab</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="pill">Match Lab</span>
+          <div class="brand__title">Motion x Music Timeline</div>
+        </div>
+        <div class="topbar__status" id="analysis-status">Ready to analyze.</div>
+        <div class="topbar__actions">
+          <button id="export-json" class="btn ghost">Export markers</button>
+        </div>
+      </header>
+
+      <main class="workbench">
+        <section class="panel panel--inputs">
+          <h2>Inputs</h2>
+          <div class="inputs">
+          <label class="input">
+            <span>Dance video</span>
+            <input type="file" id="video-input" accept="video/*" />
+          </label>
+          <label class="input">
+            <span>Mode</span>
+            <select id="mode-select">
+              <option value="dance">Dance</option>
+              <option value="magic">Magic</option>
+            </select>
+          </label>
+          <label class="input">
+            <span>Motion keypoints (JSON)</span>
+            <input type="file" id="motion-json" accept="application/json" />
+          </label>
+          <label class="input">
+            <span>Music keypoints (JSON)</span>
+            <input type="file" id="music-json" accept="application/json" />
+          </label>
+          <label class="input">
+            <span>Magic events (JSON)</span>
+            <input type="file" id="magic-json" accept="application/json" />
+          </label>
+          </div>
+
+          <div class="controls">
+            <div class="toggle">
+              <input type="checkbox" id="auto-analyze" checked />
+              <label for="auto-analyze">Auto analyze on upload</label>
+            </div>
+            <div class="toggle">
+              <input type="checkbox" id="delete-mode" />
+              <label for="delete-mode">Delete mode</label>
+            </div>
+            <div class="toggle">
+              <label>Timeline zoom</label>
+              <input type="range" id="zoom" min="0.6" max="2.0" step="0.1" value="1.0" />
+            </div>
+            <button id="analyze-now" class="btn ghost">Analyze now</button>
+          </div>
+
+          <div class="helper">
+            <div class="helper__title">Tips</div>
+            <p>Click the timeline to jump the playhead. Drag markers to refine alignment.</p>
+          </div>
+        </section>
+
+        <section class="panel panel--preview">
+          <div class="panel__header">
+            <h2>Preview</h2>
+            <div class="panel__actions">
+              <label class="select">
+                <span>Add marker to</span>
+                <select id="add-target">
+                  <option value="music">Music</option>
+                  <option value="motion">Motion</option>
+                </select>
+              </label>
+              <button id="add-marker" class="btn">Add marker at playhead</button>
+            </div>
+          </div>
+          <video id="video" controls></video>
+        </section>
+
+        <section class="panel panel--editor">
+          <div class="panel__header">
+            <h2>Marker Editor</h2>
+          </div>
+          <div class="editor">
+            <div class="editor__list" id="music-list">
+              <h3>Music markers</h3>
+              <div class="list"></div>
+            </div>
+            <div class="editor__list" id="motion-list">
+              <h3>Motion markers</h3>
+              <div class="list"></div>
+            </div>
+            <div class="editor__list" id="magic-list">
+              <h3>Magic markers</h3>
+              <div class="list"></div>
+            </div>
+          </div>
+          <div class="editor__detail" id="marker-detail">
+            <h3>Selected marker</h3>
+            <div class="detail">
+              <div><strong>Track:</strong> <span id="detail-track">-</span></div>
+              <div><strong>Time:</strong> <span id="detail-time">-</span></div>
+              <div class="detail__actions">
+                <button class="btn small" data-nudge="-0.05">-0.05s</button>
+                <button class="btn small" data-nudge="-0.01">-0.01s</button>
+                <button class="btn small" data-nudge="0.01">+0.01s</button>
+                <button class="btn small" data-nudge="0.05">+0.05s</button>
+                <button class="btn small danger" id="delete-marker">Delete</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel timeline-panel">
+          <div class="timeline__header">
+            <div class="timeline__title">
+              <h2>Timeline</h2>
+              <div class="timeline__legend">
+                <span class="legend legend--music">Music hits</span>
+                <span class="legend legend--motion">Motion hits</span>
+                <span class="legend legend--hold">Motion holds</span>
+                <span class="legend legend--appear">Appear</span>
+                <span class="legend legend--vanish">Vanish</span>
+              </div>
+            </div>
+            <div class="suggestion">
+              <div>
+                <div class="suggestion__title">Alignment</div>
+                <p id="suggestion-text">Upload keypoints to see alignment insights.</p>
+              </div>
+              <button id="apply-offset" class="btn small" disabled>Apply offset</button>
+            </div>
+          </div>
+
+          <div class="timeline__canvas" id="timeline-canvas">
+            <svg id="timeline-svg"></svg>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

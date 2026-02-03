@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+paramiko
+python-multipart
+mediapipe
+opencv-python
+numpy
+scipy
+tqdm
+matplotlib
+pillow

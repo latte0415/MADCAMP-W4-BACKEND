@@ -7,6 +7,14 @@
 - **Dance 모드:** Hit/Hold 기반 모션 이벤트
 - **Magic 모드:** Object vanish/appear 기반 이벤트 + (보조) strict hit/hold
 
+## 프론트엔드 UI
+- **기술 스택:** React + TypeScript + Vite + Tailwind CSS + Framer Motion + Three.js
+- **컨셉:** 콘서트 무대 + 극장 스포트라이트 믹스
+  - 트러스 조명 구조물, 벨벳 커튼, 반사되는 무대 바닥
+  - 스포트라이트 빔 + 먼지 파티클 애니메이션
+  - 선택된 프로젝트에 조명 집중, 비선택은 실루엣
+- **색상:** Warm Analog (deep brown #0a0806, amber #d97706)
+
 ## 현재 저장소 구조 안내
 이 리포지토리는 상위에 **backend/**, **motion/**, **music-anaylzer/** 폴더가 있습니다.  
 아래 문서의 기존 경로(`pipelines/`, `gpu/` 등)는 **motion/** 하위 경로를 기준으로 이해하면 됩니다.
@@ -57,7 +65,11 @@
 - `overlay_obj_meshfill.py` : meshfill 오버레이
 
 ### 프론트엔드 (`frontend/`)
-- `src/` : Vite 앱 소스
+- `src/app/components/landing/` : 랜딩 페이지 (무대 컨셉 UI)
+  - `LandingPage.tsx` : 스크롤 스냅 컨테이너
+  - `HeroSection.tsx` : Three.js 파티클 웨이브 인트로
+  - `DJStudio.tsx` : 콘서트 무대 + 극장 스포트라이트 믹스 UI
+- `src/app/components/` : 공통 UI 컴포넌트
 - `dist/` : 빌드 결과 (백엔드에서 서빙)
 
 ## 마커 추출 방법론 (자세히)
@@ -93,8 +105,22 @@
    - appear/vanish 프레임을 별도 키프레임으로 저장합니다.
 
 ## 실행 방법 (자세히)
-### 1) 백엔드 + 프론트엔드 실행 (권장)
-1. 프론트엔드 설치/빌드
+### 1) 개발 모드 (프론트엔드 HMR)
+1. 백엔드 실행
+   ```bash
+   cd backend
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+2. 프론트엔드 개발 서버 실행
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+3. 브라우저 접속: `http://localhost:5173`
+
+### 2) 프로덕션 빌드
+1. 프론트엔드 빌드
    ```bash
    cd frontend
    npm install
@@ -112,8 +138,7 @@
    ```bash
    uvicorn backend.main:app --host 0.0.0.0 --port 8000
    ```
-5. 브라우저 접속
-   - `http://127.0.0.1:8000`
+5. 브라우저 접속: `http://127.0.0.1:8000`
 
 ### 2) GPU 서버 의존성 설치
 ```bash

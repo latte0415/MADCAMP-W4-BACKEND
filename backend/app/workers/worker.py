@@ -115,6 +115,8 @@ class AnalysisWorker:
 
             if req.audio_id:
                 self._run_music(db, req, tmpdir, progress_base=0.6)
+            else:
+                self._run_music_from_video(local_video, req, tmpdir, progress_base=0.6)
 
     def _run_magic(self, db: Session, req: models.AnalysisRequest) -> None:
         if not MAGIC_WORKER_CMD:
@@ -158,6 +160,8 @@ class AnalysisWorker:
 
             if req.audio_id:
                 self._run_music(db, req, tmpdir, progress_base=0.6)
+            else:
+                self._run_music_from_video(local_video, req, tmpdir, progress_base=0.6)
 
     def _run_music(self, db: Session, req: models.AnalysisRequest, tmpdir: str, progress_base: float = 0.6) -> None:
         audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first()
@@ -200,6 +204,30 @@ class AnalysisWorker:
         with open(local_audio, "wb") as f:
             download_fileobj(audio.s3_key, f)
 
+        self._run_music_from_path(local_audio, req, tmpdir, progress_base)
+
+    def _run_music_from_video(self, video_path: str, req: models.AnalysisRequest, tmpdir: str, progress_base: float = 0.6) -> None:
+        local_audio = os.path.join(tmpdir, "extracted_audio.wav")
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            video_path,
+            "-vn",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            local_audio,
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            log = (proc.stderr or proc.stdout or "ffmpeg extract failed")[:2000]
+            set_job(req.id, "running", log=log)
+            return
+        self._run_music_from_path(local_audio, req, tmpdir, progress_base)
+
+    def _run_music_from_path(self, local_audio: str, req: models.AnalysisRequest, tmpdir: str, progress_base: float) -> None:
         audio_path = Path(local_audio)
         stem_out_dir = Path(tmpdir) / "stems"
 

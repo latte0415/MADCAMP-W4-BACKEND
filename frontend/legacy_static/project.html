@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>프로젝트 상세</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="app shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-title">DanceMatcher</span>
+          <span class="brand-sub">Motion · Music Timeline</span>
+        </div>
+        <div class="userbox">
+          <span id="user-name">User</span>
+          <button id="logout-btn" class="ghost">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="panel hero">
+        <div class="hero-meta">
+          <div class="breadcrumb"><a href="/">라이브러리</a> / <span>프로젝트</span></div>
+          <h1 id="project-title">프로젝트</h1>
+          <div class="badge" id="project-status">-</div>
+          <div class="meta-grid">
+            <div>
+              <div class="label">모드</div>
+              <div id="project-mode">-</div>
+            </div>
+            <div>
+              <div class="label">생성일</div>
+              <div id="project-created">-</div>
+            </div>
+            <div>
+              <div class="label">완료일</div>
+              <div id="project-finished">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-video">
+          <div class="video-shell">
+            <div class="video-frame">
+              <video id="video-player" playsinline></video>
+              <button id="video-play" class="video-play">▶</button>
+            </div>
+            <div class="video-controls">
+              <button id="video-toggle" class="btn">재생</button>
+              <input id="video-seek" type="range" min="0" max="1000" value="0" />
+              <span id="video-time" class="time-display">0:00 / 0:00</span>
+            </div>
+            <div id="video-empty" class="placeholder">업로드된 비디오가 없습니다.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel timeline-panel">
+        <div class="panel-header">
+          <div>
+            <h2>통합 타임라인</h2>
+            <p class="panel-sub">휠 스크롤로 확대/축소 · 클릭으로 시킹</p>
+          </div>
+          <div class="timeline-controls">
+            <button id="timeline-play" class="btn">재생</button>
+            <span id="timeline-time" class="time-display">0:00 / 0:00</span>
+          </div>
+        </div>
+
+        <div class="timeline-wrapper">
+          <div class="timeline-band-labels">
+            <span>LOW</span>
+            <span>MID</span>
+            <span>HIGH</span>
+          </div>
+          <div id="timeline-scroll" class="timeline-scroll">
+            <div id="timeline" class="timeline-canvas">
+              <div class="timeline-grid">
+                <div class="band-row band-low"></div>
+                <div class="band-row band-mid"></div>
+                <div class="band-row band-high"></div>
+              </div>
+              <div id="timeline-events" class="timeline-events"></div>
+              <div id="timeline-cursor" class="timeline-cursor"></div>
+            </div>
+          </div>
+        </div>
+        <div id="timeline-empty" class="placeholder">타임라인 데이터가 없습니다.</div>
+      </section>
+    </main>
+
+    <script src="/static/project.js"></script>
+  </body>
+</html>

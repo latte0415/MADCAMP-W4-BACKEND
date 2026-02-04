@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 베이스 전용: run_bass_pipeline 호출 → curve, keypoints dict.
 """

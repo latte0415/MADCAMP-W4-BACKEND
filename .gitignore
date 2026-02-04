@@ -1,0 +1,50 @@
+/.DS_Store
+.DS_Store
+**/.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+.env
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+frontend/.env
+frontend/.env.*
+frontend/**/.parcel-cache/
+frontend/**/dist/
+
+# Backend temp
+backend/.env
+backend/.env.*
+backend/uploads/
+backend/tmp/
+backend/.cache/
+
+# Outputs / Generated artifacts
+outputs*/
+weights/
+inputs/
+
+# Pixie / GPU large artifacts
+motion/gpu/pixie/PIXIE/.git/
+motion/gpu/pixie/PIXIE/checkpoints/
+motion/gpu/pixie/PIXIE/logs/
+motion/gpu/pixie/PIXIE/results/
+motion/gpu/pixie/PIXIE/output/
+motion/gpu/pixie/PIXIE/data/
+motion/gpu/pixie/PIXIE/experiments/
+
+# SAM / Magic outputs
+motion/gpu/sam3/outputs*/

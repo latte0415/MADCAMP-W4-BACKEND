@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Engine 공용: 정규화·pitch 변환. onset/bass 모두 사용.
 robust_norm, hz_to_midi. 외부 라이브러리/경로 의존 없음.

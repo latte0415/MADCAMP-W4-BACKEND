@@ -15,7 +15,7 @@
 #     --keep_edges 2500 \
 #     --thickness 2 \
 #     --alpha 0.35 \
-#     --flip_y
+#     --no_flip_y
 #
 import os
 import re

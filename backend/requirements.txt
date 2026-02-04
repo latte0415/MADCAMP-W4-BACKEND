@@ -8,3 +8,20 @@ pydantic
 python-multipart
 httpx
 python-dotenv
+
+# motion pipeline
+mediapipe
+opencv-python
+numpy
+scipy
+tqdm
+pillow
+
+# music-analyzer
+librosa>=0.10.0
+soundfile>=0.12.0
+madmom>=0.16.0
+demucs>=4.0.0
+cython
+matplotlib>=3.7.0
+pandas>=2.0.0

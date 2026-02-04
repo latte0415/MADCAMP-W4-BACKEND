@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 통합 진입점: stem 폴더명 받아서 drum + bass → streams_sections_cnn.json
 """

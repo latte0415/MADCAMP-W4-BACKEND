@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 드럼 전용: CNN band onset → keypoints_by_band, texture_blocks_by_band (스트림 미사용).
 """

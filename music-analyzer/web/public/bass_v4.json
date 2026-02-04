@@ -1,1178 +1,10 @@
 {
-  "source": "sample_animal_spirits_3_45",
+  "source": "bass_v4",
   "sr": 44100,
   "duration_sec": 42.0,
   "streams": [],
   "sections": [],
   "keypoints": [],
-  "keypoints_by_band": {
-    "low": [
-      {
-        "time": 1.0,
-        "score": 0.7535
-      },
-      {
-        "time": 1.61,
-        "score": 0.8144
-      },
-      {
-        "time": 2.08,
-        "score": 0.5781
-      },
-      {
-        "time": 2.51,
-        "score": 0.5794
-      },
-      {
-        "time": 2.82,
-        "score": 0.6819
-      },
-      {
-        "time": 3.42,
-        "score": 0.7437
-      },
-      {
-        "time": 4.02,
-        "score": 0.859
-      },
-      {
-        "time": 4.49,
-        "score": 0.5462
-      },
-      {
-        "time": 4.92,
-        "score": 0.5901
-      },
-      {
-        "time": 5.22,
-        "score": 0.7354
-      },
-      {
-        "time": 5.81,
-        "score": 0.6441
-      },
-      {
-        "time": 6.41,
-        "score": 0.7686
-      },
-      {
-        "time": 6.88,
-        "score": 0.4778
-      },
-      {
-        "time": 7.31,
-        "score": 0.3077
-      },
-      {
-        "time": 7.62,
-        "score": 0.6086
-      },
-      {
-        "time": 8.21,
-        "score": 0.4761
-      },
-      {
-        "time": 8.82,
-        "score": 0.5636
-      },
-      {
-        "time": 9.29,
-        "score": 0.388
-      },
-      {
-        "time": 9.72,
-        "score": 0.4278
-      },
-      {
-        "time": 10.02,
-        "score": 0.5899
-      },
-      {
-        "time": 10.61,
-        "score": 0.5629
-      },
-      {
-        "time": 11.21,
-        "score": 0.7579
-      },
-      {
-        "time": 11.67,
-        "score": 0.4961
-      },
-      {
-        "time": 12.1,
-        "score": 0.4998
-      },
-      {
-        "time": 12.4,
-        "score": 0.5358
-      },
-      {
-        "time": 13.0,
-        "score": 0.6406
-      },
-      {
-        "time": 13.58,
-        "score": 0.3323
-      },
-      {
-        "time": 14.05,
-        "score": 0.4167
-      },
-      {
-        "time": 14.48,
-        "score": 0.3157
-      },
-      {
-        "time": 14.78,
-        "score": 0.532
-      },
-      {
-        "time": 15.38,
-        "score": 0.6139
-      },
-      {
-        "time": 15.98,
-        "score": 0.7277
-      },
-      {
-        "time": 16.45,
-        "score": 0.5627
-      },
-      {
-        "time": 16.88,
-        "score": 0.4845
-      },
-      {
-        "time": 17.17,
-        "score": 0.4616
-      },
-      {
-        "time": 17.77,
-        "score": 0.6298
-      },
-      {
-        "time": 18.36,
-        "score": 0.5477
-      },
-      {
-        "time": 18.84,
-        "score": 0.5917
-      },
-      {
-        "time": 19.25,
-        "score": 0.5233
-      },
-      {
-        "time": 19.54,
-        "score": 0.5614
-      },
-      {
-        "time": 20.14,
-        "score": 0.6655
-      },
-      {
-        "time": 20.73,
-        "score": 0.6
-      },
-      {
-        "time": 21.2,
-        "score": 0.567
-      },
-      {
-        "time": 21.62,
-        "score": 0.523
-      },
-      {
-        "time": 21.92,
-        "score": 0.6192
-      },
-      {
-        "time": 22.52,
-        "score": 0.6204
-      },
-      {
-        "time": 23.12,
-        "score": 0.4334
-      },
-      {
-        "time": 23.58,
-        "score": 0.1677
-      },
-      {
-        "time": 24.02,
-        "score": 0.4417
-      },
-      {
-        "time": 24.32,
-        "score": 0.5093
-      },
-      {
-        "time": 24.81,
-        "score": 0.5238
-      },
-      {
-        "time": 25.21,
-        "score": 0.481
-      },
-      {
-        "time": 26.12,
-        "score": 0.5632
-      },
-      {
-        "time": 26.59,
-        "score": 0.5
-      },
-      {
-        "time": 27.18,
-        "score": 0.5346
-      },
-      {
-        "time": 27.59,
-        "score": 0.3783
-      },
-      {
-        "time": 28.5,
-        "score": 0.2464
-      },
-      {
-        "time": 28.96,
-        "score": 0.3381
-      },
-      {
-        "time": 29.56,
-        "score": 0.3589
-      },
-      {
-        "time": 29.99,
-        "score": 0.3774
-      },
-      {
-        "time": 30.9,
-        "score": 0.5257
-      },
-      {
-        "time": 31.36,
-        "score": 0.2378
-      },
-      {
-        "time": 31.95,
-        "score": 0.3876
-      },
-      {
-        "time": 33.28,
-        "score": 0.6394
-      },
-      {
-        "time": 33.88,
-        "score": 0.6396
-      },
-      {
-        "time": 34.36,
-        "score": 0.5046
-      },
-      {
-        "time": 34.79,
-        "score": 0.4821
-      },
-      {
-        "time": 35.08,
-        "score": 0.459
-      },
-      {
-        "time": 35.67,
-        "score": 0.5085
-      },
-      {
-        "time": 36.26,
-        "score": 0.5382
-      },
-      {
-        "time": 36.74,
-        "score": 0.4316
-      },
-      {
-        "time": 37.16,
-        "score": 0.395
-      },
-      {
-        "time": 37.46,
-        "score": 0.589
-      },
-      {
-        "time": 38.05,
-        "score": 0.54
-      },
-      {
-        "time": 38.64,
-        "score": 0.5672
-      },
-      {
-        "time": 39.11,
-        "score": 0.411
-      },
-      {
-        "time": 39.53,
-        "score": 0.3099
-      },
-      {
-        "time": 39.84,
-        "score": 0.6093
-      },
-      {
-        "time": 40.41,
-        "score": 0.5769
-      },
-      {
-        "time": 41.02,
-        "score": 0.5049
-      },
-      {
-        "time": 41.48,
-        "score": 0.3433
-      },
-      {
-        "time": 41.91,
-        "score": 0.5563
-      }
-    ],
-    "mid": [
-      {
-        "time": 0.99,
-        "score": 0.6803
-      },
-      {
-        "time": 1.3,
-        "score": 0.6011
-      },
-      {
-        "time": 1.6,
-        "score": 0.614
-      },
-      {
-        "time": 1.79,
-        "score": 0.5844
-      },
-      {
-        "time": 2.08,
-        "score": 0.5811
-      },
-      {
-        "time": 2.22,
-        "score": 0.6136
-      },
-      {
-        "time": 2.5,
-        "score": 0.5694
-      },
-      {
-        "time": 2.67,
-        "score": 0.5952
-      },
-      {
-        "time": 2.81,
-        "score": 0.6069
-      },
-      {
-        "time": 3.11,
-        "score": 0.5881
-      },
-      {
-        "time": 3.41,
-        "score": 0.6578
-      },
-      {
-        "time": 3.7,
-        "score": 0.3902
-      },
-      {
-        "time": 4.01,
-        "score": 0.6175
-      },
-      {
-        "time": 4.18,
-        "score": 0.5652
-      },
-      {
-        "time": 4.49,
-        "score": 0.5974
-      },
-      {
-        "time": 4.63,
-        "score": 0.6113
-      },
-      {
-        "time": 4.91,
-        "score": 0.5846
-      },
-      {
-        "time": 5.09,
-        "score": 0.618
-      },
-      {
-        "time": 5.21,
-        "score": 0.6198
-      },
-      {
-        "time": 5.52,
-        "score": 0.5582
-      },
-      {
-        "time": 5.8,
-        "score": 0.5934
-      },
-      {
-        "time": 6.4,
-        "score": 0.5719
-      },
-      {
-        "time": 6.88,
-        "score": 0.5317
-      },
-      {
-        "time": 7.31,
-        "score": 0.5288
-      },
-      {
-        "time": 7.61,
-        "score": 0.5582
-      },
-      {
-        "time": 8.21,
-        "score": 0.569
-      },
-      {
-        "time": 8.81,
-        "score": 0.5854
-      },
-      {
-        "time": 9.28,
-        "score": 0.515
-      },
-      {
-        "time": 9.71,
-        "score": 0.5231
-      },
-      {
-        "time": 10.01,
-        "score": 0.5485
-      },
-      {
-        "time": 10.6,
-        "score": 0.5786
-      },
-      {
-        "time": 11.2,
-        "score": 0.5829
-      },
-      {
-        "time": 11.67,
-        "score": 0.5458
-      },
-      {
-        "time": 12.09,
-        "score": 0.5286
-      },
-      {
-        "time": 12.4,
-        "score": 0.563
-      },
-      {
-        "time": 12.99,
-        "score": 0.5514
-      },
-      {
-        "time": 13.58,
-        "score": 0.5035
-      },
-      {
-        "time": 14.05,
-        "score": 0.5279
-      },
-      {
-        "time": 14.47,
-        "score": 0.5035
-      },
-      {
-        "time": 14.78,
-        "score": 0.5753
-      },
-      {
-        "time": 15.37,
-        "score": 0.5938
-      },
-      {
-        "time": 15.97,
-        "score": 0.562
-      },
-      {
-        "time": 16.44,
-        "score": 0.5427
-      },
-      {
-        "time": 16.87,
-        "score": 0.5111
-      },
-      {
-        "time": 17.16,
-        "score": 0.538
-      },
-      {
-        "time": 17.76,
-        "score": 0.5048
-      },
-      {
-        "time": 18.36,
-        "score": 0.586
-      },
-      {
-        "time": 18.83,
-        "score": 0.5197
-      },
-      {
-        "time": 19.24,
-        "score": 0.5396
-      },
-      {
-        "time": 19.54,
-        "score": 0.5747
-      },
-      {
-        "time": 20.14,
-        "score": 0.5854
-      },
-      {
-        "time": 20.73,
-        "score": 0.5759
-      },
-      {
-        "time": 21.19,
-        "score": 0.5252
-      },
-      {
-        "time": 21.61,
-        "score": 0.5392
-      },
-      {
-        "time": 21.92,
-        "score": 0.581
-      },
-      {
-        "time": 22.52,
-        "score": 0.5906
-      },
-      {
-        "time": 23.12,
-        "score": 0.5392
-      },
-      {
-        "time": 23.58,
-        "score": 0.4773
-      },
-      {
-        "time": 24.01,
-        "score": 0.4972
-      },
-      {
-        "time": 24.31,
-        "score": 0.6172
-      },
-      {
-        "time": 24.61,
-        "score": 0.6236
-      },
-      {
-        "time": 24.81,
-        "score": 0.4726
-      },
-      {
-        "time": 25.21,
-        "score": 0.5336
-      },
-      {
-        "time": 25.51,
-        "score": 0.6767
-      },
-      {
-        "time": 25.71,
-        "score": 0.3262
-      },
-      {
-        "time": 25.98,
-        "score": 0.3269
-      },
-      {
-        "time": 26.11,
-        "score": 0.5168
-      },
-      {
-        "time": 26.58,
-        "score": 0.5021
-      },
-      {
-        "time": 26.69,
-        "score": 0.6216
-      },
-      {
-        "time": 27.17,
-        "score": 0.4979
-      },
-      {
-        "time": 27.47,
-        "score": 0.4812
-      },
-      {
-        "time": 27.59,
-        "score": 0.556
-      },
-      {
-        "time": 27.9,
-        "score": 0.6741
-      },
-      {
-        "time": 28.08,
-        "score": 0.4064
-      },
-      {
-        "time": 28.37,
-        "score": 0.3772
-      },
-      {
-        "time": 28.5,
-        "score": 0.4529
-      },
-      {
-        "time": 28.96,
-        "score": 0.5172
-      },
-      {
-        "time": 29.07,
-        "score": 0.6173
-      },
-      {
-        "time": 29.56,
-        "score": 0.519
-      },
-      {
-        "time": 29.87,
-        "score": 0.4694
-      },
-      {
-        "time": 29.99,
-        "score": 0.5264
-      },
-      {
-        "time": 30.29,
-        "score": 0.6742
-      },
-      {
-        "time": 30.89,
-        "score": 0.4864
-      },
-      {
-        "time": 31.36,
-        "score": 0.4427
-      },
-      {
-        "time": 31.48,
-        "score": 0.6112
-      },
-      {
-        "time": 31.66,
-        "score": 0.3929
-      },
-      {
-        "time": 31.94,
-        "score": 0.4762
-      },
-      {
-        "time": 32.23,
-        "score": 0.5079
-      },
-      {
-        "time": 32.65,
-        "score": 0.6533
-      },
-      {
-        "time": 32.96,
-        "score": 0.6111
-      },
-      {
-        "time": 33.27,
-        "score": 0.5439
-      },
-      {
-        "time": 33.88,
-        "score": 0.5539
-      },
-      {
-        "time": 34.35,
-        "score": 0.5178
-      },
-      {
-        "time": 34.78,
-        "score": 0.5327
-      },
-      {
-        "time": 35.08,
-        "score": 0.5404
-      },
-      {
-        "time": 35.67,
-        "score": 0.5679
-      },
-      {
-        "time": 36.26,
-        "score": 0.5761
-      },
-      {
-        "time": 36.73,
-        "score": 0.4975
-      },
-      {
-        "time": 37.15,
-        "score": 0.511
-      },
-      {
-        "time": 37.45,
-        "score": 0.5496
-      },
-      {
-        "time": 38.04,
-        "score": 0.5948
-      },
-      {
-        "time": 38.63,
-        "score": 0.542
-      },
-      {
-        "time": 39.11,
-        "score": 0.4965
-      },
-      {
-        "time": 39.53,
-        "score": 0.5271
-      },
-      {
-        "time": 39.83,
-        "score": 0.5604
-      },
-      {
-        "time": 40.4,
-        "score": 0.5735
-      },
-      {
-        "time": 41.01,
-        "score": 0.5159
-      },
-      {
-        "time": 41.48,
-        "score": 0.5224
-      },
-      {
-        "time": 41.9,
-        "score": 0.5212
-      }
-    ],
-    "high": [
-      {
-        "time": 0.99,
-        "score": 0.5879
-      },
-      {
-        "time": 1.3,
-        "score": 0.4919
-      },
-      {
-        "time": 1.6,
-        "score": 0.5978
-      },
-      {
-        "time": 2.08,
-        "score": 0.5617
-      },
-      {
-        "time": 2.5,
-        "score": 0.6238
-      },
-      {
-        "time": 2.81,
-        "score": 0.5898
-      },
-      {
-        "time": 3.1,
-        "score": 0.5306
-      },
-      {
-        "time": 3.41,
-        "score": 0.6749
-      },
-      {
-        "time": 3.7,
-        "score": 0.5539
-      },
-      {
-        "time": 4.01,
-        "score": 0.6083
-      },
-      {
-        "time": 4.49,
-        "score": 0.5971
-      },
-      {
-        "time": 4.91,
-        "score": 0.6451
-      },
-      {
-        "time": 5.21,
-        "score": 0.6424
-      },
-      {
-        "time": 5.51,
-        "score": 0.4688
-      },
-      {
-        "time": 5.8,
-        "score": 0.5941
-      },
-      {
-        "time": 6.11,
-        "score": 0.4595
-      },
-      {
-        "time": 6.4,
-        "score": 0.6316
-      },
-      {
-        "time": 6.88,
-        "score": 0.5492
-      },
-      {
-        "time": 7.31,
-        "score": 0.5546
-      },
-      {
-        "time": 7.61,
-        "score": 0.6258
-      },
-      {
-        "time": 8.2,
-        "score": 0.568
-      },
-      {
-        "time": 8.81,
-        "score": 0.644
-      },
-      {
-        "time": 9.28,
-        "score": 0.5846
-      },
-      {
-        "time": 9.71,
-        "score": 0.6124
-      },
-      {
-        "time": 10.01,
-        "score": 0.619
-      },
-      {
-        "time": 10.6,
-        "score": 0.6306
-      },
-      {
-        "time": 11.2,
-        "score": 0.6255
-      },
-      {
-        "time": 11.49,
-        "score": 0.4823
-      },
-      {
-        "time": 11.67,
-        "score": 0.6011
-      },
-      {
-        "time": 12.09,
-        "score": 0.5579
-      },
-      {
-        "time": 12.39,
-        "score": 0.6283
-      },
-      {
-        "time": 12.99,
-        "score": 0.5774
-      },
-      {
-        "time": 13.58,
-        "score": 0.6244
-      },
-      {
-        "time": 14.05,
-        "score": 0.593
-      },
-      {
-        "time": 14.47,
-        "score": 0.645
-      },
-      {
-        "time": 14.77,
-        "score": 0.6694
-      },
-      {
-        "time": 15.37,
-        "score": 0.6391
-      },
-      {
-        "time": 15.97,
-        "score": 0.6397
-      },
-      {
-        "time": 16.44,
-        "score": 0.5403
-      },
-      {
-        "time": 16.87,
-        "score": 0.5839
-      },
-      {
-        "time": 17.16,
-        "score": 0.5774
-      },
-      {
-        "time": 17.46,
-        "score": 0.4568
-      },
-      {
-        "time": 17.76,
-        "score": 0.551
-      },
-      {
-        "time": 18.35,
-        "score": 0.6601
-      },
-      {
-        "time": 18.82,
-        "score": 0.622
-      },
-      {
-        "time": 19.24,
-        "score": 0.6691
-      },
-      {
-        "time": 19.53,
-        "score": 0.6388
-      },
-      {
-        "time": 20.13,
-        "score": 0.616
-      },
-      {
-        "time": 20.72,
-        "score": 0.618
-      },
-      {
-        "time": 21.19,
-        "score": 0.5917
-      },
-      {
-        "time": 21.61,
-        "score": 0.5819
-      },
-      {
-        "time": 21.91,
-        "score": 0.6541
-      },
-      {
-        "time": 22.51,
-        "score": 0.5691
-      },
-      {
-        "time": 22.81,
-        "score": 0.4855
-      },
-      {
-        "time": 23.11,
-        "score": 0.6321
-      },
-      {
-        "time": 23.4,
-        "score": 0.5031
-      },
-      {
-        "time": 24.01,
-        "score": 0.6375
-      },
-      {
-        "time": 24.31,
-        "score": 0.5024
-      },
-      {
-        "time": 24.61,
-        "score": 0.4653
-      },
-      {
-        "time": 25.2,
-        "score": 0.6838
-      },
-      {
-        "time": 25.51,
-        "score": 0.6553
-      },
-      {
-        "time": 25.81,
-        "score": 0.5925
-      },
-      {
-        "time": 26.11,
-        "score": 0.638
-      },
-      {
-        "time": 26.39,
-        "score": 0.4955
-      },
-      {
-        "time": 26.58,
-        "score": 0.4652
-      },
-      {
-        "time": 27.0,
-        "score": 0.5
-      },
-      {
-        "time": 27.17,
-        "score": 0.5387
-      },
-      {
-        "time": 27.58,
-        "score": 0.6527
-      },
-      {
-        "time": 27.9,
-        "score": 0.5619
-      },
-      {
-        "time": 28.19,
-        "score": 0.5419
-      },
-      {
-        "time": 28.77,
-        "score": 0.4585
-      },
-      {
-        "time": 29.38,
-        "score": 0.4838
-      },
-      {
-        "time": 29.56,
-        "score": 0.5771
-      },
-      {
-        "time": 29.98,
-        "score": 0.6148
-      },
-      {
-        "time": 30.29,
-        "score": 0.5809
-      },
-      {
-        "time": 30.88,
-        "score": 0.5699
-      },
-      {
-        "time": 31.77,
-        "score": 0.4651
-      },
-      {
-        "time": 31.93,
-        "score": 0.477
-      },
-      {
-        "time": 32.06,
-        "score": 0.4881
-      },
-      {
-        "time": 32.36,
-        "score": 0.4798
-      },
-      {
-        "time": 32.65,
-        "score": 0.5175
-      },
-      {
-        "time": 32.96,
-        "score": 0.5789
-      },
-      {
-        "time": 33.27,
-        "score": 0.6565
-      },
-      {
-        "time": 33.87,
-        "score": 0.5864
-      },
-      {
-        "time": 34.35,
-        "score": 0.524
-      },
-      {
-        "time": 34.78,
-        "score": 0.5589
-      },
-      {
-        "time": 35.08,
-        "score": 0.6053
-      },
-      {
-        "time": 36.25,
-        "score": 0.5879
-      },
-      {
-        "time": 37.15,
-        "score": 0.545
-      },
-      {
-        "time": 37.45,
-        "score": 0.613
-      },
-      {
-        "time": 38.04,
-        "score": 0.6001
-      },
-      {
-        "time": 38.63,
-        "score": 0.6254
-      },
-      {
-        "time": 39.52,
-        "score": 0.542
-      },
-      {
-        "time": 39.83,
-        "score": 0.6346
-      },
-      {
-        "time": 40.4,
-        "score": 0.4761
-      },
-      {
-        "time": 41.01,
-        "score": 0.565
-      },
-      {
-        "time": 41.48,
-        "score": 0.5065
-      },
-      {
-        "time": 41.89,
-        "score": 0.6024
-      }
-    ]
-  },
-  "texture_blocks_by_band": {
-    "mid": [],
-    "high": []
-  },
   "bass": {
     "notes": [
       {
@@ -1197,11 +29,7 @@
         "energy_peak": 0.4933,
         "energy_mean": 0.3927,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 12.9258,
-        "superflux_var": 800.5169,
-        "render_type": "line",
-        "groove_confidence": 0.56
+        "decay_time": 0.0
       },
       {
         "start": 5.51,
@@ -1225,11 +53,7 @@
         "energy_peak": 0.4811,
         "energy_mean": 0.3677,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 7.7832,
-        "superflux_var": 40.8948,
-        "render_type": "line",
-        "groove_confidence": 0.53
+        "decay_time": 0.0
       },
       {
         "start": 5.74,
@@ -1253,11 +77,7 @@
         "energy_peak": 0.4794,
         "energy_mean": 0.2514,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 14.8572,
-        "superflux_var": 84.6953,
-        "render_type": "line",
-        "groove_confidence": 0.38
+        "decay_time": 0.0
       },
       {
         "start": 5.82,
@@ -1281,11 +101,7 @@
         "energy_peak": 0.4816,
         "energy_mean": 0.1872,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 5.4153,
-        "superflux_var": 78.0595,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 8.25,
@@ -1309,11 +125,7 @@
         "energy_peak": 0.5742,
         "energy_mean": 0.1935,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 9.7156,
-        "superflux_var": 174.4641,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 8.83,
@@ -1337,11 +149,7 @@
         "energy_peak": 0.3941,
         "energy_mean": 0.1743,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 41.9684,
-        "superflux_var": 303.325,
-        "render_type": "line",
-        "groove_confidence": 0.37
+        "decay_time": 0.0
       },
       {
         "start": 8.9,
@@ -1365,11 +173,7 @@
         "energy_peak": 0.6322,
         "energy_mean": 0.2113,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 3.9921,
-        "superflux_var": 56.2508,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 10.63,
@@ -1393,11 +197,7 @@
         "energy_peak": 0.491,
         "energy_mean": 0.1378,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 11.9475,
-        "superflux_var": 372.8535,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 11.24,
@@ -1421,11 +221,7 @@
         "energy_peak": 0.5858,
         "energy_mean": 0.2756,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 11.0906,
-        "superflux_var": 377.5802,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 13.0,
@@ -1449,11 +245,7 @@
         "energy_peak": 0.6313,
         "energy_mean": 0.3004,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 15.3048,
-        "superflux_var": 933.2439,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 13.5,
@@ -1477,11 +269,7 @@
         "energy_peak": 0.621,
         "energy_mean": 0.1831,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 27.9184,
-        "superflux_var": 2557.4158,
-        "render_type": "line",
-        "groove_confidence": 0.58
+        "decay_time": 0.0
       },
       {
         "start": 13.78,
@@ -1505,11 +293,7 @@
         "energy_peak": 0.5258,
         "energy_mean": 0.1499,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 25.433,
-        "superflux_var": 3509.7437,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 14.08,
@@ -1533,11 +317,7 @@
         "energy_peak": 0.4917,
         "energy_mean": 0.2973,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 10.9636,
-        "superflux_var": 685.909,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 14.68,
@@ -1561,11 +341,7 @@
         "energy_peak": 0.518,
         "energy_mean": 0.329,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 14.3295,
-        "superflux_var": 253.0659,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 14.82,
@@ -1589,11 +365,7 @@
         "energy_peak": 0.4959,
         "energy_mean": 0.2239,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 8.6879,
-        "superflux_var": 112.4315,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 15.38,
@@ -1617,11 +389,7 @@
         "energy_peak": 0.4029,
         "energy_mean": 0.1527,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 6.4949,
-        "superflux_var": 55.4514,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 17.33,
@@ -1645,11 +413,7 @@
         "energy_peak": 0.2305,
         "energy_mean": 0.1631,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 62.4397,
-        "superflux_var": 1646.4292,
-        "render_type": "point",
-        "groove_confidence": 0.35
+        "decay_time": 0.0
       },
       {
         "start": 17.38,
@@ -1673,11 +437,7 @@
         "energy_peak": 0.452,
         "energy_mean": 0.1874,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 44.943,
-        "superflux_var": 3630.529,
-        "render_type": "line",
-        "groove_confidence": 0.43
+        "decay_time": 0.0
       },
       {
         "start": 17.51,
@@ -1701,11 +461,7 @@
         "energy_peak": 0.6462,
         "energy_mean": 0.2513,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 35.0682,
-        "superflux_var": 2253.6361,
-        "render_type": "line",
-        "groove_confidence": 0.48
+        "decay_time": 0.0
       },
       {
         "start": 17.69,
@@ -1729,11 +485,7 @@
         "energy_peak": 0.6327,
         "energy_mean": 0.2464,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 19.9516,
-        "superflux_var": 620.8435,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 17.83,
@@ -1757,11 +509,7 @@
         "energy_peak": 0.4783,
         "energy_mean": 0.1721,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 7.6168,
-        "superflux_var": 246.957,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 18.38,
@@ -1785,11 +533,7 @@
         "energy_peak": 0.628,
         "energy_mean": 0.265,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 8.816,
-        "superflux_var": 502.0091,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 20.16,
@@ -1813,11 +557,7 @@
         "energy_peak": 0.4842,
         "energy_mean": 0.141,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 9.2564,
-        "superflux_var": 538.9176,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 20.75,
@@ -1841,11 +581,7 @@
         "energy_peak": 0.5569,
         "energy_mean": 0.2006,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 9.3816,
-        "superflux_var": 536.8207,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 22.43,
@@ -1869,11 +605,7 @@
         "energy_peak": 0.4814,
         "energy_mean": 0.2101,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 37.0549,
-        "superflux_var": 5869.8628,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 22.57,
@@ -1897,11 +629,7 @@
         "energy_peak": 0.6385,
         "energy_mean": 0.3083,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 12.4658,
-        "superflux_var": 391.9755,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 23.0,
@@ -1925,11 +653,7 @@
         "energy_peak": 0.5665,
         "energy_mean": 0.2092,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 28.7674,
-        "superflux_var": 2917.7061,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 23.32,
@@ -1953,11 +677,7 @@
         "energy_peak": 0.5183,
         "energy_mean": 0.2517,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 34.7666,
-        "superflux_var": 3335.2499,
-        "render_type": "line",
-        "groove_confidence": 0.47
+        "decay_time": 0.0
       },
       {
         "start": 23.62,
@@ -1981,11 +701,7 @@
         "energy_peak": 0.474,
         "energy_mean": 0.2913,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 10.1821,
-        "superflux_var": 623.8031,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 24.52,
@@ -2009,11 +725,7 @@
         "energy_peak": 0.4923,
         "energy_mean": 0.26,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 21.6427,
-        "superflux_var": 1211.6252,
-        "render_type": "line",
-        "groove_confidence": 0.57
+        "decay_time": 0.0
       },
       {
         "start": 25.11,
@@ -2037,11 +749,7 @@
         "energy_peak": 0.3947,
         "energy_mean": 0.1389,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 46.6943,
-        "superflux_var": 4235.3274,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 25.25,
@@ -2065,11 +773,7 @@
         "energy_peak": 0.4658,
         "energy_mean": 0.1882,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 11.1971,
-        "superflux_var": 374.1364,
-        "render_type": "line",
-        "groove_confidence": 0.59
+        "decay_time": 0.0
       },
       {
         "start": 25.54,
@@ -2093,11 +797,7 @@
         "energy_peak": 0.4939,
         "energy_mean": 0.2308,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 18.7316,
-        "superflux_var": 821.2308,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 25.85,
@@ -2121,11 +821,7 @@
         "energy_peak": 0.4624,
         "energy_mean": 0.2198,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 27.3368,
-        "superflux_var": 3017.5271,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 26.17,
@@ -2149,11 +845,7 @@
         "energy_peak": 0.449,
         "energy_mean": 0.2082,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 13.2627,
-        "superflux_var": 867.5187,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 26.6,
@@ -2177,11 +869,7 @@
         "energy_peak": 0.4559,
         "energy_mean": 0.158,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 21.5113,
-        "superflux_var": 2036.3751,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 26.93,
@@ -2205,11 +893,7 @@
         "energy_peak": 0.5341,
         "energy_mean": 0.2243,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 59.4988,
-        "superflux_var": 7492.0194,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 27.07,
@@ -2233,11 +917,7 @@
         "energy_peak": 0.6157,
         "energy_mean": 0.2783,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 31.5374,
-        "superflux_var": 3821.3019,
-        "render_type": "line",
-        "groove_confidence": 0.45
+        "decay_time": 0.0
       },
       {
         "start": 27.46,
@@ -2261,11 +941,7 @@
         "energy_peak": 0.3631,
         "energy_mean": 0.1217,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 26.5762,
-        "superflux_var": 2477.5048,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 27.6,
@@ -2289,11 +965,7 @@
         "energy_peak": 0.4329,
         "energy_mean": 0.1634,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 13.7456,
-        "superflux_var": 515.2085,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 27.93,
@@ -2317,11 +989,7 @@
         "energy_peak": 0.4683,
         "energy_mean": 0.2277,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 19.664,
-        "superflux_var": 1706.5327,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 28.23,
@@ -2345,11 +1013,7 @@
         "energy_peak": 0.4802,
         "energy_mean": 0.2079,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 19.3358,
-        "superflux_var": 1508.1842,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 28.53,
@@ -2373,11 +1037,7 @@
         "energy_peak": 0.4589,
         "energy_mean": 0.2989,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 10.9973,
-        "superflux_var": 328.4074,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 28.83,
@@ -2401,11 +1061,7 @@
         "energy_peak": 0.4708,
         "energy_mean": 0.3077,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 12.5484,
-        "superflux_var": 166.0344,
-        "render_type": "line",
-        "groove_confidence": 0.48
+        "decay_time": 0.0
       },
       {
         "start": 29.01,
@@ -2429,11 +1085,7 @@
         "energy_peak": 0.4297,
         "energy_mean": 0.1284,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 14.2992,
-        "superflux_var": 1190.2152,
-        "render_type": "line",
-        "groove_confidence": 0.58
+        "decay_time": 0.0
       },
       {
         "start": 29.29,
@@ -2457,11 +1109,7 @@
         "energy_peak": 0.6025,
         "energy_mean": 0.1618,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 22.7799,
-        "superflux_var": 3008.8957,
-        "render_type": "line",
-        "groove_confidence": 0.59
+        "decay_time": 0.0
       },
       {
         "start": 29.58,
@@ -2485,11 +1133,7 @@
         "energy_peak": 0.4383,
         "energy_mean": 0.2063,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 42.2164,
-        "superflux_var": 5200.4288,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 29.72,
@@ -2513,11 +1157,7 @@
         "energy_peak": 0.5214,
         "energy_mean": 0.2449,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 25.0136,
-        "superflux_var": 1682.2692,
-        "render_type": "line",
-        "groove_confidence": 0.45
+        "decay_time": 0.0
       },
       {
         "start": 29.87,
@@ -2541,11 +1181,7 @@
         "energy_peak": 0.36,
         "energy_mean": 0.1752,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 35.8246,
-        "superflux_var": 3531.5335,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 30.01,
@@ -2569,11 +1205,7 @@
         "energy_peak": 0.438,
         "energy_mean": 0.1567,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 15.1422,
-        "superflux_var": 1615.4049,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 30.32,
@@ -2597,11 +1229,7 @@
         "energy_peak": 0.4838,
         "energy_mean": 0.3127,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 21.8257,
-        "superflux_var": 3077.7308,
-        "render_type": "line",
-        "groove_confidence": 0.47
+        "decay_time": 0.0
       },
       {
         "start": 30.49,
@@ -2625,11 +1253,7 @@
         "energy_peak": 0.3812,
         "energy_mean": 0.1204,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 16.7967,
-        "superflux_var": 1287.2507,
-        "render_type": "line",
-        "groove_confidence": 0.42
+        "decay_time": 0.0
       },
       {
         "start": 30.61,
@@ -2653,11 +1277,7 @@
         "energy_peak": 0.4689,
         "energy_mean": 0.194,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 25.8723,
-        "superflux_var": 3017.9807,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 30.92,
@@ -2681,11 +1301,7 @@
         "energy_peak": 0.4808,
         "energy_mean": 0.2298,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 15.0208,
-        "superflux_var": 1650.1702,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 31.36,
@@ -2709,11 +1325,7 @@
         "energy_peak": 0.4303,
         "energy_mean": 0.1578,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 15.9047,
-        "superflux_var": 2005.5687,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 31.66,
@@ -2737,11 +1349,7 @@
         "energy_peak": 0.4627,
         "energy_mean": 0.2432,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 46.9168,
-        "superflux_var": 4352.5129,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 31.8,
@@ -2765,11 +1373,7 @@
         "energy_peak": 0.5078,
         "energy_mean": 0.2677,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 28.0502,
-        "superflux_var": 2537.3731,
-        "render_type": "line",
-        "groove_confidence": 0.48
+        "decay_time": 0.0
       },
       {
         "start": 31.98,
@@ -2793,11 +1397,7 @@
         "energy_peak": 0.4299,
         "energy_mean": 0.1833,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 15.7984,
-        "superflux_var": 555.7015,
-        "render_type": "line",
-        "groove_confidence": 0.57
+        "decay_time": 0.0
       },
       {
         "start": 32.25,
@@ -2821,11 +1421,7 @@
         "energy_peak": 0.5264,
         "energy_mean": 0.1773,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 19.3096,
-        "superflux_var": 1565.5688,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 32.55,
@@ -2849,11 +1445,7 @@
         "energy_peak": 0.5292,
         "energy_mean": 0.143,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 31.9119,
-        "superflux_var": 4735.7573,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 32.85,
@@ -2877,11 +1469,7 @@
         "energy_peak": 0.4693,
         "energy_mean": 0.2373,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 34.6479,
-        "superflux_var": 5658.3146,
-        "render_type": "line",
-        "groove_confidence": 0.46
+        "decay_time": 0.0
       },
       {
         "start": 33.01,
@@ -2905,11 +1493,7 @@
         "energy_peak": 0.2743,
         "energy_mean": 0.1535,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 8.5507,
-        "superflux_var": 21.5224,
-        "render_type": "line",
-        "groove_confidence": 0.45
+        "decay_time": 0.0
       },
       {
         "start": 33.16,
@@ -2933,11 +1517,7 @@
         "energy_peak": 0.4586,
         "energy_mean": 0.1816,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 20.6616,
-        "superflux_var": 527.5772,
-        "render_type": "line",
-        "groove_confidence": 0.46
+        "decay_time": 0.0
       },
       {
         "start": 35.6,
@@ -2961,11 +1541,7 @@
         "energy_peak": 0.4324,
         "energy_mean": 0.1936,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 56.9663,
-        "superflux_var": 8570.0069,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 35.74,
@@ -2989,11 +1565,7 @@
         "energy_peak": 0.5304,
         "energy_mean": 0.1427,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 7.8335,
-        "superflux_var": 192.0392,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 36.29,
@@ -3017,11 +1589,7 @@
         "energy_peak": 0.576,
         "energy_mean": 0.2315,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 9.8169,
-        "superflux_var": 456.4233,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 38.06,
@@ -3045,11 +1613,7 @@
         "energy_peak": 0.4865,
         "energy_mean": 0.1705,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 11.5031,
-        "superflux_var": 403.7119,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 38.54,
@@ -3073,11 +1637,7 @@
         "energy_peak": 0.4057,
         "energy_mean": 0.1729,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 31.8512,
-        "superflux_var": 2427.5575,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 38.68,
@@ -3101,11 +1661,7 @@
         "energy_peak": 0.5643,
         "energy_mean": 0.2748,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 8.3656,
-        "superflux_var": 183.5782,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 40.35,
@@ -3129,11 +1685,7 @@
         "energy_peak": 0.4203,
         "energy_mean": 0.2064,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 38.191,
-        "superflux_var": 3542.4552,
-        "render_type": "line",
-        "groove_confidence": 0.44
+        "decay_time": 0.0
       },
       {
         "start": 40.49,
@@ -3157,11 +1709,7 @@
         "energy_peak": 0.563,
         "energy_mean": 0.3013,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 9.5427,
-        "superflux_var": 440.158,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 40.92,
@@ -3185,11 +1733,7 @@
         "energy_peak": 0.4747,
         "energy_mean": 0.1641,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 22.6562,
-        "superflux_var": 1629.4738,
-        "render_type": "line",
-        "groove_confidence": 0.59
+        "decay_time": 0.0
       },
       {
         "start": 41.21,
@@ -3213,11 +1757,7 @@
         "energy_peak": 0.5007,
         "energy_mean": 0.1513,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 17.8582,
-        "superflux_var": 1359.3808,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       },
       {
         "start": 41.52,
@@ -3241,11 +1781,7 @@
         "energy_peak": 0.4701,
         "energy_mean": 0.2961,
         "attack_time": 0.0,
-        "decay_time": 0.0,
-        "superflux_mean": 13.6834,
-        "superflux_var": 877.2424,
-        "render_type": "line",
-        "groove_confidence": 0.6
+        "decay_time": 0.0
       }
     ],
     "render": {

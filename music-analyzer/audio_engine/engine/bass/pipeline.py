@@ -1,6 +1,7 @@
 """
-베이스 스템 전체 파이프라인.
-bass.wav → pitch → energy → clean/segment → simplify → keypoints → bass dict.
+[LEGACY] 베이스 스템 전체 파이프라인.
+bass.wav → pitch → energy → note segmentation → simplify → bass dict (notes).
+새 계획 제공 후 교체 예정.
 """
 from __future__ import annotations
 
@@ -19,7 +20,6 @@ from audio_engine.engine.bass.pitch_tracking import compute_pitch_pyin
 from audio_engine.engine.bass.energy_envelope import compute_bass_energy_envelope
 from audio_engine.engine.bass.curve_clean_segment import clean_and_segment_pitch_curve
 from audio_engine.engine.bass.curve_simplify import simplify_curve_rdp
-from audio_engine.engine.bass.keypoints import extract_bass_keypoints
 from audio_engine.engine.bass.export import build_bass_output
 
 
@@ -35,7 +35,7 @@ def run_bass_pipeline(
     bass.wav 한 파일에 대해 전체 파이프라인 실행.
 
     Returns:
-        {"curve": [...], "keypoints": [...]} — write_streams_sections_json(..., bass=...)에 전달.
+        {"notes": [...], "render": {...}} — write_streams_sections_json(..., bass=...)에 전달.
     """
     path = Path(bass_wav_path)
     if not path.exists():
@@ -46,22 +46,23 @@ def run_bass_pipeline(
     else:
         if sr != sr_load:
             y, _ = librosa.load(str(path), sr=sr, mono=True)
-    duration = float(len(y)) / sr
 
     times, pitch_hz, confidence = compute_pitch_pyin(y, sr, hop_length=hop_length)
     n_frames = len(times)
     energy = compute_bass_energy_envelope(y, sr, n_frames, hop_length=hop_length)
 
-    segments = clean_and_segment_pitch_curve(
+    notes = clean_and_segment_pitch_curve(
         times,
         pitch_hz,
         confidence,
         energy,
         min_segment_duration_sec=min_segment_duration_sec,
         absorb_short_segments=True,
+        sr=sr,
+        hop_length=hop_length,
     )
 
-    for seg in segments:
+    for seg in notes:
         t_seg, p_seg = seg["pitch_curve"]
         t_simple, p_simple = simplify_curve_rdp(
             np.asarray(t_seg),
@@ -69,11 +70,5 @@ def run_bass_pipeline(
             epsilon_semitone=epsilon_semitone,
         )
         seg["simplified_curve"] = (t_simple, p_simple)
-        start_idx = seg["start_idx"]
-        end_idx = seg["end_idx"]
-        if start_idx < len(energy) and end_idx <= len(energy):
-            seg["energy_curve"] = energy[start_idx:end_idx].tolist()
 
-    keypoints = extract_bass_keypoints(segments, times, pitch_hz, energy)
-
-    return build_bass_output(segments, keypoints)
+    return build_bass_output(notes)

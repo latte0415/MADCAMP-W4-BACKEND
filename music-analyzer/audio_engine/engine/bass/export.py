@@ -1,68 +1,99 @@
 """
-베이스 결과 → JSON용 dict 구성.
+베이스 결과 → JSON용 dict 구성 (notes 기반).
 실제 파일 쓰기는 onset/export.write_streams_sections_json(bass=...)에 위임.
 """
 from __future__ import annotations
 
 from typing import Any
 
+from audio_engine.engine.utils import hz_to_midi
 
-def build_bass_output(
-    curve_segments: list[dict[str, Any]],
-    keypoints: list[dict[str, Any]],
-) -> dict[str, Any]:
+
+def build_bass_output(notes: list[dict[str, Any]]) -> dict[str, Any]:
     """
-    curve segments(각각 simplified_curve 포함)와 keypoints를
-    streams_sections_cnn.json 내 bass 필드 스키마로 변환.
+    note 리스트를 streams_sections_cnn.json 내 bass 필드 스키마로 변환.
 
     Returns:
-        {"curve": [...], "keypoints": [...]} — JSON 직렬화 가능.
+        {"notes": [...], "render": {...}} — JSON 직렬화 가능.
     """
-    curve_out: list[dict[str, Any]] = []
-    for seg in curve_segments:
+    notes_out: list[dict[str, Any]] = []
+    for seg in notes:
         t_seg, p_seg = seg["pitch_curve"]
+        t_seg = getattr(t_seg, "tolist", lambda: list(t_seg))()
+        p_seg = getattr(p_seg, "tolist", lambda: list(p_seg))()
         pitch_curve = [
-            [round(float(t), 4), round(float(p), 4) if __is_finite(p) else None]
+            [round(float(t), 4), round(float(hz_to_midi(p)), 4) if _is_finite(p) and p > 0 else None]
             for t, p in zip(t_seg, p_seg)
         ]
         energy_curve = seg.get("energy_curve")
         if energy_curve is None:
-            energy_curve = [round(float(seg["energy_mean"]), 4)] * len(pitch_curve)
+            energy_curve = [round(float(seg.get("energy_mean", 0)), 4)] * len(pitch_curve)
         else:
             energy_curve = [round(float(e), 4) for e in energy_curve]
-        conf = seg.get("confidence")
-        if conf is not None:
-            conf = [round(float(c), 4) for c in conf]
+        pc = seg.get("pitch_center", seg.get("pitch_median"))
         entry: dict[str, Any] = {
             "start": round(float(seg["start"]), 4),
             "end": round(float(seg["end"]), 4),
+            "duration": round(float(seg["duration"]), 4),
+            "pitch_center": _round_or_none(pc),
             "pitch_curve": pitch_curve,
             "energy_curve": energy_curve,
-            "confidence": conf,
+            "energy_peak": round(float(seg["energy_peak"]), 4),
+            "energy_mean": round(float(seg["energy_mean"]), 4),
+            "attack_time": round(float(seg.get("attack_time", 0)), 4),
+            "decay_time": round(float(seg.get("decay_time", 0)), 4),
         }
+        if "pitch_min" in seg:
+            entry["pitch_min"] = _round_or_none(seg["pitch_min"])
+        if "pitch_max" in seg:
+            entry["pitch_max"] = _round_or_none(seg["pitch_max"])
         if "simplified_curve" in seg:
             t_s, p_s = seg["simplified_curve"]
+            t_s = getattr(t_s, "tolist", lambda: list(t_s))()
+            p_s = getattr(p_s, "tolist", lambda: list(p_s))()
             entry["simplified_curve"] = [
-                [round(float(t), 4), round(float(p), 4) if __is_finite(p) else None]
+                [round(float(t), 4), round(float(hz_to_midi(p)), 4) if _is_finite(p) and p > 0 else None]
                 for t, p in zip(t_s, p_s)
             ]
-        curve_out.append(entry)
+        if "superflux_mean" in seg:
+            entry["superflux_mean"] = round(float(seg["superflux_mean"]), 4)
+        if "superflux_var" in seg:
+            entry["superflux_var"] = round(float(seg["superflux_var"]), 4)
+        if "render_type" in seg:
+            entry["render_type"] = str(seg["render_type"])
+        if "groove_confidence" in seg:
+            entry["groove_confidence"] = round(float(seg["groove_confidence"]), 4)
+        if "groove_group" in seg:
+            entry["groove_group"] = int(seg["groove_group"])
+        if "superflux_curve" in seg:
+            entry["superflux_curve"] = [round(float(x), 4) for x in seg["superflux_curve"]]
+        notes_out.append(entry)
 
-    kp_out = []
-    for k in keypoints:
-        item: dict[str, Any] = {"time": k["time"], "type": k["type"]}
-        if "pitch" in k:
-            item["pitch"] = k["pitch"]
-        if "energy" in k:
-            item["energy"] = k["energy"]
-        kp_out.append(item)
-
-    return {"curve": curve_out, "keypoints": kp_out}
+    render: dict[str, Any] = {
+        "y_axis": "pitch_midi",
+        "thickness": "energy",
+        "curve": "spline",
+    }
+    return {"notes": notes_out, "render": render}
 
 
-def __is_finite(x: Any) -> bool:
+def _is_finite(x: Any) -> bool:
     import numpy as np
     try:
         return bool(np.isfinite(x))
     except (TypeError, ValueError):
         return False
+
+
+def _round_or_none(x: Any) -> float | None:
+    """NaN/비유한 값은 JSON null용 None, 그 외는 round(..., 4)."""
+    import math
+    try:
+        if x is None:
+            return None
+        f = float(x)
+        if not math.isfinite(f):
+            return None
+        return round(f, 4)
+    except (TypeError, ValueError):
+        return None

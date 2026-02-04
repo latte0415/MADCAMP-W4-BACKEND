@@ -4,7 +4,7 @@ import type { ClarityEvent, ClarityJsonData } from "../types/clarityEvent";
 import type { TemporalEvent, TemporalJsonData } from "../types/temporalEvent";
 import type { SpectralEvent, SpectralJsonData } from "../types/spectralEvent";
 import type { ContextEvent, ContextJsonData } from "../types/contextEvent";
-import type { StreamsSectionsData } from "../types/streamsSections";
+import type { StreamsSectionsData, BassData } from "../types/streamsSections";
 import type { DrumBandEnergyJsonData } from "../types/drumBandEnergy";
 
 const DEFAULT_POINT_COLOR = "#5a9fd4";
@@ -332,12 +332,13 @@ export function parseDrumBandEnergyJson(data: unknown): DrumBandEnergyJsonData |
   };
 }
 
-/** 07_streams_sections → streams_sections.json 형식 (events 있으면 P0/P1/P2 roles 파싱) */
+/** 07_streams_sections → streams_sections.json 형식 (events 있으면 P0/P1/P2 roles 파싱). streams/sections/keypoints 없으면 빈 배열로 처리. */
 export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | null {
   if (!data || typeof data !== "object") return null;
   const obj = data as Record<string, unknown>;
-  if (!Array.isArray(obj.streams) || !Array.isArray(obj.sections) || !Array.isArray(obj.keypoints))
-    return null;
+  const streams = Array.isArray(obj.streams) ? obj.streams : [];
+  const sections = Array.isArray(obj.sections) ? obj.sections : [];
+  const keypoints = Array.isArray(obj.keypoints) ? obj.keypoints : [];
   const events = Array.isArray(obj.events)
     ? (obj.events as unknown[])
         .filter((item): item is Record<string, unknown> => item != null && typeof item === "object")
@@ -352,17 +353,52 @@ export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | n
       ? (obj.texture_blocks_by_band as StreamsSectionsData["texture_blocks_by_band"])
       : undefined;
 
+  const bass = parseBassData(obj.bass);
+
   return {
     source: String(obj.source ?? ""),
     sr: Number(obj.sr ?? 22050),
     duration_sec: Number(obj.duration_sec ?? 0),
-    streams: obj.streams as StreamsSectionsData["streams"],
-    sections: obj.sections as StreamsSectionsData["sections"],
-    keypoints: obj.keypoints as StreamsSectionsData["keypoints"],
+    streams: streams as StreamsSectionsData["streams"],
+    sections: sections as StreamsSectionsData["sections"],
+    keypoints: keypoints as StreamsSectionsData["keypoints"],
     events,
     keypoints_by_band,
     texture_blocks_by_band,
+    bass,
   };
+}
+
+function parseBassData(raw: unknown): BassData | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  const notes = obj.notes;
+  if (!Array.isArray(notes)) return undefined;
+  const render =
+    obj.render && typeof obj.render === "object"
+      ? (obj.render as BassData["render"])
+      : undefined;
+  let bass_curve_v3: BassData["bass_curve_v3"];
+  if (Array.isArray(obj.bass_curve_v3)) {
+    bass_curve_v3 = (obj.bass_curve_v3 as unknown[]).filter(
+      (item): item is { t: number; pitch: number; amp: number } =>
+        item != null &&
+        typeof item === "object" &&
+        "t" in item &&
+        "pitch" in item &&
+        "amp" in item &&
+        typeof (item as { t: unknown }).t === "number" &&
+        typeof (item as { pitch: unknown }).pitch === "number" &&
+        typeof (item as { amp: unknown }).amp === "number"
+    );
+  } else {
+    bass_curve_v3 = undefined;
+  }
+  const bass_curve_v3_meta =
+    obj.bass_curve_v3_meta && typeof obj.bass_curve_v3_meta === "object"
+      ? (obj.bass_curve_v3_meta as BassData["bass_curve_v3_meta"])
+      : undefined;
+  return { notes: notes as BassData["notes"], render, bass_curve_v3, bass_curve_v3_meta };
 }
 
 const LAYER_COLORS: Record<string, string> = {

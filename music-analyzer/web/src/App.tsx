@@ -12,6 +12,7 @@ import { Tab08ContextView } from "./components/Tab08ContextView";
 import { Tab09LayerView } from "./components/Tab09LayerView";
 import { StreamsSectionsView } from "./components/StreamsSectionsView";
 import { Tab13DrumKeypointsView } from "./components/Tab13DrumKeypointsView";
+import { Tab14BassView } from "./components/Tab14BassView";
 import { LayerFilterPanel } from "./components/LayerFilterPanel";
 import type { EventPoint } from "./types/event";
 import type { EnergyJsonData } from "./types/energyEvent";
@@ -24,28 +25,31 @@ import type { DrumBandEnergyJsonData } from "./types/drumBandEnergy";
 import "./App.css";
 
 type MainMode = "final" | "test";
-type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13" | "streams";
+type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13" | "14" | "14b" | "streams";
 
-/** 최종본: 메인 파이프라인 결과만 (드럼 키포인트 + 기존 분석 탭) */
+/** 최종본: 픽스 메인만 (드럼 키포인트 + 베이스) */
 const TABS_FINAL: { id: TabId; label: string; samplePath: string }[] = [
   { id: "13", label: "드럼 키포인트", samplePath: "/streams_sections_cnn.json" },
+  { id: "14", label: "베이스", samplePath: "/streams_sections_cnn.json" },
+];
+
+/** 테스트·실험: 그 외 분석/레거시/실험 뷰 */
+const TABS_TEST: { id: TabId; label: string; samplePath: string }[] = [
+  { id: "01", label: "01 Explore", samplePath: "/onset_beats.json" },
+  { id: "03", label: "03 Visualize", samplePath: "/onset_events.json" },
   { id: "04", label: "04 Energy", samplePath: "/onset_events_energy.json" },
+  { id: "04b", label: "04b Energy Bar (테스트)", samplePath: "/onset_events_energy.json" },
+  { id: "04c", label: "04c Drum Band Energy", samplePath: "/drum_band_energy.json" },
   { id: "05", label: "05 Clarity", samplePath: "/onset_events_clarity.json" },
   { id: "06", label: "06 Temporal", samplePath: "/onset_events_temporal.json" },
   { id: "07", label: "07 Spectral", samplePath: "/onset_events_spectral.json" },
   { id: "08", label: "08 Context", samplePath: "/onset_events_context.json" },
   { id: "09", label: "09 Layer (P0/P1/P2)", samplePath: "/onset_events_layered.json" },
-];
-
-/** 테스트·실험: 레거시·실험용 뷰 */
-const TABS_TEST: { id: TabId; label: string; samplePath: string }[] = [
-  { id: "01", label: "01 Explore", samplePath: "/onset_beats.json" },
-  { id: "03", label: "03 Visualize", samplePath: "/onset_events.json" },
-  { id: "04b", label: "04b Energy Bar (테스트)", samplePath: "/onset_events_energy.json" },
-  { id: "04c", label: "04c Drum Band Energy", samplePath: "/drum_band_energy.json" },
   { id: "10", label: "10 Madmom Drum Band", samplePath: "/drum_band_madmom.json" },
   { id: "11", label: "11 CNN Band Onsets", samplePath: "/cnn_band_onsets.json" },
   { id: "12", label: "12 CNN Streams/Layers", samplePath: "/streams_sections_cnn.json" },
+  { id: "14", label: "14 베이스 (레거시 v2/v3 토글)", samplePath: "/streams_sections_cnn.json" },
+  { id: "14b", label: "14b Bass v4 (테스트)", samplePath: "/bass_v4.json" },
   { id: "streams", label: "스트림·파트 (레거시)", samplePath: "/streams_sections.json" },
 ];
 
@@ -207,7 +211,7 @@ function App() {
                   onSpectralLoaded={tab.id === "07" ? handleSpectralLoaded : undefined}
                   onContextLoaded={tab.id === "08" ? handleContextLoaded : undefined}
                   onDrumBandEnergyLoaded={tab.id === "04c" || tab.id === "10" || tab.id === "11" ? handleDrumBandEnergyLoaded : undefined}
-                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" || tab.id === "streams" ? handleStreamsSectionsLoadedForTab : undefined}
+                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" || tab.id === "14" || tab.id === "14b" || tab.id === "streams" ? handleStreamsSectionsLoadedForTab : undefined}
                   samplePath={tab.samplePath}
                   sampleLabel={`${tab.label} 샘플 로드`}
                 />
@@ -278,6 +282,18 @@ function App() {
                   <Tab13DrumKeypointsView
                     audioUrl={audioUrl}
                     data={tabStreamsSectionsData["13"] ?? null}
+                  />
+                ) : tab.id === "14" ? (
+                  <Tab14BassView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["14"] ?? null}
+                    notesOnly={mainMode === "final"}
+                  />
+                ) : tab.id === "14b" ? (
+                  <Tab14BassView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["14b"] ?? null}
+                    notesOnly={true}
                   />
                 ) : (
                   <>

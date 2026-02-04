@@ -50,12 +50,13 @@ def run_stem_folder(
     print(f"  keypoints_by_band: low={len(keypoints_by_band.get('low', []))}, mid={len(keypoints_by_band.get('mid', []))}, high={len(keypoints_by_band.get('high', []))}")
     print(f"  texture_blocks_by_band: mid={len(texture_blocks_by_band.get('mid', []))}, high={len(texture_blocks_by_band.get('high', []))}")
 
+    # 베이스: v4(madmom onset) 메인. notes 개수 출력.
     bass_dict = None
     bass_path = folder / "bass.wav"
     if bass_path.exists():
         try:
             bass_dict = _bass_run.run(bass_path, sr=sr)
-            print(f"  베이스: curve {len(bass_dict.get('curve', []))}개, keypoints {len(bass_dict.get('keypoints', []))}개")
+            print(f"  베이스: notes {len(bass_dict.get('notes', []))}개")
         except Exception as e:
             print(f"  베이스 파이프라인 스킵: {e}")
 

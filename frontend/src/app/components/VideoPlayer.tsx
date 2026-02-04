@@ -60,7 +60,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     };
 
     return (
-      <div className="relative bg-black/40 rounded-lg overflow-hidden border border-white/10">
+      <div className="relative bg-neutral-950/80 rounded border border-neutral-800 overflow-hidden">
         {videoUrl ? (
           <div className="relative aspect-video bg-black flex items-center justify-center">
             <video
@@ -70,12 +70,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             />
             
             {/* Custom overlay controls */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
               <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-between">
                 <Button
                   onClick={onPlayPause}
                   size="lg"
-                  className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/20"
+                  className="rounded-full bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-md border border-amber-500/30"
                 >
                   {isPlaying ? (
                     <Pause className="size-6 text-white" />
@@ -84,16 +84,16 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   )}
                 </Button>
                 
-                <div className="text-white font-medium text-sm bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md">
+                <div className="text-white font-medium text-xs uppercase tracking-widest bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md">
                   {formatTime(currentTime)}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="aspect-video bg-zinc-900/50 flex items-center justify-center">
-            <div className="text-center text-zinc-500">
-              <div className="size-16 mx-auto mb-3 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="aspect-video bg-neutral-950/80 flex items-center justify-center">
+            <div className="text-center text-neutral-500">
+              <div className="size-16 mx-auto mb-3 rounded-full bg-neutral-900 flex items-center justify-center border border-neutral-800">
                 <Play className="size-8" />
               </div>
               <p>No video loaded</p>

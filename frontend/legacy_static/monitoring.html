@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring - Dance Lab</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Dance Lab Monitoring</div>
+      <div class="user">
+        <span id="user-name" class="user__name">게스트</span>
+        <a class="btn ghost" href="/">대시보드</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <div class="panel__header">
+          <h2>대기중 (모션)</h2>
+          <button id="btn-refresh" class="btn ghost">새로고침</button>
+        </div>
+        <div id="list-queued" class="library"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>대기중 (음악)</h2>
+        </div>
+        <div id="list-queued-music" class="library"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>진행중</h2>
+        </div>
+        <div id="list-running" class="library"></div>
+      </section>
+    </main>
+
+    <script src="/static/monitoring.js"></script>
+  </body>
+</html>

@@ -33,6 +33,10 @@ export function ProjectLibrary({ projects, onSelectProject, onNewProject, userNa
         return <CheckCircle2 className="size-4 text-green-500" />;
       case 'running':
         return <Loader2 className="size-4 text-blue-500 animate-spin" />;
+      case 'failed':
+        return <Clock className="size-4 text-red-500" />;
+      case 'queued':
+        return <Loader2 className="size-4 text-amber-500 animate-spin" />;
       default:
         return <Clock className="size-4 text-zinc-500" />;
     }
@@ -44,6 +48,10 @@ export function ProjectLibrary({ projects, onSelectProject, onNewProject, userNa
         return 'Completed';
       case 'running':
         return 'Analyzing...';
+      case 'queued':
+        return 'Queued';
+      case 'failed':
+        return 'Failed';
       default:
         return 'Draft';
     }
@@ -75,11 +83,9 @@ export function ProjectLibrary({ projects, onSelectProject, onNewProject, userNa
           {projects.map(project => (
             <div
               key={project.id}
-              onClick={() => project.status === 'done' && onSelectProject(project)}
+              onClick={() => onSelectProject(project)}
               className={`group relative bg-zinc-900/50 rounded-lg border border-white/10 overflow-hidden transition-all ${
-                project.status === 'done'
-                  ? 'cursor-pointer hover:border-white/20 hover:bg-zinc-900/70'
-                  : 'opacity-60 cursor-not-allowed'
+                'cursor-pointer hover:border-white/20 hover:bg-zinc-900/70'
               }`}
             >
               {/* Thumbnail */}

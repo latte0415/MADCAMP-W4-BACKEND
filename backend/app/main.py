@@ -2,20 +2,28 @@ from __future__ import annotations
 
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from .core.config import SESSION_SECRET, COOKIE_SECURE, WORKER_ENABLED, WORKER_CONCURRENCY
+from .core.config import (
+    SESSION_SECRET,
+    COOKIE_SECURE,
+    WORKER_ENABLED,
+    WORKER_CONCURRENCY,
+    PROJECT_ROOT,
+    MUSIC_WORKER_CONCURRENCY,
+)
 from .db.base import Base, engine
 from .db import models  # noqa: F401
 from .api.auth import router as auth_router
 from .api.api import router as api_router
-from .workers.worker import AnalysisWorker
+from .workers.worker import MotionAnalysisWorker, MusicAnalysisWorker
 
 app = FastAPI()
-_workers: list[AnalysisWorker] = []
+_motion_workers: list[MotionAnalysisWorker] = []
+_music_workers: list[MusicAnalysisWorker] = []
 
 app.add_middleware(
     SessionMiddleware,
@@ -24,12 +32,12 @@ app.add_middleware(
     https_only=COOKIE_SECURE,
 )
 
-FRONTEND_DIST = "frontend/dist"
-LEGACY_STATIC = "frontend/legacy_static"
+FRONTEND_DIST = str(PROJECT_ROOT / "frontend" / "dist")
+LEGACY_STATIC = str(PROJECT_ROOT / "frontend" / "legacy_static")
 
 if os.path.isdir(os.path.join(FRONTEND_DIST, "assets")):
     app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
-else:
+if os.path.isdir(LEGACY_STATIC):
     app.mount("/static", StaticFiles(directory=LEGACY_STATIC), name="static")
 
 
@@ -37,25 +45,38 @@ else:
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
     if WORKER_ENABLED:
-        count = max(WORKER_CONCURRENCY, 1)
-        for _ in range(count):
-            worker = AnalysisWorker()
+        motion_count = max(WORKER_CONCURRENCY, 1)
+        for _ in range(motion_count):
+            worker = MotionAnalysisWorker()
             worker.start()
-            _workers.append(worker)
+            _motion_workers.append(worker)
+
+        music_count = max(MUSIC_WORKER_CONCURRENCY, 1)
+        for _ in range(music_count):
+            worker = MusicAnalysisWorker()
+            worker.start()
+            _music_workers.append(worker)
 
 
 @app.get("/")
 def index():
     if os.path.isfile(os.path.join(FRONTEND_DIST, "index.html")):
         return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
-    return FileResponse(os.path.join(LEGACY_STATIC, "index.html"))
+    raise HTTPException(status_code=404, detail="frontend build not found")
 
 
 @app.get("/project/{project_id}")
 def project_detail(project_id: int):
     if os.path.isfile(os.path.join(FRONTEND_DIST, "index.html")):
         return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
-    return FileResponse(os.path.join(LEGACY_STATIC, "project.html"))
+    raise HTTPException(status_code=404, detail="frontend build not found")
+
+
+@app.get("/monitoring")
+def monitoring():
+    if os.path.isfile(os.path.join(LEGACY_STATIC, "monitoring.html")):
+        return FileResponse(os.path.join(LEGACY_STATIC, "monitoring.html"))
+    raise HTTPException(status_code=404, detail="monitoring page not found")
 
 
 @app.get("/health")

@@ -60,12 +60,16 @@ def create_analysis_request(db: Session, user_id: int, payload: AnalysisRequestC
             forbidden_detail="audio must belong to you",
         )
 
+    params = dict(payload.params_json or {})
+    if payload.audio_id is None:
+        params["skip_music"] = True
+
     req = models.AnalysisRequest(
         user_id=user_id,
         video_id=payload.video_id,
         audio_id=payload.audio_id,
         mode=payload.mode,
-        params_json=payload.params_json,
+        params_json=params or None,
         status="queued",
         title=payload.title,
         notes=payload.notes,
@@ -157,6 +161,10 @@ def update_analysis_audio(
         forbidden_detail="audio must belong to you",
     )
     req.audio_id = payload.audio_id
+    if req.params_json and req.params_json.get("skip_music"):
+        params = dict(req.params_json)
+        params.pop("skip_music", None)
+        req.params_json = params or None
     db.commit()
     return payload.audio_id
 
@@ -171,12 +179,42 @@ def queue_music_rerun(db: Session, user_id: int, request_id: int) -> None:
         raise HTTPException(status_code=400, detail="no audio attached")
 
     _get_media_or_404(db, req.audio_id, expected_type="audio")
+    queue_music_only(db, user_id, request_id, audio_id=None)
+
+
+def queue_music_only(
+    db: Session,
+    user_id: int,
+    request_id: int,
+    audio_id: Optional[int] = None,
+) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+
+    if audio_id is not None:
+        _require_owned_media(
+            db,
+            user_id,
+            audio_id,
+            expected_type="audio",
+            not_found_detail="audio media not found",
+            forbidden_detail="audio must belong to you",
+        )
+        req.audio_id = audio_id
+
+    if not req.audio_id:
+        raise HTTPException(status_code=400, detail="no audio attached")
+
+    _get_media_or_404(db, req.audio_id, expected_type="audio")
 
     params = dict(req.params_json or {})
+    params.pop("skip_music", None)
     params["music_only"] = True
     req.params_json = params
-    req.status = "queued"
+    req.status = "queued_music"
     req.error_message = None
     db.commit()
-    set_job(req.id, "queued", message="music re-run queued", progress=0.0, db=db)
-
+    set_job(req.id, "queued", message="music only queued", progress=0.0, db=db)

@@ -47,6 +47,7 @@ def build_project_detail(
         "title": req.title,
         "mode": req.mode,
         "status": req.status,
+        "error_message": req.error_message,
         "created_at": req.created_at,
         "finished_at": req.finished_at,
         "video": {
@@ -67,4 +68,3 @@ def build_project_detail(
             "edited_motion_markers": _url_for_key(edit.motion_markers_s3_key) if edit else None,
         },
     }
-

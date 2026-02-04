@@ -16,6 +16,25 @@ pip install -r backend/requirements.txt
 uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 
+## Workers (separate process)
+API 서버에서 워커를 끄고, 모션/음악 워커를 별도 프로세스로 실행할 수 있습니다.
+
+```
+export WORKER_ENABLED=false
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+```
+
+```
+bash backend/scripts/run_motion_worker.sh
+bash backend/scripts/run_music_worker.sh
+```
+
+추가 옵션 예시:
+```
+bash backend/scripts/run_motion_worker.sh --concurrency 2 --poll-interval 1.0
+bash backend/scripts/run_music_worker.sh --concurrency 1
+```
+
 ## Auth endpoints
 - `GET /auth/google/login`
 - `GET /auth/google/callback`
@@ -32,3 +51,4 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000
 - `GET /api/analysis/{id}/status`
 - `GET /api/library` (q/status/mode/archived/limit/offset)
 - `GET /api/media/{id}/download`
+- `POST /api/analysis/{id}/music-only`

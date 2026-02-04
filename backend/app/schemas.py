@@ -94,3 +94,14 @@ class MusicResultResponse(BaseModel):
 class AnalysisAudioUpdate(BaseModel):
     """분석 요청의 오디오(음악) 교체용."""
     audio_id: int
+
+
+class AnalysisMusicOnlyRequest(BaseModel):
+    """음악 분석만 실행할 때 사용하는 요청."""
+    audio_id: Optional[int] = None
+
+
+class MonitoringResponse(BaseModel):
+    queued: List[LibraryItem]
+    queued_music: List[LibraryItem]
+    running: List[LibraryItem]

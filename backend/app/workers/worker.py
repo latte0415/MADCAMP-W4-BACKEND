@@ -7,7 +7,6 @@ import tempfile
 import threading
 import time
 from typing import Optional
-from pathlib import Path
 from datetime import datetime
 
 from sqlalchemy.orm import Session
@@ -27,15 +26,11 @@ MAGIC_WORKER_CMD = os.environ.get("MAGIC_WORKER_CMD")
 logger = logging.getLogger(__name__)
 
 
-class AnalysisWorker:
+class BaseAnalysisWorker:
     def __init__(self, poll_interval: float = 2.0):
         self._poll_interval = poll_interval
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
-        self._handlers = {
-            "dance": self._run_dance,
-            "magic": self._run_magic,
-        }
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -51,41 +46,33 @@ class AnalysisWorker:
             try:
                 self._tick()
             except Exception:
-                pass
+                logger.exception("analysis worker tick failed")
             time.sleep(self._poll_interval)
+
+    def _fetch_request(self, db: Session) -> Optional[models.AnalysisRequest]:
+        raise NotImplementedError
+
+    def _handle_request(self, db: Session, req: models.AnalysisRequest) -> None:
+        raise NotImplementedError
 
     def _tick(self) -> None:
         db: Session = SessionLocal()
         try:
-            req = (
-                db.query(models.AnalysisRequest)
-                .filter(models.AnalysisRequest.status == "queued")
-                .order_by(models.AnalysisRequest.created_at.asc())
-                .with_for_update(skip_locked=True)
-                .first()
-            )
+            req = self._fetch_request(db)
             if not req:
                 return
 
             req.status = "running"
-            req.started_at = datetime.utcnow()
+            if req.started_at is None:
+                req.started_at = datetime.utcnow()
             db.commit()
             set_job(req.id, "running", message="starting", progress=0.05, db=db)
 
-            if (req.params_json or {}).get("music_only"):
-                handler = self._run_music_only
-            else:
-                handler = self._handlers.get(req.mode)
+            self._handle_request(db, req)
 
-            if not handler:
-                raise RuntimeError("Unknown mode")
-
-            handler(db, req)
-
-            if (req.params_json or {}).get("music_only"):
-                params = dict(req.params_json or {})
-                params.pop("music_only", None)
-                req.params_json = params or None
+            if req.status == "queued_music":
+                set_job(req.id, "queued", message="motion done, music queued", progress=0.85, db=db)
+                return
 
             req.status = "done"
             req.finished_at = datetime.utcnow()
@@ -104,6 +91,37 @@ class AnalysisWorker:
                 logger.exception("analysis worker tick failed before request loaded")
         finally:
             db.close()
+
+
+class MotionAnalysisWorker(BaseAnalysisWorker):
+    def _fetch_request(self, db: Session) -> Optional[models.AnalysisRequest]:
+        return (
+            db.query(models.AnalysisRequest)
+            .filter(models.AnalysisRequest.status == "queued")
+            .order_by(models.AnalysisRequest.created_at.asc())
+            .with_for_update(skip_locked=True)
+            .first()
+        )
+
+    def _handle_request(self, db: Session, req: models.AnalysisRequest) -> None:
+        if (req.params_json or {}).get("music_only"):
+            self._queue_music(db, req)
+            return
+        handler = {
+            "dance": self._run_dance,
+            "magic": self._run_magic,
+        }.get(req.mode)
+        if not handler:
+            raise RuntimeError("Unknown mode")
+        handler(db, req)
+
+    def _queue_music(self, db: Session, req: models.AnalysisRequest) -> None:
+        params = dict(req.params_json or {})
+        params.pop("skip_music", None)
+        params["music_only"] = True
+        req.params_json = params
+        req.status = "queued_music"
+        db.commit()
 
     def _run_dance(self, db: Session, req: models.AnalysisRequest) -> None:
         video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first()
@@ -136,8 +154,8 @@ class AnalysisWorker:
             res.motion_json_s3_key = result_key
             db.commit()
 
-            if req.audio_id:
-                self._run_music(db, req, tmpdir, progress_start=0.6, progress_end=0.95)
+            if req.audio_id and not (req.params_json or {}).get("skip_music"):
+                self._queue_music(db, req)
             else:
                 set_job(req.id, "running", message="motion done", progress=0.85, db=db)
 
@@ -181,16 +199,32 @@ class AnalysisWorker:
             res.magic_json_s3_key = result_key
             db.commit()
 
-            if req.audio_id:
-                self._run_music(db, req, tmpdir, progress_start=0.6, progress_end=0.95)
+            if req.audio_id and not (req.params_json or {}).get("skip_music"):
+                self._queue_music(db, req)
             else:
                 set_job(req.id, "running", message="magic done", progress=0.85, db=db)
 
-    def _run_music_only(self, db: Session, req: models.AnalysisRequest) -> None:
+
+class MusicAnalysisWorker(BaseAnalysisWorker):
+    def _fetch_request(self, db: Session) -> Optional[models.AnalysisRequest]:
+        return (
+            db.query(models.AnalysisRequest)
+            .filter(models.AnalysisRequest.status == "queued_music")
+            .order_by(models.AnalysisRequest.created_at.asc())
+            .with_for_update(skip_locked=True)
+            .first()
+        )
+
+    def _handle_request(self, db: Session, req: models.AnalysisRequest) -> None:
         if not req.audio_id:
             raise RuntimeError("audio not found")
         with tempfile.TemporaryDirectory() as tmpdir:
             self._run_music(db, req, tmpdir, progress_start=0.2, progress_end=0.95)
+
+        params = dict(req.params_json or {})
+        params.pop("music_only", None)
+        req.params_json = params or None
+        db.commit()
 
     def _run_music(
         self,

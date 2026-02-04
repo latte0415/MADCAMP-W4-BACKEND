@@ -15,6 +15,7 @@ type ProjectDetailResponse = {
   title: string | null;
   mode: ProjectMode;
   status: string;
+  error_message?: string | null;
   created_at: string;
   finished_at?: string | null;
   video?: { url?: string | null; duration_sec?: number | null };
@@ -75,6 +76,20 @@ export async function commitMedia(payload: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAnalysisAudio(requestId: number, audioId: number) {
+  return apiFetch(`/api/analysis/${requestId}/audio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ audio_id: audioId }),
+  });
+}
+
+export async function rerunMusicAnalysis(requestId: number) {
+  return apiFetch(`/api/analysis/${requestId}/rerun-music`, {
+    method: 'POST',
   });
 }
 
@@ -259,5 +274,6 @@ export function mapProjectDetail(
     motionKeypoints,
     bassNotes,
     status,
+    errorMessage: detail.error_message ?? undefined,
   };
 }

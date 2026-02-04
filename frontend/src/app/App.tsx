@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { VinylLibrary3D } from './components/VinylLibrary3D';
+import { ProjectLibrary } from './components/ProjectLibrary';
 import { ProjectDetail } from './components/ProjectDetail';
 import { UploadDialog } from './components/UploadDialog';
+import { LandingPage } from './components/landing/LandingPage';
 import { Project, ProjectMode } from './types';
 import {
   getLibrary,
@@ -20,10 +21,10 @@ import {
   logout,
 } from './api';
 
-type View = 'library' | 'detail';
+type View = 'landing' | 'library' | 'detail';
 
 export default function App() {
-  const [view, setView] = useState<View>('library');
+  const [view, setView] = useState<View>('landing');
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -140,31 +141,36 @@ export default function App() {
     refreshLibrary().catch(() => {});
   }, []);
 
+  const authProps = {
+    userName,
+    onLogin: () => (window.location.href = '/auth/google/login'),
+    onLogout: async () => {
+      await logout();
+      setUserName('게스트');
+    },
+  };
+
   return (
     <div className="size-full bg-zinc-950 text-white">
-      {view === 'library' ? (
-        <VinylLibrary3D
-          userName={userName}
-          onLogin={() => (window.location.href = '/auth/google/login')}
-          onLogout={async () => {
-            await logout();
-            setUserName('게스트');
-          }}
+      {view === 'landing' ? (
+        <LandingPage
           projects={projects}
           onSelectProject={handleSelectProject}
           onNewProject={handleNewProject}
-          loading={loadingProject}
+          {...authProps}
+        />
+      ) : view === 'library' ? (
+        <ProjectLibrary
+          projects={projects}
+          onSelectProject={handleSelectProject}
+          onNewProject={handleNewProject}
+          {...authProps}
         />
       ) : selectedProject ? (
         <ProjectDetail
           project={selectedProject}
           onBack={handleBack}
-          userName={userName}
-          onLogin={() => (window.location.href = '/auth/google/login')}
-          onLogout={async () => {
-            await logout();
-            setUserName('게스트');
-          }}
+          {...authProps}
         />
       ) : null}
 

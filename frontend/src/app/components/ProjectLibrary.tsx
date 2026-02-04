@@ -1,4 +1,5 @@
 import { Project } from '../types';
+import { Header } from './Header';
 import { Video, Music2, Plus, Clock, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -6,9 +7,12 @@ interface ProjectLibraryProps {
   projects: Project[];
   onSelectProject: (project: Project) => void;
   onNewProject: () => void;
+  userName?: string;
+  onLogin?: () => void;
+  onLogout?: () => void;
 }
 
-export function ProjectLibrary({ projects, onSelectProject, onNewProject }: ProjectLibraryProps) {
+export function ProjectLibrary({ projects, onSelectProject, onNewProject, userName = '게스트', onLogin, onLogout }: ProjectLibraryProps) {
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -47,6 +51,7 @@ export function ProjectLibrary({ projects, onSelectProject, onNewProject }: Proj
 
   return (
     <div className="min-h-screen bg-zinc-950">
+      <Header userName={userName} onLogin={onLogin} onLogout={onLogout} />
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

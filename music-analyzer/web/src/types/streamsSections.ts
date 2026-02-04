@@ -43,7 +43,17 @@ export interface TextureBlockItem {
   count: number;
 }
 
-/** 베이스 note (run_bass_v4 출력). pitch_center는 pyin 누락 구간에서 null. */
+/** 베이스 선(그루브) — 노트와 독립. 한 선 = 연속 sustain 구간. */
+export interface BassLine {
+  id: number;
+  start: number;
+  end: number;
+  pitch_curve: [number, number | null][];
+  energy_curve: number[];
+  decay_ratio?: number;
+}
+
+/** 베이스 note (run_bass_v4 출력). pitch_center는 pyin 누락 구간에서 null. 선에 속한 노트는 pitch_curve/energy_curve 없음. */
 export interface BassNote {
   start: number;
   end: number;
@@ -51,13 +61,20 @@ export interface BassNote {
   pitch_center: number | null;
   pitch_min?: number | null;
   pitch_max?: number | null;
-  pitch_curve: [number, number | null][];
+  /** standalone 노트만 가짐. 선 소속 노트는 없음 */
+  pitch_curve?: [number, number | null][];
   energy_curve?: number[];
   energy_peak: number;
   energy_mean?: number;
   attack_time?: number;
   decay_time?: number;
+  /** 구간 끝 에너지/peak (0~1, 붓 decay) */
+  decay_ratio?: number;
   simplified_curve?: [number, number | null][];
+  /** 속한 선 id. standalone이면 null */
+  line_id?: number | null;
+  /** standalone | start | mid | end */
+  role?: "standalone" | "start" | "mid" | "end";
   /** Dual Onset Track: superflux 구간 평균 */
   superflux_mean?: number;
   /** Dual Onset Track: superflux 구간 분산 */
@@ -91,11 +108,60 @@ export interface BassCurveV3Meta {
   amp?: string;
 }
 
+/** 그루브 밀도 곡선: 점(onset) 집합의 흐름을 근사한 envelope. [t, value], value 0~1. */
+export type GrooveCurvePoint = [number, number];
+
 export interface BassData {
   notes: BassNote[];
+  /** @deprecated 선 구현 제거. 밀도 곡선은 groove_curve 사용. */
+  lines?: BassLine[];
+  /** 점(onset) 밀도·에너지 흐름 곡선. 두께 = curve 값. */
+  groove_curve?: GrooveCurvePoint[];
   render?: BassRenderHint;
   bass_curve_v3?: BassCurveV3Point[];
   bass_curve_v3_meta?: BassCurveV3Meta;
+}
+
+/** 보컬 연속 곡선 한 점 (시간–피치, 선 굵기=amp/centroid) */
+export interface VocalCurvePoint {
+  t: number;
+  pitch: number;
+  amp: number;
+  centroid?: number;
+}
+
+/** 보컬 키포인트: 변화율 기반 제스처 지점 */
+export interface VocalKeypoint {
+  t: number;
+  type?: "pitch_change" | "energy_change" | "phrase";
+  score?: number;
+}
+
+export interface VocalData {
+  vocal_curve: VocalCurvePoint[];
+  vocal_keypoints: VocalKeypoint[];
+  vocal_curve_meta?: { pitch_unit?: string; amp?: string; y_axis_hint?: string };
+}
+
+/** Other 곡선 한 점 (시간–밀도) */
+export interface OtherCurvePoint {
+  t: number;
+  density: number;
+}
+
+/** Other 패드 영역 (반투명 밴드) */
+export interface OtherRegion {
+  start: number;
+  end: number;
+  intensity?: number;
+  flux_mean?: number;
+}
+
+export interface OtherData {
+  other_curve?: OtherCurvePoint[];
+  other_keypoints?: { t: number; type?: string; score?: number }[];
+  other_regions?: OtherRegion[];
+  other_meta?: Record<string, unknown>;
 }
 
 import type { EventPoint } from "./event";
@@ -115,4 +181,8 @@ export interface StreamsSectionsData {
   texture_blocks_by_band?: Record<string, TextureBlockItem[]>;
   /** [LEGACY] 베이스 스템 분석 결과 (notes). 새 계획 후 교체 예정 */
   bass?: BassData;
+  /** 보컬 곡선 + 제스처 키포인트 */
+  vocal?: VocalData;
+  /** other 스템: 곡선(밀도) + 영역(패드) */
+  other?: OtherData;
 }

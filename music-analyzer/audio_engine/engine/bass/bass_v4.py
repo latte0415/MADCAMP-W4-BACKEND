@@ -16,6 +16,7 @@ from typing import Any
 
 import librosa
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 from scipy.signal import butter, hilbert, sosfiltfilt
 
 from audio_engine.engine.bass.export import build_bass_output
@@ -50,6 +51,13 @@ PYIN_HOP = 256
 DEFAULT_PITCH_HZ = 80.0
 
 HOP_SEC = 0.01  # 에너지 그리드
+
+# 밀집 곡선 (붓질/그루브용): 노트 구간을 고정 hop으로 나눔
+DENSE_HOP_SEC = 0.025  # 25ms
+
+# 그루브 밀도 곡선: 임펄스 + Gaussian smoothing
+GROOVE_CURVE_NUM_SAMPLES = 2000
+GROOVE_CURVE_SIGMA_SEC = 0.05  # 대략 50ms 스무딩
 
 # render_type / groove_confidence 판별
 D_SHORT_SEC = 0.08       # 이보다 길면 선 성향
@@ -211,6 +219,63 @@ def _energy_for_segment(
     return peak, mean
 
 
+def _dense_curves_for_segment(
+    envelope: np.ndarray,
+    sr: int,
+    t_start: float,
+    t_end: float,
+    pitch_hz: float,
+    hop_sec: float = DENSE_HOP_SEC,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    """
+    세그먼트 [t_start, t_end]를 고정 hop으로 나누어 pitch_curve, energy_curve, decay_ratio 생성.
+    Returns: (times, pitches, energies, decay_ratio)
+    - times: [t0, t1, ...], pitches: 동일 길이 (구간 pyin 1개 반복), energies: hop 구간별 envelope 평균
+    - decay_ratio: 구간 끝 envelope / 구간 peak (0~1, 붓이 떼지는 정도)
+    """
+    dur = t_end - t_start
+    if dur <= 0 or sr <= 0 or len(envelope) == 0:
+        t_seg = np.array([t_start, t_end], dtype=np.float64)
+        p_seg = np.array([pitch_hz, pitch_hz], dtype=np.float64)
+        e_seg = np.array([0.0, 0.0], dtype=np.float64)
+        return t_seg, p_seg, e_seg, 1.0
+
+    # 시간 그리드: t_start, t_start+hop, ... , t_end (최소 2점)
+    n_hop = max(1, int(dur / hop_sec))
+    times = np.linspace(t_start, t_end, n_hop + 1, dtype=np.float64)
+    pitches = np.full_like(times, pitch_hz)
+
+    # 구간별 envelope 평균 → energy_curve
+    energies = np.zeros_like(times)
+    start_samp = int(t_start * sr)
+    end_samp = int(t_end * sr)
+    seg_env = envelope[max(0, start_samp) : min(end_samp, len(envelope))]
+    if len(seg_env) == 0:
+        energies[:] = 0.0
+        decay_ratio = 1.0
+        return times, pitches, energies, decay_ratio
+
+    peak = float(np.max(seg_env))
+    for i, t in enumerate(times):
+        t_next = times[i + 1] if i + 1 < len(times) else t_end
+        a = int(t * sr)
+        b = int(t_next * sr)
+        a = max(start_samp, min(a, len(envelope) - 1))
+        b = max(a, min(b, len(envelope)))
+        if b > a:
+            energies[i] = float(np.mean(envelope[a:b]))
+        else:
+            energies[i] = float(envelope[a]) if a < len(envelope) else 0.0
+
+    # decay_ratio: 구간 끝 쪽 에너지 / peak
+    tail_len = max(1, len(seg_env) // 10)
+    tail_mean = float(np.mean(seg_env[-tail_len:]))
+    decay_ratio = (tail_mean / peak) if peak > 0 else 1.0
+    decay_ratio = float(np.clip(decay_ratio, 0.0, 1.0))
+
+    return times, pitches, energies, decay_ratio
+
+
 def _compute_groove_confidence(
     superflux_mean: float,
     superflux_var: float,
@@ -240,13 +305,17 @@ def _segments_to_notes(
         pitch_hz = _pitch_for_segment(y, sr, t0, t_end)
         pitch_midi = hz_to_midi(pitch_hz) if np.isfinite(hz_to_midi(pitch_hz)) else 0.0
         energy_peak, energy_mean = _energy_for_segment(y_band, envelope, sr, t0, t_end)
-        t_seg = np.array([t0, t_end], dtype=np.float64)
-        p_seg = np.array([pitch_hz, pitch_hz], dtype=np.float64)
+        # 밀집 곡선: 고정 hop으로 pitch_curve, energy_curve, decay_ratio
+        t_seg, p_seg, energy_curve, decay_ratio = _dense_curves_for_segment(
+            envelope, sr, t0, t_end, pitch_hz, hop_sec=DENSE_HOP_SEC
+        )
         note: dict[str, Any] = {
             "start": t0,
             "end": t_end,
             "duration": dur,
             "pitch_curve": (t_seg, p_seg),
+            "energy_curve": energy_curve,
+            "decay_ratio": decay_ratio,
             "pitch_center": pitch_midi,
             "pitch_median": pitch_midi,
             "energy_peak": energy_peak,
@@ -287,6 +356,37 @@ def _segments_to_notes(
 
         notes.append(note)
     return notes
+
+
+def _compute_groove_curve(
+    notes: list[dict[str, Any]],
+    duration: float,
+    num_samples: int = GROOVE_CURVE_NUM_SAMPLES,
+    sigma_sec: float = GROOVE_CURVE_SIGMA_SEC,
+) -> list[tuple[float, float]]:
+    """
+    점(onset) + 세기(energy) → 임펄스 신호 → Gaussian smoothing → 정규화 곡선.
+    곡선 = 점들의 밀도·에너지 흐름(envelope), polyline이 아님.
+    """
+    if duration <= 0 or not notes:
+        return []
+    t_dense = np.linspace(0, duration, num_samples, dtype=np.float64)
+    signal = np.zeros(num_samples, dtype=np.float64)
+    for n in notes:
+        t = float(n["start"])
+        w = float(n.get("energy_peak", n.get("energy_mean", 0.0)) or 0.0)
+        if w < 0:
+            w = 0.0
+        idx = int(np.argmin(np.abs(t_dense - t)))
+        idx = max(0, min(idx, num_samples - 1))
+        signal[idx] += w
+    sigma_samples = max(1.0, sigma_sec * (num_samples / duration))
+    smooth = gaussian_filter1d(signal, sigma=float(sigma_samples), mode="constant", cval=0.0)
+    smooth = np.asarray(smooth, dtype=np.float64)
+    peak = float(np.max(smooth))
+    if peak > 0:
+        smooth = smooth / peak
+    return list(zip(t_dense.tolist(), smooth.tolist()))
 
 
 def run_bass_v4(bass_wav_path: Path | str, sr: int | None = None) -> dict[str, Any]:
@@ -330,4 +430,5 @@ def run_bass_v4(bass_wav_path: Path | str, sr: int | None = None) -> dict[str, A
         duration_sec=duration,
     )
     notes = [n for n in notes if n.get("energy_mean", 0.0) >= ENERGY_MEAN_MIN]
-    return build_bass_output(notes)
+    groove_curve = _compute_groove_curve(notes, duration)
+    return build_bass_output(notes, groove_curve=groove_curve)

@@ -965,6 +965,172 @@
   color: #888;
 }
 
+/* 탭 15 Vocal (곡선 + 제스처 키포인트) */
+.tab15-vocal-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.tab15-vocal-view .placeholder {
+  color: #888;
+  padding: 2rem;
+  text-align: center;
+}
+
+.tab15-vocal-view .tab15-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.75rem;
+}
+
+.tab15-vocal-view .tab15-meta-count {
+  color: #bbb;
+  font-size: 0.85rem;
+}
+
+.tab15-vocal-view .tab15-meta-source {
+  color: #888;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.tab15-vocal-view .waveform-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.tab15-vocal-view .tab15-tracks-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tab15-vocal-view .tab15-track {
+  width: 100%;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: visible;
+}
+
+.tab15-vocal-view .tab15-track-label {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.tab15-vocal-view .tab15-pitch-strip-inner {
+  border-radius: 4px;
+}
+
+.tab15-vocal-view .tab15-details {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.tab15-vocal-view .tab15-details summary {
+  cursor: pointer;
+  color: #aaa;
+}
+
+.tab15-vocal-view .tab15-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* 탭 16 Other (밀도 곡선 + 패드 영역) */
+.tab16-other-view {
+  background: var(--bg-soft, #2a2a2a);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.tab16-other-view .placeholder {
+  color: #888;
+  padding: 2rem;
+  text-align: center;
+}
+
+.tab16-other-view .tab16-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.75rem;
+}
+
+.tab16-other-view .tab16-meta-count {
+  color: #bbb;
+  font-size: 0.85rem;
+}
+
+.tab16-other-view .tab16-meta-source {
+  color: #888;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.tab16-other-view .waveform-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.tab16-other-view .tab16-tracks-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tab16-other-view .tab16-track {
+  width: 100%;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: visible;
+}
+
+.tab16-other-view .tab16-track-label {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.tab16-other-view .tab16-strip-inner {
+  border-radius: 4px;
+}
+
+.tab16-other-view .tab16-details {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.tab16-other-view .tab16-details summary {
+  cursor: pointer;
+  color: #aaa;
+}
+
+.tab16-other-view .tab16-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
 /* 스트림 시각화 타임라인 */
 .streams-sections-view .streams-visual-wrap {
   background: rgba(0, 0, 0, 0.25);

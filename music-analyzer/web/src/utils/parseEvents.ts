@@ -4,7 +4,7 @@ import type { ClarityEvent, ClarityJsonData } from "../types/clarityEvent";
 import type { TemporalEvent, TemporalJsonData } from "../types/temporalEvent";
 import type { SpectralEvent, SpectralJsonData } from "../types/spectralEvent";
 import type { ContextEvent, ContextJsonData } from "../types/contextEvent";
-import type { StreamsSectionsData, BassData } from "../types/streamsSections";
+import type { StreamsSectionsData, BassData, BassLine, VocalData, OtherData } from "../types/streamsSections";
 import type { DrumBandEnergyJsonData } from "../types/drumBandEnergy";
 
 const DEFAULT_POINT_COLOR = "#5a9fd4";
@@ -354,6 +354,8 @@ export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | n
       : undefined;
 
   const bass = parseBassData(obj.bass);
+  const vocal = parseVocalData(obj.vocal);
+  const other = parseOtherData(obj.other);
 
   return {
     source: String(obj.source ?? ""),
@@ -366,7 +368,85 @@ export function parseStreamsSectionsJson(data: unknown): StreamsSectionsData | n
     keypoints_by_band,
     texture_blocks_by_band,
     bass,
+    vocal,
+    other,
   };
+}
+
+function parseVocalData(raw: unknown): VocalData | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  if (!Array.isArray(obj.vocal_curve)) return undefined;
+  const vocal_curve = (obj.vocal_curve as unknown[]).filter(
+    (item): item is VocalData["vocal_curve"][number] =>
+      item != null &&
+      typeof item === "object" &&
+      "t" in item &&
+      "pitch" in item &&
+      "amp" in item &&
+      typeof (item as { t: unknown }).t === "number" &&
+      typeof (item as { pitch: unknown }).pitch === "number" &&
+      typeof (item as { amp: unknown }).amp === "number"
+  );
+  let vocal_keypoints: VocalData["vocal_keypoints"] = [];
+  if (Array.isArray(obj.vocal_keypoints)) {
+    vocal_keypoints = (obj.vocal_keypoints as unknown[]).filter(
+      (item): item is VocalData["vocal_keypoints"][number] =>
+        item != null && typeof item === "object" && "t" in item && typeof (item as { t: unknown }).t === "number"
+    );
+  }
+  const vocal_curve_meta =
+    obj.vocal_curve_meta && typeof obj.vocal_curve_meta === "object"
+      ? (obj.vocal_curve_meta as VocalData["vocal_curve_meta"])
+      : undefined;
+  return { vocal_curve, vocal_keypoints, vocal_curve_meta };
+}
+
+function parseOtherData(raw: unknown): OtherData | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  let other_curve: OtherData["other_curve"];
+  if (Array.isArray(obj.other_curve)) {
+    other_curve = (obj.other_curve as unknown[]).filter(
+      (item): item is { t: number; density: number } =>
+        item != null &&
+        typeof item === "object" &&
+        "t" in item &&
+        "density" in item &&
+        typeof (item as { t: unknown }).t === "number" &&
+        typeof (item as { density: unknown }).density === "number"
+    );
+  } else {
+    other_curve = undefined;
+  }
+  let other_keypoints: OtherData["other_keypoints"];
+  if (Array.isArray(obj.other_keypoints)) {
+    other_keypoints = (obj.other_keypoints as unknown[]).filter(
+      (item): item is { t: number; type?: string; score?: number } =>
+        item != null && typeof item === "object" && "t" in item && typeof (item as { t: unknown }).t === "number"
+    );
+  } else {
+    other_keypoints = undefined;
+  }
+  let other_regions: OtherData["other_regions"];
+  if (Array.isArray(obj.other_regions)) {
+    other_regions = (obj.other_regions as unknown[]).filter(
+      (item): item is { start: number; end: number; intensity?: number } =>
+        item != null &&
+        typeof item === "object" &&
+        "start" in item &&
+        "end" in item &&
+        typeof (item as { start: unknown }).start === "number" &&
+        typeof (item as { end: unknown }).end === "number"
+    );
+  } else {
+    other_regions = undefined;
+  }
+  const other_meta =
+    obj.other_meta && typeof obj.other_meta === "object"
+      ? (obj.other_meta as OtherData["other_meta"])
+      : undefined;
+  return { other_curve, other_keypoints, other_regions, other_meta };
 }
 
 function parseBassData(raw: unknown): BassData | undefined {
@@ -398,7 +478,31 @@ function parseBassData(raw: unknown): BassData | undefined {
     obj.bass_curve_v3_meta && typeof obj.bass_curve_v3_meta === "object"
       ? (obj.bass_curve_v3_meta as BassData["bass_curve_v3_meta"])
       : undefined;
-  return { notes: notes as BassData["notes"], render, bass_curve_v3, bass_curve_v3_meta };
+  let lines: BassData["lines"];
+  if (Array.isArray(obj.lines)) {
+    lines = (obj.lines as unknown[]).filter(
+      (item): item is BassLine =>
+        item != null &&
+        typeof item === "object" &&
+        "id" in item &&
+        "start" in item &&
+        "end" in item &&
+        Array.isArray((item as BassLine).pitch_curve) &&
+        Array.isArray((item as BassLine).energy_curve)
+    ) as BassLine[];
+  } else {
+    lines = undefined;
+  }
+  let groove_curve: BassData["groove_curve"];
+  if (Array.isArray(obj.groove_curve)) {
+    groove_curve = (obj.groove_curve as unknown[]).filter(
+      (pt): pt is [number, number] =>
+        Array.isArray(pt) && pt.length >= 2 && typeof pt[0] === "number" && typeof pt[1] === "number"
+    );
+  } else {
+    groove_curve = undefined;
+  }
+  return { notes: notes as BassData["notes"], render, bass_curve_v3, bass_curve_v3_meta, lines, groove_curve };
 }
 
 const LAYER_COLORS: Record<string, string> = {

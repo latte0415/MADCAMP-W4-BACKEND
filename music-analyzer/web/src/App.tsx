@@ -13,6 +13,8 @@ import { Tab09LayerView } from "./components/Tab09LayerView";
 import { StreamsSectionsView } from "./components/StreamsSectionsView";
 import { Tab13DrumKeypointsView } from "./components/Tab13DrumKeypointsView";
 import { Tab14BassView } from "./components/Tab14BassView";
+import { Tab15VocalView } from "./components/Tab15VocalView";
+import { Tab16OtherView } from "./components/Tab16OtherView";
 import { LayerFilterPanel } from "./components/LayerFilterPanel";
 import type { EventPoint } from "./types/event";
 import type { EnergyJsonData } from "./types/energyEvent";
@@ -25,12 +27,14 @@ import type { DrumBandEnergyJsonData } from "./types/drumBandEnergy";
 import "./App.css";
 
 type MainMode = "final" | "test";
-type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13" | "14" | "14b" | "streams";
+type TabId = "01" | "03" | "04" | "04b" | "04c" | "05" | "06" | "07" | "08" | "09" | "10" | "11" | "12" | "13" | "14" | "14b" | "15" | "16" | "streams";
 
-/** 최종본: 픽스 메인만 (드럼 키포인트 + 베이스) */
+/** 최종본: 픽스 메인만 (드럼 키포인트 + 베이스 + 보컬) */
 const TABS_FINAL: { id: TabId; label: string; samplePath: string }[] = [
   { id: "13", label: "드럼 키포인트", samplePath: "/streams_sections_cnn.json" },
   { id: "14", label: "베이스", samplePath: "/streams_sections_cnn.json" },
+  { id: "15", label: "보컬", samplePath: "/streams_sections_cnn.json" },
+  { id: "16", label: "Other", samplePath: "/streams_sections_cnn.json" },
 ];
 
 /** 테스트·실험: 그 외 분석/레거시/실험 뷰 */
@@ -50,6 +54,8 @@ const TABS_TEST: { id: TabId; label: string; samplePath: string }[] = [
   { id: "12", label: "12 CNN Streams/Layers", samplePath: "/streams_sections_cnn.json" },
   { id: "14", label: "14 베이스 (레거시 v2/v3 토글)", samplePath: "/streams_sections_cnn.json" },
   { id: "14b", label: "14b Bass v4 (테스트)", samplePath: "/bass_v4.json" },
+  { id: "15", label: "15 보컬", samplePath: "/streams_sections_cnn.json" },
+  { id: "16", label: "16 Other", samplePath: "/streams_sections_cnn.json" },
   { id: "streams", label: "스트림·파트 (레거시)", samplePath: "/streams_sections.json" },
 ];
 
@@ -211,7 +217,7 @@ function App() {
                   onSpectralLoaded={tab.id === "07" ? handleSpectralLoaded : undefined}
                   onContextLoaded={tab.id === "08" ? handleContextLoaded : undefined}
                   onDrumBandEnergyLoaded={tab.id === "04c" || tab.id === "10" || tab.id === "11" ? handleDrumBandEnergyLoaded : undefined}
-                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" || tab.id === "14" || tab.id === "14b" || tab.id === "streams" ? handleStreamsSectionsLoadedForTab : undefined}
+                  onStreamsSectionsLoaded={tab.id === "12" || tab.id === "13" || tab.id === "14" || tab.id === "14b" || tab.id === "15" || tab.id === "16" || tab.id === "streams" ? handleStreamsSectionsLoadedForTab : undefined}
                   samplePath={tab.samplePath}
                   sampleLabel={`${tab.label} 샘플 로드`}
                 />
@@ -294,6 +300,16 @@ function App() {
                     audioUrl={audioUrl}
                     data={tabStreamsSectionsData["14b"] ?? null}
                     notesOnly={true}
+                  />
+                ) : tab.id === "15" ? (
+                  <Tab15VocalView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["15"] ?? null}
+                  />
+                ) : tab.id === "16" ? (
+                  <Tab16OtherView
+                    audioUrl={audioUrl}
+                    data={tabStreamsSectionsData["16"] ?? null}
                   />
                 ) : (
                   <>

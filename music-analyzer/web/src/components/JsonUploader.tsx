@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { EventPoint } from "../types/event";
 import type { EnergyJsonData } from "../types/energyEvent";
 import type { ClarityJsonData } from "../types/clarityEvent";
@@ -66,12 +66,12 @@ export function JsonUploader({
   const [sampleError, setSampleError] = useState<string | null>(null);
   const [loadedInfo, setLoadedInfo] = useState<{ source: string; eventCount: number } | null>(null);
   const inputId = `json-upload-${samplePath.replace(/\W/g, "_")}`;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setSampleError(null);
-    e.target.value = "";
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -84,6 +84,7 @@ export function JsonUploader({
         setSampleError(err instanceof Error ? err.message : "JSON 처리 실패");
         setLoadedInfo(null);
       }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     };
     reader.readAsText(file);
   };
@@ -115,13 +116,18 @@ export function JsonUploader({
   return (
     <div className="uploader">
       <input
+        ref={fileInputRef}
         type="file"
-        accept=".json"
+        accept=".json,application/json"
         onChange={handleChange}
         style={{ display: "none" }}
         id={inputId}
+        aria-label="JSON 파일 선택"
       />
-      <button type="button" onClick={() => document.getElementById(inputId)?.click()}>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+      >
         분석 JSON 업로드
       </button>
       <button type="button" onClick={loadSample} title={`${samplePath} 샘플`}>

@@ -399,7 +399,32 @@ function parseVocalData(raw: unknown): VocalData | undefined {
     obj.vocal_curve_meta && typeof obj.vocal_curve_meta === "object"
       ? (obj.vocal_curve_meta as VocalData["vocal_curve_meta"])
       : undefined;
-  return { vocal_curve, vocal_keypoints, vocal_curve_meta };
+  let vocal_phrases: VocalData["vocal_phrases"];
+  if (Array.isArray(obj.vocal_phrases)) {
+    vocal_phrases = (obj.vocal_phrases as unknown[]).filter(
+      (item): item is VocalData["vocal_phrases"] extends (infer E)[] ? E : never =>
+        item != null &&
+        typeof item === "object" &&
+        "start" in item &&
+        "end" in item &&
+        "gestures" in item &&
+        typeof (item as { start: unknown }).start === "number" &&
+        typeof (item as { end: unknown }).end === "number" &&
+        Array.isArray((item as { gestures: unknown }).gestures)
+    ) as VocalData["vocal_phrases"];
+  } else {
+    vocal_phrases = undefined;
+  }
+  let vocal_turns: VocalData["vocal_turns"];
+  if (Array.isArray(obj.vocal_turns)) {
+    vocal_turns = (obj.vocal_turns as unknown[]).filter(
+      (item): item is VocalData["vocal_turns"] extends (infer E)[] ? E : never =>
+        item != null && typeof item === "object" && "t" in item && typeof (item as { t: unknown }).t === "number"
+    ) as VocalData["vocal_turns"];
+  } else {
+    vocal_turns = undefined;
+  }
+  return { vocal_curve, vocal_keypoints, vocal_curve_meta, vocal_phrases, vocal_turns };
 }
 
 function parseOtherData(raw: unknown): OtherData | undefined {

@@ -1,9 +1,10 @@
 """
 Vocal 연속 곡선: pyin + envelope (+ optional centroid) → 공통 그리드 vocal_curve.
-vocals.wav에 대해 bass v3와 동일한 재료를 vocal 주파수 대역으로만 적용.
+madmom RNN onset activation으로 "활동" 마스크를 적용해 무음/노이즈 구간은 amp=0으로 게이팅.
 """
 from __future__ import annotations
 
+import collections
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,14 @@ from scipy.signal import hilbert
 from scipy.interpolate import interp1d
 
 from audio_engine.engine.utils import hz_to_midi
+
+# Python 3.10+ / NumPy 2.0+ 호환 (madmom)
+if not hasattr(collections, "MutableSequence"):
+    import collections.abc
+    collections.MutableSequence = collections.abc.MutableSequence  # type: ignore
+for _attr, _val in [("float", np.float64), ("int", np.int64), ("bool", np.bool_), ("complex", np.complex128)]:
+    if not hasattr(np, _attr):
+        setattr(np, _attr, _val)
 
 # -----------------------------------------------------------------------------
 # 상수 (vocal 범위)
@@ -24,6 +33,11 @@ PYIN_FMAX = 1000.0
 PYIN_FRAME_LENGTH = 2048
 INTERP_GAP_MAX_SEC = 0.08
 LOG_AMP_K = 100.0
+
+# Activity 게이팅: 이 값 미만이면 amp=0 (무음/비활성)
+AMP_VOICE_MIN = 0.04
+MADMOM_ACT_THRESHOLD = 0.15
+MADMOM_FPS = 100
 
 
 def _hilbert_envelope(y: np.ndarray) -> np.ndarray:
@@ -157,6 +171,49 @@ def _resample_to_grid(
     return amp_out, pitch_out, centroid_out
 
 
+def _madmom_activation_curve(audio_path: Path | str) -> tuple[np.ndarray, np.ndarray]:
+    """
+    madmom RNN onset activation (peak picking 없음). t_out 그리드에 리샘플링·정규화한 곡선 반환.
+    Returns: (t_out, activation_out) — activation_out은 0~1 정규화.
+    """
+    from madmom.features.onsets import RNNOnsetProcessor
+
+    proc = RNNOnsetProcessor()
+    activations = proc(str(audio_path))
+    act = np.asarray(activations, dtype=np.float64).flatten()
+    fps = getattr(activations, "fps", MADMOM_FPS)
+    n = len(act)
+    if n == 0:
+        return np.array([0.0], dtype=np.float64), np.array([0.0], dtype=np.float64)
+    times_act = np.arange(n, dtype=np.float64) / fps
+    # 0~1 정규화 (percentile로 이상치 완화)
+    p1, p99 = np.percentile(act, [1, 99])
+    if p99 > p1:
+        act_norm = (act - p1) / (p99 - p1)
+        act_norm = np.clip(act_norm, 0.0, 1.0)
+    else:
+        act_norm = np.zeros_like(act)
+    return times_act, act_norm
+
+
+def _resample_activation_to_grid(
+    t_out: np.ndarray,
+    times_act: np.ndarray,
+    activation: np.ndarray,
+) -> np.ndarray:
+    """activation을 t_out 그리드에 리샘플링. 경계 밖은 0."""
+    if len(times_act) < 2 or len(activation) != len(times_act):
+        return np.zeros_like(t_out)
+    f = interp1d(
+        times_act,
+        activation,
+        kind="linear",
+        bounds_error=False,
+        fill_value=0.0,
+    )
+    return f(t_out).astype(np.float64)
+
+
 def run_vocal_curve(
     vocal_wav_path: Path | str,
     sr: int | None = None,
@@ -208,13 +265,32 @@ def run_vocal_curve(
         t_out, times_amp, amp_frames, times_pitch, pitch_midi, t_centroid, centroid
     )
 
-    # Step E — 출력
-    vocal_curve: list[dict[str, Any]] = []
+    # Step D2 — madmom RNN onset activation으로 활동 마스크, amp 게이팅
+    activation_out = None
+    try:
+        times_act, act_norm = _madmom_activation_curve(path)
+        activation_out = _resample_activation_to_grid(t_out, times_act, act_norm)
+        mask = (amp_out >= AMP_VOICE_MIN) & (activation_out >= MADMOM_ACT_THRESHOLD)
+        amp_out = np.where(mask, amp_out, 0.0)
+    except Exception:
+        # madmom 실패 시 envelope만 사용 (기존 동작)
+        amp_out = np.where(amp_out >= AMP_VOICE_MIN, amp_out, 0.0)
+
+    # Step E — 출력 (vocal_activation은 phrase boundary OR 조건용으로 전달)
+    vocal_curve_list: list[dict[str, Any]] = []
     for i in range(len(t_out)):
         p = float(pitch_out[i]) if np.isfinite(pitch_out[i]) else 0.0
         pt = {"t": round(float(t_out[i]), 4), "pitch": round(p, 4), "amp": round(float(amp_out[i]), 4)}
         if centroid_out is not None and np.isfinite(centroid_out[i]):
             pt["centroid"] = round(float(centroid_out[i]), 4)
-        vocal_curve.append(pt)
-    meta = {"pitch_unit": "midi", "amp": "hilbert_envelope", "y_axis_hint": "pitch"}
-    return {"vocal_curve": vocal_curve, "vocal_curve_meta": meta}
+        vocal_curve_list.append(pt)
+    meta = {
+        "pitch_unit": "midi",
+        "amp": "hilbert_envelope_masked_by_madmom_activity",
+        "y_axis_hint": "pitch",
+        "activity_gate": "madmom_rnn_onset",
+    }
+    out: dict[str, Any] = {"vocal_curve": vocal_curve_list, "vocal_curve_meta": meta}
+    if activation_out is not None:
+        out["vocal_activation"] = [round(float(x), 4) for x in activation_out]
+    return out

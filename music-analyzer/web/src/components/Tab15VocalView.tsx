@@ -3,7 +3,7 @@ import WaveSurfer from "wavesurfer.js";
 import type {
   StreamsSectionsData,
   VocalCurvePoint,
-  VocalKeypoint,
+  VocalGesture,
 } from "../types/streamsSections";
 
 const WAVEFORM_HEIGHT = 120;
@@ -24,60 +24,89 @@ const AMP_STROKE_SCALE = 10;
 /** 에너지(amp) 이 값 미만이면 곡선 미표시 */
 const AMP_DRAW_MIN = 0.05;
 
-/** 키포인트 하이라이트 구간 반경(초). [t - W, t + W] */
-const KEYPOINT_WINDOW_SEC = 0.12;
-
-/** 하이라이트 색 (키포인트 구간) */
-const HIGHLIGHT_STROKE = "#f1c40f";
-/** 하이라이트 추가 두께(px) */
-const HIGHLIGHT_STROKE_EXTRA = 2;
-const HIGHLIGHT_STROKE_MIN = 2.5;
+/** 시각화: 분석 10ms → 50~100ms (선이 선율처럼 보이도록) */
+const VIS_DOWNSAMPLE_SEC = 0.1;
+/** 시각화: downsampled pitch에 적용할 moving average 창 (gesture와 유사 효과) */
+const VIS_SMOOTH_WINDOW = 5;
 
 function midiToHz(midi: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-/** 세그먼트 [a.t, b.t]가 키포인트 kp의 [kp.t - W, kp.t + W]와 겹치는지 */
-function segmentInKeypointWindow(
-  a: VocalCurvePoint,
-  b: VocalCurvePoint,
-  kp: VocalKeypoint,
-  W: number
-): boolean {
-  return a.t <= kp.t + W && b.t >= kp.t - W;
+/** phrase 내부 points를 bucketSec 단위로 downsampling (median pitch, avg amp, t=버킷 중심) */
+function downsamplePhrasePoints(
+  points: VocalCurvePoint[],
+  bucketSec: number
+): { t: number; pitch: number; amp: number }[] {
+  if (points.length === 0) return [];
+  const half = bucketSec / 2;
+  const buckets = new Map<number, { pitch: number[]; amp: number[] }>();
+  for (const p of points) {
+    const pitch = Number(p.pitch);
+    const amp = Number(p.amp) ?? 0;
+    if (!Number.isFinite(pitch)) continue;
+    const bucketCenter = Math.floor(p.t / bucketSec) * bucketSec + half;
+    const key = Math.round(bucketCenter * 1e4) / 1e4;
+    if (!buckets.has(key)) buckets.set(key, { pitch: [], amp: [] });
+    buckets.get(key)!.pitch.push(pitch);
+    buckets.get(key)!.amp.push(amp);
+  }
+  const out: { t: number; pitch: number; amp: number }[] = [];
+  for (const [tKey, v] of buckets) {
+    const t = tKey;
+    const pitchSorted = [...v.pitch].sort((a, b) => a - b);
+    const mid = pitchSorted.length >> 1;
+    const medianPitch =
+      pitchSorted.length % 2 === 1
+        ? pitchSorted[mid]!
+        : (pitchSorted[mid - 1]! + pitchSorted[mid]!) / 2;
+    const avgAmp = v.amp.reduce((s, x) => s + x, 0) / v.amp.length;
+    out.push({ t, pitch: medianPitch, amp: avgAmp });
+  }
+  out.sort((a, b) => a.t - b.t);
+  return out;
 }
 
-function isSegmentHighlighted(
-  a: VocalCurvePoint,
-  b: VocalCurvePoint,
-  keypoints: VocalKeypoint[],
-  keypointWindowSec: number
-): boolean {
-  return keypoints.some((kp) => segmentInKeypointWindow(a, b, kp, keypointWindowSec));
+/** downsampled 시리즈에 moving average (pitch만, purely rendering) */
+function smoothPitchSeries(
+  points: { t: number; pitch: number; amp: number }[],
+  window: number
+): { t: number; pitch: number; amp: number }[] {
+  if (points.length === 0 || window < 2) return points;
+  const w = Math.min(window, points.length);
+  const half = (w - 1) >> 1;
+  return points.map((p, i) => {
+    let sum = 0;
+    let n = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(points.length - 1, i + half); j++) {
+      sum += points[j]!.pitch;
+      n++;
+    }
+    return { ...p, pitch: n > 0 ? sum / n : p.pitch };
+  });
 }
 
+/** phrase 단위로만 pitch 선 렌더링 (구간 사이 연결 금지) */
 function VocalPitchCanvas({
   canvasRef,
   width,
   height,
   points,
+  phrases,
   xScale,
   pitchToY,
   ampScale,
   gridMidi,
-  keypoints,
-  keypointWindowSec,
 }: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   width: number;
   height: number;
   points: VocalCurvePoint[];
+  phrases: { start: number; end: number }[];
   xScale: (t: number) => number;
   pitchToY: (midi: number) => number;
   ampScale: number;
   gridMidi: number[];
-  keypoints: VocalKeypoint[];
-  keypointWindowSec: number;
 }) {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -98,58 +127,58 @@ function VocalPitchCanvas({
       ctx.stroke();
     }
     ctx.setLineDash([]);
-    if (points.length >= 2) {
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(155, 89, 182, 0.95)";
 
-      // 패스 1: 일반 곡선 (에너지 임계 통과, 키포인트 구간 제외)
-      ctx.strokeStyle = "#9b59b6";
-      for (let i = 0; i < points.length - 1; i++) {
-        const a = points[i]!;
-        const b = points[i + 1]!;
-        const minAmp = Math.min(Number(a.amp) ?? 0, Number(b.amp) ?? 0);
-        if (minAmp < AMP_DRAW_MIN) continue;
-        if (isSegmentHighlighted(a, b, keypoints, keypointWindowSec)) continue;
-        const pa = Number(a.pitch);
-        const pb = Number(b.pitch);
-        if (!Number.isFinite(pa) || !Number.isFinite(pb)) continue;
-        const x0 = xScale(a.t);
-        const y0 = pitchToY(pa);
-        const x1 = xScale(b.t);
-        const y1 = pitchToY(pb);
-        const w = Math.max(0.5, (Number(a.amp) ?? 0) * ampScale);
-        ctx.lineWidth = w;
+    if (phrases.length > 0) {
+      // A-1: phrase 밖에는 pitch 없음 — 구간별 clip; A-2: phrase마다 스타일 차이(짝/홀 opacity)
+      for (let pi = 0; pi < phrases.length; pi++) {
+        const ph = phrases[pi]!;
+        const x0 = xScale(ph.start);
+        const x1 = xScale(ph.end);
+        const w = Math.max(1, x1 - x0);
+        ctx.save();
         ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x1, y1);
-        ctx.stroke();
+        ctx.rect(x0, 0, w, height);
+        ctx.clip();
+        ctx.globalAlpha = pi % 2 === 0 ? 0.95 : 0.75;
+        const seg = points.filter((p) => p.t >= ph.start && p.t <= ph.end);
+        if (seg.length >= 2) {
+          const down = downsamplePhrasePoints(seg, VIS_DOWNSAMPLE_SEC);
+          if (down.length >= 2) {
+            const vis = smoothPitchSeries(down, VIS_SMOOTH_WINDOW);
+            for (let i = 0; i < vis.length - 1; i++) {
+              const a = vis[i]!;
+              const b = vis[i + 1]!;
+              if (a.amp < AMP_DRAW_MIN && b.amp < AMP_DRAW_MIN) continue;
+              ctx.lineWidth = Math.max(0.5, Math.max(a.amp, b.amp) * ampScale);
+              ctx.beginPath();
+              ctx.moveTo(xScale(a.t), pitchToY(a.pitch));
+              ctx.lineTo(xScale(b.t), pitchToY(b.pitch));
+              ctx.stroke();
+            }
+          }
+        }
+        ctx.restore();
       }
-
-      // 패스 2: 키포인트 구간 하이라이트 (다른 색, 더 굵게)
-      ctx.strokeStyle = HIGHLIGHT_STROKE;
-      for (let i = 0; i < points.length - 1; i++) {
-        const a = points[i]!;
-        const b = points[i + 1]!;
-        const minAmp = Math.min(Number(a.amp) ?? 0, Number(b.amp) ?? 0);
-        if (minAmp < AMP_DRAW_MIN) continue;
-        if (!isSegmentHighlighted(a, b, keypoints, keypointWindowSec)) continue;
-        const pa = Number(a.pitch);
-        const pb = Number(b.pitch);
-        if (!Number.isFinite(pa) || !Number.isFinite(pb)) continue;
-        const x0 = xScale(a.t);
-        const y0 = pitchToY(pa);
-        const x1 = xScale(b.t);
-        const y1 = pitchToY(pb);
-        const baseW = Math.max(0.5, (Number(a.amp) ?? 0) * ampScale);
-        const w = Math.max(HIGHLIGHT_STROKE_MIN, baseW + HIGHLIGHT_STROKE_EXTRA);
+    } else if (points.length >= 2) {
+      // fallback: phrase 없을 때도 downsampling 적용 (호환용)
+      const down = downsamplePhrasePoints(points, VIS_DOWNSAMPLE_SEC);
+      const vis = down.length >= 2 ? smoothPitchSeries(down, VIS_SMOOTH_WINDOW) : down;
+      for (let i = 0; i < vis.length - 1; i++) {
+        const a = vis[i]!;
+        const b = vis[i + 1]!;
+        if (a.amp < AMP_DRAW_MIN && b.amp < AMP_DRAW_MIN) continue;
+        const w = Math.max(0.5, Math.max(a.amp, b.amp) * ampScale);
         ctx.lineWidth = w;
         ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x1, y1);
+        ctx.moveTo(xScale(a.t), pitchToY(a.pitch));
+        ctx.lineTo(xScale(b.t), pitchToY(b.pitch));
         ctx.stroke();
       }
     }
-  }, [canvasRef, width, height, points, xScale, pitchToY, ampScale, gridMidi, keypoints, keypointWindowSec]);
+  }, [canvasRef, width, height, points, phrases, xScale, pitchToY, ampScale, gridMidi]);
   return (
     <canvas
       ref={canvasRef}
@@ -249,6 +278,9 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
   const vocal = data?.vocal;
   const curve = vocal?.vocal_curve ?? [];
   const keypoints = vocal?.vocal_keypoints ?? [];
+  const phrases = vocal?.vocal_phrases ?? [];
+  const turns = vocal?.vocal_turns ?? [];
+  const useTurnsMode = turns.length > 0;
   const hasVocal = Array.isArray(curve) && curve.length > 0;
 
   const dur = data?.duration_sec ?? (duration || 1);
@@ -297,11 +329,21 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
   };
 
   const visibleCurvePoints = curve.filter((p) => p.t >= visibleStart && p.t <= visibleEnd);
-  const visibleKeypoints = keypoints.filter((kp) => kp.t >= visibleStart && kp.t <= visibleEnd);
-  /** 하이라이트 판별용: visible 구간과 겹칠 수 있는 키포인트만 (kp.t ± KEYPOINT_WINDOW_SEC) */
-  const keypointsForCanvas = keypoints.filter(
-    (kp) =>
-      kp.t >= visibleStart - KEYPOINT_WINDOW_SEC && kp.t <= visibleEnd + KEYPOINT_WINDOW_SEC
+  const visiblePhrases = useTurnsMode ? [] : phrases.filter(
+    (ph) => ph.end >= visibleStart && ph.start <= visibleEnd
+  );
+  const visibleTurns = turns.filter((t) => t.t >= visibleStart && t.t <= visibleEnd);
+  const allGestures = useTurnsMode ? [] : phrases.flatMap((ph) =>
+    ph.gestures
+      .filter((g) => g.type !== "phrase_start")
+      .map((g) => ({ g, ph }))
+  );
+  const visibleGesturesWithPhrase = allGestures.filter(
+    ({ g, ph }) =>
+      g.t >= visibleStart &&
+      g.t <= visibleEnd &&
+      g.t > ph.start &&
+      g.t < ph.end
   );
   const gridMidi = [48, 60, 72, 84, 96];
 
@@ -327,7 +369,12 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
     <div className="tab15-vocal-view">
       <div className="tab15-meta">
         <span className="tab15-meta-count">
-          곡선 {curve.length}점, 제스처 키포인트 {keypoints.length}개
+          곡선 {curve.length}점
+          {useTurnsMode
+            ? `, Turn ${turns.length}개`
+            : phrases.length > 0
+              ? `, phrases ${phrases.length}개, 제스처 ${allGestures.length}개`
+              : `, 키포인트 ${keypoints.length}개`}
         </span>
         {data.source && <span className="tab15-meta-source">{data.source}</span>}
       </div>
@@ -361,7 +408,7 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
             </div>
             <div className="tab15-track tab15-track-pitch">
               <div className="tab15-track-label">
-                보컬 · y=피치, 선 굵기=에너지 (에너지 낮은 구간 미표시, 키포인트 구간 하이라이트)
+                보컬 · {useTurnsMode ? "pitch 선 하나, ▲ 전환(2~4개/20초)" : "phrase 단위 피치 선, ● onset(발음·강세)"}
               </div>
               {dur > 0 && stripWidth > 1 && (
                 <div
@@ -378,12 +425,11 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                     width={stripWidth}
                     height={PITCH_STRIP_HEIGHT}
                     points={visibleCurvePoints}
+                    phrases={useTurnsMode ? [] : visiblePhrases}
                     xScale={xScale}
                     pitchToY={pitchToY}
                     ampScale={AMP_STROKE_SCALE}
                     gridMidi={gridMidi}
-                    keypoints={keypointsForCanvas}
-                    keypointWindowSec={KEYPOINT_WINDOW_SEC}
                   />
                   <svg
                     width={stripWidth}
@@ -397,25 +443,118 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                       pointerEvents: "none",
                     }}
                   >
-                    {visibleKeypoints.map((kp: VocalKeypoint, i: number) => {
-                      const nearest = curve.length > 0
-                        ? curve.reduce((a, b) =>
-                            Math.abs(b.t - kp.t) < Math.abs(a.t - kp.t) ? b : a
-                          )
-                        : null;
-                      const cy = nearest != null ? pitchToY(nearest.pitch) : PITCH_STRIP_HEIGHT / 2;
+                    {!useTurnsMode && visiblePhrases.map((ph, i) => {
+                      const x = xScale(ph.start);
+                      const w = Math.max(1, xScale(ph.end) - x);
                       return (
-                        <circle
-                          key={`kp-${i}`}
-                          cx={xScale(kp.t)}
-                          cy={cy}
-                          r={4}
-                          fill={kp.type === "pitch_change" ? "#e74c3c" : "#f39c12"}
-                          stroke="#fff"
-                          strokeWidth={1}
-                        />
+                        <g key={`phrase-${i}`}>
+                          <rect
+                            x={x}
+                            y={0}
+                            width={w}
+                            height={PITCH_STRIP_HEIGHT}
+                            fill="rgba(155, 89, 182, 0.04)"
+                            stroke="rgba(155, 89, 182, 0.1)"
+                            strokeWidth={1}
+                          />
+                          <line
+                            x1={x}
+                            x2={x}
+                            y1={0}
+                            y2={PITCH_STRIP_HEIGHT}
+                            stroke="rgba(155, 89, 182, 0.25)"
+                            strokeWidth={1}
+                          />
+                          <line
+                            x1={x + w}
+                            x2={x + w}
+                            y1={0}
+                            y2={PITCH_STRIP_HEIGHT}
+                            stroke="rgba(155, 89, 182, 0.25)"
+                            strokeWidth={1}
+                          />
+                        </g>
                       );
                     })}
+                    <g style={{ pointerEvents: "auto" }}>
+                      {useTurnsMode
+                        ? visibleTurns.map((turn, i: number) => {
+                        const nearest = curve.length > 0
+                          ? curve.reduce((a, b) =>
+                              Math.abs(b.t - turn.t) < Math.abs(a.t - turn.t) ? b : a
+                            )
+                          : null;
+                        const cy = nearest != null ? pitchToY(nearest.pitch) : PITCH_STRIP_HEIGHT / 2;
+                        const cx = xScale(turn.t);
+                        const up =
+                          turn.direction === "down_to_up" ||
+                          (turn.direction !== "up_to_down" && !turn.direction);
+                        const size = 6;
+                        const pts = up
+                          ? `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`
+                          : `${cx},${cy + size} ${cx - size},${cy - size} ${cx + size},${cy - size}`;
+                        return (
+                          <polygon
+                            key={`turn-${i}-${turn.t}`}
+                            points={pts}
+                            fill="#f39c12"
+                            stroke="#fff"
+                            strokeWidth={1}
+                            title="전환: 멜로디가 꺾이는 지점 (여기서 동작을 바꿔라)"
+                          />
+                        );
+                      })
+                      : visibleGesturesWithPhrase.map(({ g, ph }, i: number) => {
+                        const nearest = curve.length > 0
+                          ? curve.reduce((a, b) =>
+                              Math.abs(b.t - g.t) < Math.abs(a.t - g.t) ? b : a
+                            )
+                          : null;
+                        const cy = nearest != null ? pitchToY(nearest.pitch) : PITCH_STRIP_HEIGHT / 2;
+                        const x0 = xScale(ph.start) + 2;
+                        const x1 = xScale(ph.end) - 2;
+                        const cx = Math.max(x0, Math.min(x1, xScale(g.t)));
+                        const fill =
+                          g.type === "accent" ? "#e74c3c" : g.type === "onset" ? "#3498db" : "#f39c12";
+                        const title =
+                          g.type === "pitch_gesture"
+                            ? "전환 포인트: 멜로디 방향이 바뀌는 지점"
+                            : g.type === "onset"
+                              ? "발음/강세: onset이 강한 지점"
+                              : "강조 포인트: 표현이 강해지는 지점";
+                        if (g.type === "pitch_gesture") {
+                          const up =
+                            g.direction === "down_to_up" ||
+                            (g.direction !== "up_to_down" && (g.direction === "up" || !g.direction));
+                          const size = 6;
+                          const pts = up
+                            ? `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`
+                            : `${cx},${cy + size} ${cx - size},${cy - size} ${cx + size},${cy - size}`;
+                          return (
+                            <polygon
+                              key={`gesture-${i}-${g.t}`}
+                              points={pts}
+                              fill={fill}
+                              stroke="#fff"
+                              strokeWidth={1}
+                              title={title}
+                            />
+                          );
+                        }
+                        return (
+                          <circle
+                            key={`gesture-${i}-${g.t}`}
+                            cx={cx}
+                            cy={cy}
+                            r={g.type === "onset" ? 4 : 5}
+                            fill={fill}
+                            stroke="#fff"
+                            strokeWidth={1}
+                            title={title}
+                          />
+                        );
+                      })}
+                    </g>
                     {duration > 0 && (
                       <line
                         x1={xScale(currentTime)}
@@ -434,7 +573,9 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
           <details className="tab15-details">
             <summary>보컬 곡선 설명</summary>
             <p className="tab15-desc">
-              y축 = 피치(log scale), 선 굵기 = 에너지. 에너지가 일정 이하인 구간은 표시하지 않음. 키포인트로 판단된 구간(노란색)은 하이라이트로 표시.
+              {useTurnsMode
+                ? "y축 = 피치(log scale). pitch 선 하나. ▲ 전환: 멜로디가 위↔아래로 꺾이는 지점(20초당 2~4개). 마커에 마우스를 올리면 설명이 보입니다."
+                : "y축 = 피치(log scale). phrase 안에서만 보임. phrase당 onset peak 3~4개(파란 점). 마커에 마우스를 올리면 설명이 보입니다."}
             </p>
           </details>
         </>

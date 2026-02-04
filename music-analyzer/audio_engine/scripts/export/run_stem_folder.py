@@ -68,7 +68,7 @@ def run_stem_folder(
     if vocals_path.exists():
         try:
             vocal_dict = _vocal_run.run(vocals_path, sr=sr)
-            print(f"  보컬: curve {len(vocal_dict.get('vocal_curve', []))}점, keypoints {len(vocal_dict.get('vocal_keypoints', []))}개")
+            print(f"  보컬: curve {len(vocal_dict.get('vocal_curve', []))}점, keypoints {len(vocal_dict.get('vocal_keypoints', []))}개, phrases {len(vocal_dict.get('vocal_phrases', []))}개")
         except Exception as e:
             print(f"  보컬 파이프라인 스킵: {e}")
 

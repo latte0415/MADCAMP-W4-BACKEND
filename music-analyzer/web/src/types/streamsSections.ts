@@ -130,16 +130,47 @@ export interface VocalCurvePoint {
   centroid?: number;
 }
 
-/** 보컬 키포인트: 변화율 기반 제스처 지점 */
+/** 보컬 제스처 이벤트 (phrase_start / pitch_gesture / accent) */
 export interface VocalKeypoint {
   t: number;
-  type?: "pitch_change" | "energy_change" | "phrase";
+  type?: "phrase_start" | "pitch_gesture" | "accent" | "pitch_change" | "energy_change" | "phrase";
+  score?: number;
+  direction?: "up_to_down" | "down_to_up";
+  delta_pitch?: number;
+  strength?: number;
+}
+
+/** phrase 내부 제스처 */
+export interface VocalGesture {
+  t: number;
+  type: "phrase_start" | "pitch_gesture" | "accent" | "onset";
+  score?: number;
+  direction?: "up_to_down" | "down_to_up";
+  delta_pitch?: number;
+  strength?: number;
+}
+
+/** 보컬 phrase 구간 (시작/끝 + 제스처 목록) */
+export interface VocalPhrase {
+  start: number;
+  end: number;
+  gestures: VocalGesture[];
+}
+
+/** phrase 없이 전체 구간 Turn 포인트 (20초당 2~4개) */
+export interface VocalTurn {
+  t: number;
+  type: "turn";
+  direction?: "up_to_down" | "down_to_up";
+  delta_pitch?: number;
   score?: number;
 }
 
 export interface VocalData {
   vocal_curve: VocalCurvePoint[];
   vocal_keypoints: VocalKeypoint[];
+  vocal_phrases?: VocalPhrase[];
+  vocal_turns?: VocalTurn[];
   vocal_curve_meta?: { pitch_unit?: string; amp?: string; y_axis_hint?: string };
 }
 

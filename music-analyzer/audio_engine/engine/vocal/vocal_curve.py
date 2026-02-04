@@ -13,7 +13,7 @@ import numpy as np
 from scipy.signal import hilbert
 from scipy.interpolate import interp1d
 
-from audio_engine.engine.utils import hz_to_midi
+from audio_engine.engine.utils import hz_to_midi, log_norm_01
 
 # Python 3.10+ / NumPy 2.0+ 호환 (madmom)
 if not hasattr(collections, "MutableSequence"):
@@ -61,14 +61,7 @@ def _envelope_to_frames(y: np.ndarray, sr: int, hop: int) -> tuple[np.ndarray, n
 
 def _log_norm(amp: np.ndarray, k: float = LOG_AMP_K) -> np.ndarray:
     """log(1 + k*x) 후 0~1 정규화."""
-    out = np.log1p(k * np.maximum(amp, 0))
-    mx = np.nanmax(out)
-    mn = np.nanmin(out)
-    if mx > mn:
-        out = (out - mn) / (mx - mn)
-    else:
-        out = np.zeros_like(out)
-    return out
+    return log_norm_01(amp, k=k)
 
 
 def _pyin_times_pitch(y: np.ndarray, sr: int) -> tuple[np.ndarray, np.ndarray]:

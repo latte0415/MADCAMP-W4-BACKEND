@@ -11,6 +11,7 @@ import {
   fetchJson,
   parseMusicKeypoints,
   parseMotionKeypoints,
+  parseBassNotes,
   mapProjectDetail,
   presignUpload,
   uploadFileToS3,
@@ -49,7 +50,8 @@ export default function App() {
         ...parseMotionKeypoints(motionJson),
         ...parseMotionKeypoints(magicJson),
       ];
-      setSelectedProject(mapProjectDetail(detail, musicKeypoints, motionKeypoints));
+      const bassNotes = parseBassNotes(musicJson);
+      setSelectedProject(mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes));
       setView('detail');
     } finally {
       setLoadingProject(false);
@@ -170,6 +172,7 @@ export default function App() {
         <ProjectDetail
           project={selectedProject}
           onBack={handleBack}
+          onOpenUploadDialog={() => setUploadDialogOpen(true)}
           {...authProps}
         />
       ) : null}

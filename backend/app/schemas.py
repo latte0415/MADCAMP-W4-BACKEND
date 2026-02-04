@@ -84,3 +84,13 @@ class AnalysisResultUpsert(BaseModel):
     music_json_s3_key: Optional[str] = None
     magic_json_s3_key: Optional[str] = None
     overlay_video_s3_key: Optional[str] = None
+
+
+class MusicResultResponse(BaseModel):
+    """음악 분석 결과(streams_sections_cnn.json) 다운로드 URL."""
+    url: str
+
+
+class AnalysisAudioUpdate(BaseModel):
+    """분석 요청의 오디오(음악) 교체용."""
+    audio_id: int

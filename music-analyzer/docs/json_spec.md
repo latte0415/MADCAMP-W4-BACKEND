@@ -13,6 +13,9 @@
 - **05_context** → `onset_events_context.json`
 - **06_layered_export** → `onset_events_layered.json`
 
+## tempo/run → tempo_bars.json (선택)
+- **tempo/run** (`--write-json` 시) → `tempo_bars.json` (BPM·마디·비트 시각)
+
 ## legacy/ (실행 비활성)
 - **streams_sections** → `streams_sections.json`
 - **drum_band_energy** → (드럼 대역 에너지 JSON/시각화)
@@ -118,6 +121,19 @@
 
 ---
 
+## 9-2. tempo/run.py → tempo_bars.json (선택)
+
+**출력 경로**: `audio_engine/samples/tempo_bars.json` (또는 `--write-json <path>` 지정)
+
+**스키마 (최상위)**: `bpm`, `bars`, `beats`, `duration_sec`.
+
+- `bpm`: number — 추정 BPM
+- `bars`: `[{ "bar": 0, "start": number, "end": number }, ...]` — 마디 경계(초)
+- `beats`: number[] — 비트 시각(초)
+- `duration_sec`: number — 오디오 길이(초)
+
+---
+
 ## 10. legacy/streams_sections.py → streams_sections.json (LEGACY)
 
 **출력 경로**: `audio_engine/samples/streams_sections.json`. **실행**: 비활성(export/run_stem_folder 사용 권장).
@@ -136,7 +152,7 @@
 
 **출력 경로**: `audio_engine/samples/streams_sections_cnn.json` (또는 지정 경로)
 
-**입력**: stem 폴더명. **흐름**: `drum/run.py`(CNN band onset → keypoints_by_band, texture_blocks_by_band, 스트림 미사용) + `bass/run.py`(bass.wav 있으면 run_bass_pipeline) → `write_streams_sections_json(..., bass=bass_dict)`.
+**입력**: stem 폴더명. **흐름**: `drum/run.py`(CNN band onset → keypoints_by_band, texture_blocks_by_band, 스트림 미사용) + `bass/run.py`(bass.wav 있으면 run_bass_v4) + `vocal/run.py`(vocals.wav 있으면) + `other/run.py`(other.wav 있으면) → `write_streams_sections_json(..., bass=..., vocal=..., other=...)`.
 
 **스키마 (최상위)**:
 - `source`, `sr`, `duration_sec`
@@ -145,7 +161,9 @@
 - `keypoints`: [] (미사용)
 - `keypoints_by_band`: 드럼 대역별 키온셋 목록 (drum/run 출력)
 - `texture_blocks_by_band`: 드럼 대역별 질감 블록 (drum/run 출력)
-- `bass`: (선택) `{ "curve": [...], "keypoints": [...] }` — 베이스 피치 곡선·키포인트
+- `bass`: (선택) `{ "notes": [...], "render": {...} }` — 베이스 v4 노트·렌더 (bass_keypoints.md 참고)
+- `vocal`: (선택) `{ "vocal_curve": [...], "vocal_keypoints": [...], "vocal_curve_meta": {...}, "vocal_phrases"?: [...], "vocal_turns"?: [...], "vocal_onsets"?: [...] }` — 보컬 곡선·키포인트·프레이즈 (vocal_keypoints.md 참고)
+- `other`: (선택) `{ "other_curve": [...], "other_regions": [...], "other_meta": {...} }` — Other 밀도·패드 (other_keypoints.md 참고)
 
 ---
 

@@ -35,7 +35,7 @@
 
 ### 1.3 스트림·섹션 (레거시, 메인 파이프라인 미사용)
 
-- **메인 출력**: **export/run_stem_folder** — drum/run(CNN → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(조건부) → `streams_sections_cnn.json`.
+- **메인 출력**: **export/run_stem_folder** — drum/run(CNN → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run + vocal/run + other/run(각 stem 파일 있으면) → `streams_sections_cnn.json`.
 - **legacy/streams_sections**: **입력** `build_context_with_band_evidence()`의 `band_onset_times`, `band_onset_strengths`. **추출** `build_streams` → `segment_sections`. **키포인트** 섹션 경계 + 스트림 accent → `streams_sections.json`. 실행 비활성.
 
 ---

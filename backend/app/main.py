@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from .core.config import SESSION_SECRET, COOKIE_SECURE, WORKER_ENABLED
+from .core.config import SESSION_SECRET, COOKIE_SECURE, WORKER_ENABLED, WORKER_CONCURRENCY
 from .db.base import Base, engine
 from .db import models  # noqa: F401
 from .api.auth import router as auth_router
@@ -15,6 +15,7 @@ from .api.api import router as api_router
 from .workers.worker import AnalysisWorker
 
 app = FastAPI()
+_workers: list[AnalysisWorker] = []
 
 app.add_middleware(
     SessionMiddleware,
@@ -36,7 +37,11 @@ else:
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
     if WORKER_ENABLED:
-        AnalysisWorker().start()
+        count = max(WORKER_CONCURRENCY, 1)
+        for _ in range(count):
+            worker = AnalysisWorker()
+            worker.start()
+            _workers.append(worker)
 
 
 @app.get("/")

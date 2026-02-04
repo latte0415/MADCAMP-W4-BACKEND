@@ -424,7 +424,16 @@ function parseVocalData(raw: unknown): VocalData | undefined {
   } else {
     vocal_turns = undefined;
   }
-  return { vocal_curve, vocal_keypoints, vocal_curve_meta, vocal_phrases, vocal_turns };
+  let vocal_onsets: VocalData["vocal_onsets"];
+  if (Array.isArray(obj.vocal_onsets)) {
+    vocal_onsets = (obj.vocal_onsets as unknown[]).filter(
+      (item): item is { t: number; type?: string; strength?: number; score?: number } =>
+        item != null && typeof item === "object" && "t" in item && typeof (item as { t: unknown }).t === "number"
+    ) as VocalData["vocal_onsets"];
+  } else {
+    vocal_onsets = undefined;
+  }
+  return { vocal_curve, vocal_keypoints, vocal_curve_meta, vocal_phrases, vocal_turns, vocal_onsets };
 }
 
 function parseOtherData(raw: unknown): OtherData | undefined {

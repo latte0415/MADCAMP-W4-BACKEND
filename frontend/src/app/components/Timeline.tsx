@@ -9,6 +9,7 @@ interface TimelineProps {
   musicKeypoints: MusicKeypoint[];
   motionKeypoints: MotionKeypoint[];
   onSeek: (time: number) => void;
+  onHoverTime?: (time: number | null) => void;
 }
 
 export function Timeline({
@@ -17,6 +18,7 @@ export function Timeline({
   musicKeypoints,
   motionKeypoints,
   onSeek,
+  onHoverTime,
 }: TimelineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,13 +28,27 @@ export function Timeline({
   const pixelsPerSecond = 100 * zoom;
   const timelineWidth = duration * pixelsPerSecond;
 
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onHoverTime) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const time = rect.width > 0 ? (x / rect.width) * duration : 0;
+    onHoverTime(Math.max(0, Math.min(duration, time)));
+  };
+
+  const handleCanvasMouseLeave = () => {
+    onHoverTime?.(null);
+  };
+
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const time = (x / canvas.width) * duration;
+    const time = rect.width > 0 ? (x / rect.width) * duration : 0;
     onSeek(Math.max(0, Math.min(duration, time)));
   };
 
@@ -262,6 +278,8 @@ export function Timeline({
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseLeave={handleCanvasMouseLeave}
           className="cursor-pointer"
         />
       </div>

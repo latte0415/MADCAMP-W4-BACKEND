@@ -14,11 +14,12 @@
     → 레이어드 익스포트 (onset_layered/01_energy ~ 05_context) → onset_events_energy|clarity|temporal|spectral|context.json
     → 레이어 통합 (onset_layered/06_layered_export)  → onset_events_layered.json
     → (선택) 드럼 대역 (drum/cnn_band_onsets, drum/madmom_band)
-    → 통합 진입점 (export/run_stem_folder) → drum + bass → streams_sections_cnn.json
+    → BPM·마디 메인 파이프라인 (tempo/run) → BPM 유추, 마디 그리드 → tempo_bars.json (선택)
+    → 통합 진입점 (export/run_stem_folder) → drum + bass + vocal + other → streams_sections_cnn.json
     → Web (JsonUploader, parseEvents) → 파형 위 이벤트/레이어 표시
 ```
 
-**메인 드럼 파이프라인은 스트림/섹션을 사용하지 않음.** 드럼은 `drum/run.py`(CNN → keypoints_by_band, texture_blocks_by_band)로, 베이스는 `bass/run.py`로 분석 후 `export/run_stem_folder.py`에서 한 번에 JSON 출력. 레거시 스트림·섹션 스크립트는 `legacy/` 참고.
+**메인 파이프라인:** 드럼 `drum/run.py`(CNN → keypoints_by_band, texture_blocks_by_band), 베이스 `bass/run.py`, 보컬 `vocal/run.py`, Other `other/run.py`, **BPM·마디 `tempo/run.py`**(BPM 유추 → 마디 표시). `export/run_stem_folder.py`에서 drum + bass + vocal + other 한 번에 JSON 출력. **메인 드럼 파이프라인은 스트림/섹션을 사용하지 않음.** 레거시 스트림·섹션 스크립트는 `legacy/` 참고.
 
 **06 내부 파이프라인 (목표 순서)**  
 1. **대역 분류**: `compute_band_hz(y, sr)` — 곡 전체 스펙트럼 + 고정 Hz 혼합으로 저/중/고 경계 산출.  
@@ -40,8 +41,11 @@
 | drum/run | `audio_engine/scripts/drum/run.py` | CNN band onset → keypoints_by_band, texture_blocks_by_band (스트림 미사용) | (반환값만, JSON 직접 쓰지 않음) |
 | drum/cnn_band_onsets | `audio_engine/scripts/drum/cnn_band_onsets.py` | CNN band onset만 → drum_band_energy JSON (선택) | (선택) |
 | drum/madmom_band | `audio_engine/scripts/drum/madmom_band.py` | madmom 드럼 대역 (선택) | (선택) |
-| bass/run | `audio_engine/scripts/bass/run.py` | run_bass_pipeline → curve, keypoints | (반환값만) |
-| **export/run_stem_folder** | `audio_engine/scripts/export/run_stem_folder.py` | stem 폴더명 → drum.run + bass.run(조건부) → write_streams_sections_json | `streams_sections_cnn.json` |
+| bass/run | `audio_engine/scripts/bass/run.py` | run_bass_v4(madmom onset) → notes, render | (반환값만) |
+| vocal/run | `audio_engine/scripts/vocal/run.py` | vocal_curve + vocal_phrases 또는 vocal_turns + vocal_onsets → build_vocal_output | (반환값만) |
+| other/run | `audio_engine/scripts/other/run.py` | other_curve(멜로디 pitch) + other_regions(멜로디 활성 구간) → build_other_output | (반환값만) |
+| **tempo/run** | `audio_engine/scripts/tempo/run.py` | **메인 파이프라인**: BPM 유추 → 마디 그리드(bars) | `tempo_bars.json` (--write-json 시) |
+| **export/run_stem_folder** | `audio_engine/scripts/export/run_stem_folder.py` | stem 폴더명 → drum.run + bass.run + vocal.run + other.run(각 조건부) → write_streams_sections_json | `streams_sections_cnn.json` |
 | legacy/streams_sections | `audio_engine/scripts/legacy/streams_sections.py` | (LEGACY) build_streams → segment_sections | 실행 비활성 |
 | legacy/drum_band_energy | `audio_engine/scripts/legacy/drum_band_energy.py` | (LEGACY) stem 기반 low/mid/high 에너지 | 실행 비활성 |
 
@@ -61,6 +65,6 @@
 
 ## 4. 샘플 오디오·출력 위치
 
-- **입력 예시**: `audio_engine/samples/stems/htdemucs/sample_ropes_short/drums.wav`
-- **출력**: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`
+- **입력 예시**: `audio_engine/samples/stems/htdemucs/{트랙명}/drums.wav`, `bass.wav`, `vocals.wav`, `other.wav`
+- **출력**: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, `streams_sections_cnn.json`, `tempo_bars.json` (tempo/run --write-json 시)
 - **웹 복사**: `web/public/` (동일 파일명)

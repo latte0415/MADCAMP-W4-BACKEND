@@ -36,13 +36,19 @@
    python audio_engine/scripts/onset_layered/06_layered_export.py
    ```
 
-3. **드럼 + 베이스 통합 JSON (메인 진입점)**  
+3. **BPM·마디 (선택)**  
+   ```bash
+   python audio_engine/scripts/tempo/run.py <audio.wav> --write-json
+   ```
+   - 산출: `audio_engine/samples/tempo_bars.json` (또는 지정 경로).
+
+4. **드럼 + 베이스 + 보컬 + Other 통합 JSON (메인 진입점)**  
    ```bash
    python audio_engine/scripts/export/run_stem_folder.py
    ```
-   - stem 폴더명 지정(예: sample_animal_spirits_3_45). drum/run + bass/run(조건부) → `streams_sections_cnn.json`.
+   - stem 폴더명 지정(예: sample_animal_spirits_3_45). drum/run + bass/run + vocal/run + other/run(각 stem 파일 있으면) → `streams_sections_cnn.json`.
 
-- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, `streams_sections_cnn.json`.  
+- 산출: `audio_engine/samples/onset_events_*.json`, `onset_events_layered.json`, `streams_sections_cnn.json`, `tempo_bars.json`(tempo 실행 시).  
 - `web/public/` 이 있으면 동일 파일이 복사됨.
 
 ---
@@ -72,6 +78,7 @@ from audio_engine.engine.onset import (
     compute_energy, compute_clarity, compute_temporal, compute_spectral, compute_context_dependency,
     assign_roles_by_band, write_layered_json,
     build_streams, segment_sections, compute_cnn_band_onsets_with_odf, simplify_shaker_clap_streams, assign_layer_to_streams,
+    merge_close_onsets, merge_close_band_onsets, filter_by_strength, select_key_onsets_by_band, merge_texture_blocks_by_band,
 )
 print('OK: 공개 API import 성공')
 "
@@ -83,10 +90,10 @@ python audio_engine/scripts/onset_layered/06_layered_export.py
 # 종료 코드 0, onset_events_layered.json 생성 확인
 ```
 
-**엔드투엔드 (드럼+베이스 통합)**:
+**엔드투엔드 (드럼+베이스+보컬+Other 통합)**:
 ```bash
 python audio_engine/scripts/export/run_stem_folder.py
-# stem 폴더명 인자로 전달. streams_sections_cnn.json 생성 확인
+# stem 폴더명 인자로 전달. streams_sections_cnn.json 생성 확인 (vocal/other는 해당 wav 있으면 포함)
 ```
 
 ---

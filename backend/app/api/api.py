@@ -6,9 +6,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session, aliased
 
-from .deps import get_db
-from . import models
-from .schemas import (
+from ..core.deps import get_db
+from ..db import models
+from ..schemas import (
     MediaCreateResponse,
     MediaPresignRequest,
     MediaCommitRequest,
@@ -20,8 +20,8 @@ from .schemas import (
     LibraryItem,
     LibraryResponse,
 )
-from .s3 import upload_fileobj, presign_get_url, presign_put_url, S3_BUCKET
-from .jobs import set_job, get_job
+from ..services.s3 import upload_fileobj, presign_get_url, presign_put_url, S3_BUCKET
+from ..workers.jobs import set_job, get_job
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -269,3 +269,43 @@ def media_download(media_id: int, db: Session = Depends(get_db)):
     if not media:
         raise HTTPException(status_code=404, detail="not found")
     return {"url": presign_get_url(media.s3_key)}
+
+
+@router.get("/project/{request_id}")
+def project_detail(request_id: int, db: Session = Depends(get_db)):
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first()
+    audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first() if req.audio_id else None
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).first()
+
+    def url_for_key(key: str | None) -> str | None:
+        return presign_get_url(key) if key else None
+
+    return {
+        "id": req.id,
+        "title": req.title,
+        "mode": req.mode,
+        "status": req.status,
+        "created_at": req.created_at,
+        "finished_at": req.finished_at,
+        "video": {
+            "s3_key": video.s3_key if video else None,
+            "url": url_for_key(video.s3_key) if video else None,
+            "duration_sec": video.duration_sec if video else None,
+        },
+        "audio": {
+            "s3_key": audio.s3_key if audio else None,
+            "url": url_for_key(audio.s3_key) if audio else None,
+            "duration_sec": audio.duration_sec if audio else None,
+        } if audio else None,
+        "results": {
+            "motion_json": url_for_key(res.motion_json_s3_key) if res else None,
+            "music_json": url_for_key(res.music_json_s3_key) if res else None,
+            "magic_json": url_for_key(res.magic_json_s3_key) if res else None,
+            "overlay_video": url_for_key(res.overlay_video_s3_key) if res else None,
+            "edited_motion_markers": url_for_key(edit.motion_markers_s3_key) if edit else None,
+        },
+    }

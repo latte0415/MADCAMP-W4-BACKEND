@@ -5,9 +5,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth, OAuthError
 
-from . import models
-from .config import BASE_URL, FRONTEND_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-from .deps import get_db
+from ..db import models
+from ..core.config import BASE_URL, FRONTEND_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from ..core.deps import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

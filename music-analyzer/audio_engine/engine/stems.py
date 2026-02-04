@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Stem 분리 (Demucs/Spleeter wrapper)
 """

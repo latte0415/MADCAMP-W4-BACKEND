@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 스크립트 공용: 프로젝트 루트·스템 경로.
 """

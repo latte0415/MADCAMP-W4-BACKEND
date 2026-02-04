@@ -14,66 +14,51 @@
 ## 폴더 구조
 ```
 .
-├─ demo/                     # 로컬 데모 UI + API
-│  ├─ index.html
-│  ├─ styles.css
-│  ├─ app.js
-│  ├─ api.py                 # FastAPI (로컬) + GPU 워커 연동
-│  └─ server.py              # (구버전) Flask 서버
-├─ pipelines/                # Dance 파이프라인 코드
-│  ├─ motion_pipeline.py
-│  ├─ segment_motion.py
-│  ├─ visualize_motion.py
-│  ├─ visualize_parts.py
-│  ├─ export_segments.py
-│  └─ extract_keyframes.py
-├─ gpu/
-│  ├─ sam3/                   # GPU 서버 전용 (마술 이벤트)
-│  │  ├─ detect_object_events.py
-│  │  ├─ extract_object_keyframes.py
-│  │  ├─ merge_object_events.py
-│  │  ├─ split_and_run.sh
-│  │  └─ detect_object_events_hf.py  # (실험용)
-│  └─ pixie/                  # GPU 서버 전용 (3D 메시)
-│     ├─ PIXIE/               # PIXIE 원본
-│     ├─ overlay_obj_on_keyframe.py
-│     └─ overlay_obj_meshfill.py
-├─ scripts/                   # 실행 스크립트
-│  └─ run_pipeline.sh
-├─ tools/                     # 디버그/실험용 유틸
-│  ├─ overlay_video.py
-│  ├─ overlay_events.py
-│  ├─ overlay_obj_debug.py
-│  ├─ bg_change_detect.py
-│  └─ check_owlvit_input.py
-├─ inputs/                    # 입력 영상
-├─ outputs*/                  # 결과물 (자동 생성)
-└─ weights/                   # 모델 가중치
+├─ backend/                  # FastAPI 백엔드 (API + 워커)
+│  ├─ main.py
+│  ├─ api.py
+│  ├─ auth.py
+│  ├─ worker.py
+│  └─ requirements.txt
+├─ frontend/                 # 프론트엔드 (Vite)
+│  ├─ src/
+│  ├─ dist/                  # build 결과 (생성됨)
+│  └─ legacy_static/         # 이전 정적 데모 보관
+├─ motion/                   # Dance 파이프라인
+│  ├─ pipelines/
+│  ├─ gpu/                   # (PIXIE / SAM3 등 GPU 전용)
+│  └─ scripts/
+├─ music-analyzer/           # 음악 분석 모듈
+├─ inputs/                   # 입력 영상
+├─ outputs*/                 # 결과물 (자동 생성)
+├─ weights/                  # 모델 가중치
+├─ overlay_obj_on_keyframe.py
+└─ requirements.txt
 ```
 
 ## 각 코드 역할
-### Dance 파이프라인 (`pipelines/`)
+### Dance 파이프라인 (`motion/pipelines/`)
 - `motion_pipeline.py` : MediaPipe Pose 기반 포즈 추출 + hit/hold 이벤트 계산
 - `segment_motion.py` : 모션 시계열 기반 구간 분할
 - `visualize_motion.py` : 모션 특징 시각화
 - `extract_keyframes.py` : hit/hold 키프레임 추출
 - `export_segments.py`, `visualize_parts.py` : 보조 유틸
 
-### Magic 파이프라인 (`gpu/sam3/`)
+### Magic 파이프라인 (`motion/gpu/sam3/`)
 - `detect_object_events.py` : SAM3 기반 object vanish/appear 검출
 - `extract_object_keyframes.py` : vanish/appear 키프레임 추출
 - `merge_object_events.py` : 분할 실행 결과 병합
 - `split_and_run.sh` : 영상 분할 병렬 처리
 - `detect_object_events_hf.py` : HF 기반 실험용 (현재 비권장)
 
-### 3D 메시 (`gpu/pixie/`)
+### 3D 메시 (`motion/gpu/pixie/`)
 - `PIXIE/` : PIXIE 원본 코드
 - `overlay_obj_on_keyframe.py` : wireframe 오버레이
 - `overlay_obj_meshfill.py` : meshfill 오버레이
 
-### 데모 (`demo/`)
-- `api.py` : 로컬 FastAPI 서버. 마술 분석은 SSH로 GPU 서버에 위임.
-- `index.html / app.js / styles.css` : 데모 UI
+### 프론트엔드 (`frontend/`)
+- `src/` : Vite 앱 소스
+- `dist/` : 빌드 결과 (백엔드에서 서빙)
 
 ## 마커 추출 방법론 (자세히)
 ### 1) 춤 모드 (Hit/Hold)
@@ -108,20 +93,26 @@
    - appear/vanish 프레임을 별도 키프레임으로 저장합니다.
 
 ## 실행 방법 (자세히)
-### 1) 로컬 데모 (FastAPI)
-1. 로컬 의존성 설치
+### 1) 백엔드 + 프론트엔드 실행 (권장)
+1. 프론트엔드 설치/빌드
    ```bash
-   pip install -r requirements-local.txt
+   cd frontend
+   npm install
+   npm run build
    ```
-2. 환경 변수 설정
+2. 백엔드 의존성 설치
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+3. 환경 변수 설정 (예: `.env` 또는 쉘)
    ```bash
    export DANCE_SSH_PASS='(서버 비밀번호)'
    ```
-3. 서버 실행
+4. 서버 실행
    ```bash
-   python demo/api.py
+   uvicorn backend.main:app --host 0.0.0.0 --port 8000
    ```
-4. 브라우저 접속
+5. 브라우저 접속
    - `http://127.0.0.1:8000`
 
 ### 2) GPU 서버 의존성 설치

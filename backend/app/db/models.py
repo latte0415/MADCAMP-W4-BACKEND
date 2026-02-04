@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql import func
 
-from .db import Base
+from .base import Base
 
 
 class User(Base):

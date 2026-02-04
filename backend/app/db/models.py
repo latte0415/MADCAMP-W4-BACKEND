@@ -83,6 +83,19 @@ class AnalysisEdit(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
+class AnalysisJob(Base):
+    __tablename__ = "analysis_jobs"
+
+    id = Column(BigInteger, primary_key=True)
+    request_id = Column(BigInteger, ForeignKey("analysis_requests.id"), nullable=False, unique=True)
+    status = Column(String, nullable=False)
+    error_message = Column(Text)
+    message = Column(Text)
+    progress = Column(Numeric)
+    log = Column(Text)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
 class PixieOutput(Base):
     __tablename__ = "pixie_outputs"
 

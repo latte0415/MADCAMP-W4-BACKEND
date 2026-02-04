@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import io
-import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session, aliased
 
-from ..core.deps import get_db
+from ..core.deps import get_db, get_current_user
+from ..core.config import MONITORING_PUBLIC
 from ..db import models
 from ..schemas import (
     MediaCreateResponse,
@@ -17,52 +16,27 @@ from ..schemas import (
     AnalysisStatusResponse,
     AnalysisResultUpsert,
     AnalysisStatusUpdate,
+    AnalysisAudioUpdate,
+    AnalysisMusicOnlyRequest,
     LibraryItem,
     LibraryResponse,
+    MusicResultResponse,
+    MonitoringResponse,
 )
-from ..services.s3 import upload_fileobj, presign_get_url, presign_put_url, S3_BUCKET
-from ..workers.jobs import set_job, get_job
+from ..services import analysis as analysis_service
+from ..services import media as media_service
+from ..services import presenters
 
 router = APIRouter(prefix="/api", tags=["api"])
 
 
-def require_user(request: Request, db: Session) -> models.User:
-    user_id = request.session.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return user
-
-
 @router.post("/media", response_model=MediaCreateResponse)
 async def upload_media(
-    request: Request,
     file: UploadFile = File(...),
+    user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user = require_user(request, db)
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="empty filename")
-
-    ext = file.filename.split(".")[-1] if "." in file.filename else "bin"
-    media_type = "audio" if (file.content_type or "").startswith("audio/") else "video"
-    key = f"uploads/{user.id}/{uuid.uuid4().hex}.{ext}"
-
-    content = await file.read()
-    upload_fileobj(io.BytesIO(content), key, content_type=file.content_type)
-
-    media = models.MediaFile(
-        user_id=user.id,
-        type=media_type,
-        s3_bucket=S3_BUCKET,
-        s3_key=key,
-        content_type=file.content_type,
-    )
-    db.add(media)
-    db.commit()
-    db.refresh(media)
+    media = media_service.upload_media(db, user.id, file)
 
     return MediaCreateResponse(
         id=media.id,
@@ -74,28 +48,21 @@ async def upload_media(
 
 
 @router.post("/media/presign")
-def presign_media(request: Request, payload: MediaPresignRequest, db: Session = Depends(get_db)):
-    user = require_user(request, db)
-    ext = payload.filename.split(".")[-1] if "." in payload.filename else "bin"
-    key = f"uploads/{user.id}/{uuid.uuid4().hex}.{ext}"
-    url = presign_put_url(key, content_type=payload.content_type)
-    return {"upload_url": url, "s3_key": key}
+def presign_media(
+    payload: MediaPresignRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return media_service.presign_media(db, user.id, payload)
 
 
 @router.post("/media/commit", response_model=MediaCreateResponse)
-def commit_media(request: Request, payload: MediaCommitRequest, db: Session = Depends(get_db)):
-    user = require_user(request, db)
-    media = models.MediaFile(
-        user_id=user.id,
-        type=payload.type,
-        s3_bucket=S3_BUCKET,
-        s3_key=payload.s3_key,
-        content_type=payload.content_type,
-        duration_sec=payload.duration_sec,
-    )
-    db.add(media)
-    db.commit()
-    db.refresh(media)
+def commit_media(
+    payload: MediaCommitRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    media = media_service.commit_media(db, user.id, payload)
     return MediaCreateResponse(
         id=media.id,
         s3_key=media.s3_key,
@@ -107,25 +74,11 @@ def commit_media(request: Request, payload: MediaCommitRequest, db: Session = De
 
 @router.post("/analysis", response_model=AnalysisRequestResponse)
 def create_analysis(
-    request: Request,
     payload: AnalysisRequestCreate,
+    user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user = require_user(request, db)
-    req = models.AnalysisRequest(
-        user_id=user.id,
-        video_id=payload.video_id,
-        audio_id=payload.audio_id,
-        mode=payload.mode,
-        params_json=payload.params_json,
-        status="queued",
-        title=payload.title,
-        notes=payload.notes,
-    )
-    db.add(req)
-    db.commit()
-    db.refresh(req)
-    set_job(req.id, "queued")
+    req = analysis_service.create_analysis_request(db, user.id, payload)
     return AnalysisRequestResponse(
         id=req.id,
         mode=req.mode,
@@ -137,18 +90,8 @@ def create_analysis(
 
 @router.get("/analysis/{request_id}/status", response_model=AnalysisStatusResponse)
 def analysis_status(request_id: int, db: Session = Depends(get_db)):
-    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="not found")
-    job = get_job(request_id) or {}
-    return AnalysisStatusResponse(
-        id=req.id,
-        status=job.get("status", req.status),
-        error_message=job.get("error") or req.error_message,
-        message=job.get("message"),
-        progress=job.get("progress"),
-        log=job.get("log"),
-    )
+    data = analysis_service.get_analysis_status(db, request_id)
+    return AnalysisStatusResponse(**data)
 
 
 @router.post("/analysis/{request_id}/status")
@@ -157,16 +100,11 @@ def update_status(
     payload: AnalysisStatusUpdate,
     db: Session = Depends(get_db),
 ):
-    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="not found")
-    req.status = payload.status
-    req.error_message = payload.error_message
-    db.commit()
-    set_job(
+    analysis_service.update_analysis_status(
+        db,
         request_id,
         payload.status,
-        payload.error_message,
+        error_message=payload.error_message,
         message=payload.message,
         progress=payload.progress,
         log=payload.log,
@@ -180,37 +118,21 @@ def upsert_result(
     payload: AnalysisResultUpsert,
     db: Session = Depends(get_db),
 ):
-    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="not found")
-
-    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == request_id).first()
-    if not res:
-        res = models.AnalysisResult(request_id=request_id)
-        db.add(res)
-
-    res.motion_json_s3_key = payload.motion_json_s3_key
-    res.music_json_s3_key = payload.music_json_s3_key
-    res.magic_json_s3_key = payload.magic_json_s3_key
-    res.overlay_video_s3_key = payload.overlay_video_s3_key
-    req.status = "done"
-    db.commit()
+    analysis_service.upsert_analysis_result(db, request_id, payload)
     return {"ok": True}
 
 
 @router.get("/library", response_model=LibraryResponse)
 def library(
-    request: Request,
     query: Optional[str] = None,
     status: Optional[str] = None,
     mode: Optional[str] = None,
     archived: Optional[bool] = None,
     limit: int = 50,
     offset: int = 0,
+    user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user = require_user(request, db)
-
     video = aliased(models.MediaFile)
     audio = aliased(models.MediaFile)
 
@@ -244,31 +166,105 @@ def library(
 
     items = []
     for req, video_row, res, edit, audio_row in q.all():
-        items.append(LibraryItem(
-            id=req.id,
-            title=req.title,
-            mode=req.mode,
-            status=req.status,
-            created_at=req.created_at,
-            finished_at=req.finished_at,
-            video_s3_key=video_row.s3_key,
-            video_duration_sec=video_row.duration_sec,
-            audio_s3_key=audio_row.s3_key if audio_row else None,
-            motion_json_s3_key=res.motion_json_s3_key if res else None,
-            music_json_s3_key=res.music_json_s3_key if res else None,
-            magic_json_s3_key=res.magic_json_s3_key if res else None,
-            edited_motion_markers_s3_key=edit.motion_markers_s3_key if edit else None,
-        ))
+        items.append(presenters.build_library_item(req, video_row, res, edit, audio_row))
 
     return items
 
 
+@router.get("/monitoring", response_model=MonitoringResponse)
+def monitoring(
+    limit: int = 25,
+    db: Session = Depends(get_db),
+):
+    if not MONITORING_PUBLIC:
+        raise HTTPException(status_code=401, detail="monitoring disabled")
+
+    video = aliased(models.MediaFile)
+    audio = aliased(models.MediaFile)
+
+    def _fetch(status_value: str):
+        q = (
+            db.query(
+                models.AnalysisRequest,
+                video,
+                models.AnalysisResult,
+                models.AnalysisEdit,
+                audio,
+            )
+            .join(video, video.id == models.AnalysisRequest.video_id)
+            .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
+            .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
+            .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
+            .filter(models.AnalysisRequest.status == status_value)
+            .filter(models.AnalysisRequest.is_deleted == False)
+            .order_by(models.AnalysisRequest.created_at.desc())
+            .limit(limit)
+        )
+        return [presenters.build_library_item(req, video_row, res, edit, audio_row) for req, video_row, res, edit, audio_row in q.all()]
+
+    return MonitoringResponse(
+        queued=_fetch("queued"),
+        queued_music=_fetch("queued_music"),
+        running=_fetch("running"),
+    )
+
+
 @router.get("/media/{media_id}/download")
 def media_download(media_id: int, db: Session = Depends(get_db)):
-    media = db.query(models.MediaFile).filter(models.MediaFile.id == media_id).first()
-    if not media:
+    return {"url": media_service.media_download(db, media_id)}
+
+
+@router.get("/analysis/{request_id}/music", response_model=MusicResultResponse)
+def get_analysis_music(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청의 음악 분석 결과(streams_sections_cnn.json) 다운로드 URL을 반환합니다."""
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
         raise HTTPException(status_code=404, detail="not found")
-    return {"url": presign_get_url(media.s3_key)}
+    if req.user_id != user.id:
+        raise HTTPException(status_code=404, detail="not found")
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == request_id).first()
+    if not res or not res.music_json_s3_key:
+        raise HTTPException(status_code=404, detail="music result not ready")
+    return MusicResultResponse(url=presign_get_url(res.music_json_s3_key))
+
+
+@router.patch("/analysis/{request_id}/audio")
+def update_analysis_audio(
+    request_id: int,
+    payload: AnalysisAudioUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에 연결된 오디오(음악)를 교체합니다."""
+    audio_id = analysis_service.update_analysis_audio(db, user.id, request_id, payload)
+    return {"ok": True, "audio_id": audio_id}
+
+
+@router.post("/analysis/{request_id}/rerun-music")
+def rerun_music_analysis(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """해당 분석 요청의 오디오로 음악 분석만 다시 실행합니다. 오디오가 연결되어 있어야 합니다."""
+    analysis_service.queue_music_rerun(db, user.id, request_id)
+    return {"ok": True, "queued": True}
+
+
+@router.post("/analysis/{request_id}/music-only")
+def run_music_only(
+    request_id: int,
+    payload: AnalysisMusicOnlyRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """오디오만 사용해 음악 분석을 실행합니다. audio_id를 주면 교체 후 실행합니다."""
+    analysis_service.queue_music_only(db, user.id, request_id, audio_id=payload.audio_id)
+    return {"ok": True, "queued": True}
 
 
 @router.get("/project/{request_id}")
@@ -280,32 +276,4 @@ def project_detail(request_id: int, db: Session = Depends(get_db)):
     audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first() if req.audio_id else None
     res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
     edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).first()
-
-    def url_for_key(key: str | None) -> str | None:
-        return presign_get_url(key) if key else None
-
-    return {
-        "id": req.id,
-        "title": req.title,
-        "mode": req.mode,
-        "status": req.status,
-        "created_at": req.created_at,
-        "finished_at": req.finished_at,
-        "video": {
-            "s3_key": video.s3_key if video else None,
-            "url": url_for_key(video.s3_key) if video else None,
-            "duration_sec": video.duration_sec if video else None,
-        },
-        "audio": {
-            "s3_key": audio.s3_key if audio else None,
-            "url": url_for_key(audio.s3_key) if audio else None,
-            "duration_sec": audio.duration_sec if audio else None,
-        } if audio else None,
-        "results": {
-            "motion_json": url_for_key(res.motion_json_s3_key) if res else None,
-            "music_json": url_for_key(res.music_json_s3_key) if res else None,
-            "magic_json": url_for_key(res.magic_json_s3_key) if res else None,
-            "overlay_video": url_for_key(res.overlay_video_s3_key) if res else None,
-            "edited_motion_markers": url_for_key(edit.motion_markers_s3_key) if edit else None,
-        },
-    }
+    return presenters.build_project_detail(req, video, audio, res, edit)

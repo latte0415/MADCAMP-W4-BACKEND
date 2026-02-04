@@ -15,6 +15,7 @@ export function AudioUploader({ onAudioLoaded }: AudioUploaderProps) {
     if (!file) return;
     const url = URL.createObjectURL(file);
     onAudioLoaded(url);
+    e.target.value = "";
   };
 
   const loadSample = () => {

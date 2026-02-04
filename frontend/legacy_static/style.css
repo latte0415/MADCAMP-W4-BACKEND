@@ -118,6 +118,12 @@ a {
   margin-top: 16px;
 }
 
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 label {
   display: grid;
   gap: 6px;

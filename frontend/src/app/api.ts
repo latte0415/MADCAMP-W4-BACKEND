@@ -1,4 +1,4 @@
-import { MotionKeypoint, MusicKeypoint, Project, ProjectMode, ProjectStatus } from './types';
+import { BassNote, MotionKeypoint, MusicKeypoint, Project, ProjectMode, ProjectStatus } from './types';
 
 type LibraryItem = {
   id: number;
@@ -15,6 +15,7 @@ type ProjectDetailResponse = {
   title: string | null;
   mode: ProjectMode;
   status: string;
+  error_message?: string | null;
   created_at: string;
   finished_at?: string | null;
   video?: { url?: string | null; duration_sec?: number | null };
@@ -75,6 +76,20 @@ export async function commitMedia(payload: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAnalysisAudio(requestId: number, audioId: number) {
+  return apiFetch(`/api/analysis/${requestId}/audio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ audio_id: audioId }),
+  });
+}
+
+export async function rerunMusicAnalysis(requestId: number) {
+  return apiFetch(`/api/analysis/${requestId}/rerun-music`, {
+    method: 'POST',
   });
 }
 
@@ -160,6 +175,22 @@ export function parseMusicKeypoints(data: any): MusicKeypoint[] {
   return out;
 }
 
+export function parseBassNotes(data: any): BassNote[] {
+  if (!data?.bass?.notes || !Array.isArray(data.bass.notes)) return [];
+  const out: BassNote[] = [];
+  for (const item of data.bass.notes) {
+    const start = Number(item.start ?? item.time ?? 0);
+    const end = Number(item.end ?? start);
+    const duration = Number(item.duration ?? Math.max(0, end - start));
+    out.push({
+      time: start,
+      duration,
+      ...item,
+    });
+  }
+  return out;
+}
+
 export function parseMotionKeypoints(data: any): MotionKeypoint[] {
   if (!data) return [];
   const out: MotionKeypoint[] = [];
@@ -205,6 +236,7 @@ export function mapLibraryItem(item: LibraryItem): Project {
     completedAt: item.finished_at ? new Date(item.finished_at) : undefined,
     musicKeypoints: [],
     motionKeypoints: [],
+    bassNotes: [],
     status,
   };
 }
@@ -212,7 +244,8 @@ export function mapLibraryItem(item: LibraryItem): Project {
 export function mapProjectDetail(
   detail: ProjectDetailResponse,
   musicKeypoints: MusicKeypoint[],
-  motionKeypoints: MotionKeypoint[]
+  motionKeypoints: MotionKeypoint[],
+  bassNotes: BassNote[] = []
 ): Project {
   const status = (detail.status as ProjectStatus) || 'draft';
   const maxMusic = musicKeypoints.reduce((m, k) => Math.max(m, k.time), 0);
@@ -220,7 +253,14 @@ export function mapProjectDetail(
     if (k.type === 'hold' && k.duration) return Math.max(m, k.time + k.duration);
     return Math.max(m, k.time);
   }, 0);
-  const duration = Math.max(Number(detail.video?.duration_sec ?? 0), maxMusic, maxMotion, 1);
+  const maxBass = bassNotes.reduce((m, n) => Math.max(m, n.time + (n.duration ?? 0)), 0);
+  const duration = Math.max(
+    Number(detail.video?.duration_sec ?? 0),
+    maxMusic,
+    maxMotion,
+    maxBass,
+    1
+  );
   return {
     id: String(detail.id),
     title: detail.title ?? `프로젝트 #${detail.id}`,
@@ -232,6 +272,8 @@ export function mapProjectDetail(
     audioUrl: detail.audio?.url ?? undefined,
     musicKeypoints,
     motionKeypoints,
+    bassNotes,
     status,
+    errorMessage: detail.error_message ?? undefined,
   };
 }

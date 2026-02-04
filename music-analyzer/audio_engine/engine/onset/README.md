@@ -21,6 +21,6 @@
 | L3 | features/*.py | energy, clarity, temporal, spectral, context |
 | L4 | scoring.py | 정규화·역할 할당 |
 | L5 | export.py | JSON 출력 |
-| **드럼(최종)** | **drum/** | band_onset_merge, drum_band_energy, key_onset_selector, texture_block_merge, cnn_band_pipeline, cnn_band_onsets |
-| 레거시 | legacy/ | streams, sections, stream_layer, stream_simplify (스트림/섹션·실험용, 메인 파이프라인 미사용) |
+| **드럼(최종)** | **drum/** | band_onset_merge.py, drum_band_energy.py, key_onset_selector.py, texture_block_merge.py, cnn_band_pipeline.py, cnn_band_onsets.py — CNN+ODF band onset → keypoints_by_band, texture_blocks_by_band |
+| 레거시 | legacy/ | streams.py, sections.py, stream_layer.py, stream_simplify.py (스트림/섹션·실험용, 메인 파이프라인 미사용) |
 | 기타 | madmom_drum_band.py | madmom 기반 드럼 대역 키포인트 (선택 사용) |

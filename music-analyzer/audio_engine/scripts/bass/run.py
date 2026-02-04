@@ -1,6 +1,7 @@
 from __future__ import annotations
 """
-베이스 전용: run_bass_pipeline 호출 → curve, keypoints dict.
+베이스 전용: run_bass_v4(madmom onset) 메인. write_streams_sections_json(..., bass=...)에 전달.
+v2, v3는 레거시(engine 내부 참조용).
 """
 import sys
 import os
@@ -15,17 +16,17 @@ project_root = find_project_root()
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from audio_engine.engine.bass import run_bass_pipeline
+from audio_engine.engine.bass.bass_v4 import run_bass_v4
 
 
 def run(bass_wav_path: str | Path, sr: int | None = None):
     """
-    bass.wav 한 파일에 대해 베이스 파이프라인 실행.
+    bass.wav 한 파일에 대해 베이스 v4(madmom onset) 메인 파이프라인 실행.
 
     Returns:
-        {"curve": [...], "keypoints": [...]} — write_streams_sections_json(..., bass=...)에 전달.
+        {"notes": [...], "render": {...}}
     """
-    return run_bass_pipeline(bass_wav_path, sr=sr)
+    return run_bass_v4(bass_wav_path, sr=sr)
 
 
 if __name__ == "__main__":
@@ -36,4 +37,4 @@ if __name__ == "__main__":
     path = Path(_sys.argv[1])
     sr = int(_sys.argv[2]) if len(_sys.argv) > 2 else None
     out = run(path, sr=sr)
-    print(f"curve: {len(out.get('curve', []))}개, keypoints: {len(out.get('keypoints', []))}개")
+    print(f"notes: {len(out.get('notes', []))}개")

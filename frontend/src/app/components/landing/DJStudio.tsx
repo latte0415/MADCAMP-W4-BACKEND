@@ -54,6 +54,10 @@ export function DJStudio({
   const handleEnterProject = () => {
     if (loadedProject) {
       onOpenProject(loadedProject);
+      return;
+    }
+    if (currentProject) {
+      onOpenProject(currentProject);
     }
   };
 
@@ -73,8 +77,12 @@ export function DJStudio({
         e.preventDefault();
         if (loadedProject) {
           handleEnterProject();
-        } else if (currentProject?.status === 'done') {
-          handleLoadToTurntable();
+        } else if (currentProject) {
+          if (currentProject.status === 'done') {
+            handleLoadToTurntable();
+          } else {
+            onOpenProject(currentProject);
+          }
         }
       }
     };
@@ -152,8 +160,20 @@ export function DJStudio({
                           opacity: isSelected ? 1 : Math.max(0.2, 0.5 - Math.abs(offset) * 0.08),
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        onClick={() => handleSelectAlbum(index)}
-                        onDoubleClick={() => isSelected && handleLoadToTurntable()}
+                        onClick={() => {
+                          handleSelectAlbum(index);
+                          if (isSelected) {
+                            onOpenProject(project);
+                          }
+                        }}
+                        onDoubleClick={() => {
+                          if (!isSelected) return;
+                          if (project.status === 'done') {
+                            handleLoadToTurntable();
+                          } else {
+                            onOpenProject(project);
+                          }
+                        }}
                       >
                         <div
                           className="absolute inset-0 flex items-center"
@@ -215,6 +235,7 @@ export function DJStudio({
                     boxShadow: '8px 10px 40px rgba(0,0,0,0.7), 0 0 1px rgba(255,255,255,0.15)',
                     border: '1px solid rgba(255,255,255,0.08)',
                   }}
+                  onClick={() => onOpenProject(currentProject)}
                 >
                   {currentProject.thumbnailUrl && (
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 40%, transparent 55%, rgba(0,0,0,0.65) 100%)' }} />
@@ -231,6 +252,19 @@ export function DJStudio({
                 </div>
 
                 {/* Play button */}
+                <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
+                  <button
+                    onClick={() => onOpenProject(currentProject)}
+                    className="text-xs px-4 py-2 transition-colors"
+                    style={{
+                      border: '1px solid #333',
+                      color: '#ddd',
+                      background: 'transparent',
+                    }}
+                  >
+                    open
+                  </button>
+                  {currentProject.status === 'done' && !isPlaying && (
                 <div className="absolute -bottom-4 left-0" style={{ zIndex: 2 }}>
                   {currentProject.status === 'done' && !isPlaying && !isTransitioning && (
                     <button

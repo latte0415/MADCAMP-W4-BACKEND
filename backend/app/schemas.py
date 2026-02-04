@@ -84,3 +84,24 @@ class AnalysisResultUpsert(BaseModel):
     music_json_s3_key: Optional[str] = None
     magic_json_s3_key: Optional[str] = None
     overlay_video_s3_key: Optional[str] = None
+
+
+class MusicResultResponse(BaseModel):
+    """음악 분석 결과(streams_sections_cnn.json) 다운로드 URL."""
+    url: str
+
+
+class AnalysisAudioUpdate(BaseModel):
+    """분석 요청의 오디오(음악) 교체용."""
+    audio_id: int
+
+
+class AnalysisMusicOnlyRequest(BaseModel):
+    """음악 분석만 실행할 때 사용하는 요청."""
+    audio_id: Optional[int] = None
+
+
+class MonitoringResponse(BaseModel):
+    queued: List[LibraryItem]
+    queued_music: List[LibraryItem]
+    running: List[LibraryItem]

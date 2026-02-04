@@ -1,0 +1,1793 @@
+{
+  "source": "bass_v4",
+  "sr": 44100,
+  "duration_sec": 42.0,
+  "streams": [],
+  "sections": [],
+  "keypoints": [],
+  "bass": {
+    "notes": [
+      {
+        "start": 5.25,
+        "end": 5.51,
+        "duration": 0.26,
+        "pitch_center": 49.05,
+        "pitch_curve": [
+          [
+            5.25,
+            49.05
+          ],
+          [
+            5.51,
+            49.05
+          ]
+        ],
+        "energy_curve": [
+          0.3927,
+          0.3927
+        ],
+        "energy_peak": 0.4933,
+        "energy_mean": 0.3927,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 5.51,
+        "end": 5.74,
+        "duration": 0.23,
+        "pitch_center": 44.9502,
+        "pitch_curve": [
+          [
+            5.51,
+            44.9502
+          ],
+          [
+            5.74,
+            44.9502
+          ]
+        ],
+        "energy_curve": [
+          0.3677,
+          0.3677
+        ],
+        "energy_peak": 0.4811,
+        "energy_mean": 0.3677,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 5.74,
+        "end": 5.82,
+        "duration": 0.08,
+        "pitch_center": 36.8006,
+        "pitch_curve": [
+          [
+            5.74,
+            36.8006
+          ],
+          [
+            5.82,
+            36.8006
+          ]
+        ],
+        "energy_curve": [
+          0.2514,
+          0.2514
+        ],
+        "energy_peak": 0.4794,
+        "energy_mean": 0.2514,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 5.82,
+        "end": 6.42,
+        "duration": 0.6,
+        "pitch_center": 36.95,
+        "pitch_curve": [
+          [
+            5.82,
+            36.95
+          ],
+          [
+            6.42,
+            36.95
+          ]
+        ],
+        "energy_curve": [
+          0.1872,
+          0.1872
+        ],
+        "energy_peak": 0.4816,
+        "energy_mean": 0.1872,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 8.25,
+        "end": 8.83,
+        "duration": 0.58,
+        "pitch_center": 36.05,
+        "pitch_curve": [
+          [
+            8.25,
+            36.05
+          ],
+          [
+            8.83,
+            36.05
+          ]
+        ],
+        "energy_curve": [
+          0.1935,
+          0.1935
+        ],
+        "energy_peak": 0.5742,
+        "energy_mean": 0.1935,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 8.83,
+        "end": 8.9,
+        "duration": 0.07,
+        "pitch_center": 39.4868,
+        "pitch_curve": [
+          [
+            8.83,
+            39.4868
+          ],
+          [
+            8.9,
+            39.4868
+          ]
+        ],
+        "energy_curve": [
+          0.1743,
+          0.1743
+        ],
+        "energy_peak": 0.3941,
+        "energy_mean": 0.1743,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 8.9,
+        "end": 9.5,
+        "duration": 0.6,
+        "pitch_center": 41.2,
+        "pitch_curve": [
+          [
+            8.9,
+            41.2
+          ],
+          [
+            9.5,
+            41.2
+          ]
+        ],
+        "energy_curve": [
+          0.2113,
+          0.2113
+        ],
+        "energy_peak": 0.6322,
+        "energy_mean": 0.2113,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 10.63,
+        "end": 11.23,
+        "duration": 0.6,
+        "pitch_center": 34.55,
+        "pitch_curve": [
+          [
+            10.63,
+            34.55
+          ],
+          [
+            11.23,
+            34.55
+          ]
+        ],
+        "energy_curve": [
+          0.1378,
+          0.1378
+        ],
+        "energy_peak": 0.491,
+        "energy_mean": 0.1378,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 11.24,
+        "end": 11.68,
+        "duration": 0.44,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            11.24,
+            39.05
+          ],
+          [
+            11.68,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.2756,
+          0.2756
+        ],
+        "energy_peak": 0.5858,
+        "energy_mean": 0.2756,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 13.0,
+        "end": 13.5,
+        "duration": 0.5,
+        "pitch_center": 39.15,
+        "pitch_curve": [
+          [
+            13.0,
+            39.15
+          ],
+          [
+            13.5,
+            39.15
+          ]
+        ],
+        "energy_curve": [
+          0.3004,
+          0.3004
+        ],
+        "energy_peak": 0.6313,
+        "energy_mean": 0.3004,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 13.5,
+        "end": 13.78,
+        "duration": 0.28,
+        "pitch_center": 41.15,
+        "pitch_curve": [
+          [
+            13.5,
+            41.15
+          ],
+          [
+            13.78,
+            41.15
+          ]
+        ],
+        "energy_curve": [
+          0.1831,
+          0.1831
+        ],
+        "energy_peak": 0.621,
+        "energy_mean": 0.1831,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 13.78,
+        "end": 14.08,
+        "duration": 0.3,
+        "pitch_center": 41.55,
+        "pitch_curve": [
+          [
+            13.78,
+            41.55
+          ],
+          [
+            14.08,
+            41.55
+          ]
+        ],
+        "energy_curve": [
+          0.1499,
+          0.1499
+        ],
+        "energy_peak": 0.5258,
+        "energy_mean": 0.1499,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 14.08,
+        "end": 14.68,
+        "duration": 0.6,
+        "pitch_center": 44.05,
+        "pitch_curve": [
+          [
+            14.08,
+            44.05
+          ],
+          [
+            14.68,
+            44.05
+          ]
+        ],
+        "energy_curve": [
+          0.2973,
+          0.2973
+        ],
+        "energy_peak": 0.4917,
+        "energy_mean": 0.2973,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 14.68,
+        "end": 14.82,
+        "duration": 0.14,
+        "pitch_center": 38.85,
+        "pitch_curve": [
+          [
+            14.68,
+            38.85
+          ],
+          [
+            14.82,
+            38.85
+          ]
+        ],
+        "energy_curve": [
+          0.329,
+          0.329
+        ],
+        "energy_peak": 0.518,
+        "energy_mean": 0.329,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 14.82,
+        "end": 15.38,
+        "duration": 0.56,
+        "pitch_center": 32.05,
+        "pitch_curve": [
+          [
+            14.82,
+            32.05
+          ],
+          [
+            15.38,
+            32.05
+          ]
+        ],
+        "energy_curve": [
+          0.2239,
+          0.2239
+        ],
+        "energy_peak": 0.4959,
+        "energy_mean": 0.2239,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 15.38,
+        "end": 15.9,
+        "duration": 0.52,
+        "pitch_center": 37.05,
+        "pitch_curve": [
+          [
+            15.38,
+            37.05
+          ],
+          [
+            15.9,
+            37.05
+          ]
+        ],
+        "energy_curve": [
+          0.1527,
+          0.1527
+        ],
+        "energy_peak": 0.4029,
+        "energy_mean": 0.1527,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 17.33,
+        "end": 17.38,
+        "duration": 0.05,
+        "pitch_center": 39.4868,
+        "pitch_curve": [
+          [
+            17.33,
+            39.4868
+          ],
+          [
+            17.38,
+            39.4868
+          ]
+        ],
+        "energy_curve": [
+          0.1631,
+          0.1631
+        ],
+        "energy_peak": 0.2305,
+        "energy_mean": 0.1631,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 17.38,
+        "end": 17.51,
+        "duration": 0.13,
+        "pitch_center": 31.45,
+        "pitch_curve": [
+          [
+            17.38,
+            31.45
+          ],
+          [
+            17.51,
+            31.45
+          ]
+        ],
+        "energy_curve": [
+          0.1874,
+          0.1874
+        ],
+        "energy_peak": 0.452,
+        "energy_mean": 0.1874,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 17.51,
+        "end": 17.69,
+        "duration": 0.18,
+        "pitch_center": 34.05,
+        "pitch_curve": [
+          [
+            17.51,
+            34.05
+          ],
+          [
+            17.69,
+            34.05
+          ]
+        ],
+        "energy_curve": [
+          0.2513,
+          0.2513
+        ],
+        "energy_peak": 0.6462,
+        "energy_mean": 0.2513,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 17.69,
+        "end": 17.83,
+        "duration": 0.14,
+        "pitch_center": 35.2,
+        "pitch_curve": [
+          [
+            17.69,
+            35.2
+          ],
+          [
+            17.83,
+            35.2
+          ]
+        ],
+        "energy_curve": [
+          0.2464,
+          0.2464
+        ],
+        "energy_peak": 0.6327,
+        "energy_mean": 0.2464,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 17.83,
+        "end": 18.38,
+        "duration": 0.55,
+        "pitch_center": 36.05,
+        "pitch_curve": [
+          [
+            17.83,
+            36.05
+          ],
+          [
+            18.38,
+            36.05
+          ]
+        ],
+        "energy_curve": [
+          0.1721,
+          0.1721
+        ],
+        "energy_peak": 0.4783,
+        "energy_mean": 0.1721,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 18.38,
+        "end": 18.98,
+        "duration": 0.6,
+        "pitch_center": 40.95,
+        "pitch_curve": [
+          [
+            18.38,
+            40.95
+          ],
+          [
+            18.98,
+            40.95
+          ]
+        ],
+        "energy_curve": [
+          0.265,
+          0.265
+        ],
+        "energy_peak": 0.628,
+        "energy_mean": 0.265,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 20.16,
+        "end": 20.75,
+        "duration": 0.59,
+        "pitch_center": 33.95,
+        "pitch_curve": [
+          [
+            20.16,
+            33.95
+          ],
+          [
+            20.75,
+            33.95
+          ]
+        ],
+        "energy_curve": [
+          0.141,
+          0.141
+        ],
+        "energy_peak": 0.4842,
+        "energy_mean": 0.141,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 20.75,
+        "end": 21.35,
+        "duration": 0.6,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            20.75,
+            39.05
+          ],
+          [
+            21.35,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.2006,
+          0.2006
+        ],
+        "energy_peak": 0.5569,
+        "energy_mean": 0.2006,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 22.43,
+        "end": 22.57,
+        "duration": 0.14,
+        "pitch_center": 34.1,
+        "pitch_curve": [
+          [
+            22.43,
+            34.1
+          ],
+          [
+            22.57,
+            34.1
+          ]
+        ],
+        "energy_curve": [
+          0.2101,
+          0.2101
+        ],
+        "energy_peak": 0.4814,
+        "energy_mean": 0.2101,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 22.57,
+        "end": 23.0,
+        "duration": 0.43,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            22.57,
+            39.05
+          ],
+          [
+            23.0,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.3083,
+          0.3083
+        ],
+        "energy_peak": 0.6385,
+        "energy_mean": 0.3083,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 23.0,
+        "end": 23.32,
+        "duration": 0.32,
+        "pitch_center": 41.05,
+        "pitch_curve": [
+          [
+            23.0,
+            41.05
+          ],
+          [
+            23.32,
+            41.05
+          ]
+        ],
+        "energy_curve": [
+          0.2092,
+          0.2092
+        ],
+        "energy_peak": 0.5665,
+        "energy_mean": 0.2092,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 23.32,
+        "end": 23.49,
+        "duration": 0.17,
+        "pitch_center": 41.55,
+        "pitch_curve": [
+          [
+            23.32,
+            41.55
+          ],
+          [
+            23.49,
+            41.55
+          ]
+        ],
+        "energy_curve": [
+          0.2517,
+          0.2517
+        ],
+        "energy_peak": 0.5183,
+        "energy_mean": 0.2517,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 23.62,
+        "end": 24.22,
+        "duration": 0.6,
+        "pitch_center": 44.05,
+        "pitch_curve": [
+          [
+            23.62,
+            44.05
+          ],
+          [
+            24.22,
+            44.05
+          ]
+        ],
+        "energy_curve": [
+          0.2913,
+          0.2913
+        ],
+        "energy_peak": 0.474,
+        "energy_mean": 0.2913,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 24.52,
+        "end": 24.79,
+        "duration": 0.27,
+        "pitch_center": 44.45,
+        "pitch_curve": [
+          [
+            24.52,
+            44.45
+          ],
+          [
+            24.79,
+            44.45
+          ]
+        ],
+        "energy_curve": [
+          0.26,
+          0.26
+        ],
+        "energy_peak": 0.4923,
+        "energy_mean": 0.26,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 25.11,
+        "end": 25.25,
+        "duration": 0.14,
+        "pitch_center": 39.4868,
+        "pitch_curve": [
+          [
+            25.11,
+            39.4868
+          ],
+          [
+            25.25,
+            39.4868
+          ]
+        ],
+        "energy_curve": [
+          0.1389,
+          0.1389
+        ],
+        "energy_peak": 0.3947,
+        "energy_mean": 0.1389,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 25.25,
+        "end": 25.54,
+        "duration": 0.29,
+        "pitch_center": 37.05,
+        "pitch_curve": [
+          [
+            25.25,
+            37.05
+          ],
+          [
+            25.54,
+            37.05
+          ]
+        ],
+        "energy_curve": [
+          0.1882,
+          0.1882
+        ],
+        "energy_peak": 0.4658,
+        "energy_mean": 0.1882,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 25.54,
+        "end": 25.85,
+        "duration": 0.31,
+        "pitch_center": 39.15,
+        "pitch_curve": [
+          [
+            25.54,
+            39.15
+          ],
+          [
+            25.85,
+            39.15
+          ]
+        ],
+        "energy_curve": [
+          0.2308,
+          0.2308
+        ],
+        "energy_peak": 0.4939,
+        "energy_mean": 0.2308,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 25.85,
+        "end": 26.17,
+        "duration": 0.32,
+        "pitch_center": 41.05,
+        "pitch_curve": [
+          [
+            25.85,
+            41.05
+          ],
+          [
+            26.17,
+            41.05
+          ]
+        ],
+        "energy_curve": [
+          0.2198,
+          0.2198
+        ],
+        "energy_peak": 0.4624,
+        "energy_mean": 0.2198,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 26.17,
+        "end": 26.6,
+        "duration": 0.43,
+        "pitch_center": 42.05,
+        "pitch_curve": [
+          [
+            26.17,
+            42.05
+          ],
+          [
+            26.6,
+            42.05
+          ]
+        ],
+        "energy_curve": [
+          0.2082,
+          0.2082
+        ],
+        "energy_peak": 0.449,
+        "energy_mean": 0.2082,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 26.6,
+        "end": 26.93,
+        "duration": 0.33,
+        "pitch_center": 41.85,
+        "pitch_curve": [
+          [
+            26.6,
+            41.85
+          ],
+          [
+            26.93,
+            41.85
+          ]
+        ],
+        "energy_curve": [
+          0.158,
+          0.158
+        ],
+        "energy_peak": 0.4559,
+        "energy_mean": 0.158,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 26.93,
+        "end": 27.07,
+        "duration": 0.14,
+        "pitch_center": 43.95,
+        "pitch_curve": [
+          [
+            26.93,
+            43.95
+          ],
+          [
+            27.07,
+            43.95
+          ]
+        ],
+        "energy_curve": [
+          0.2243,
+          0.2243
+        ],
+        "energy_peak": 0.5341,
+        "energy_mean": 0.2243,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 27.07,
+        "end": 27.22,
+        "duration": 0.15,
+        "pitch_center": 45.95,
+        "pitch_curve": [
+          [
+            27.07,
+            45.95
+          ],
+          [
+            27.22,
+            45.95
+          ]
+        ],
+        "energy_curve": [
+          0.2783,
+          0.2783
+        ],
+        "energy_peak": 0.6157,
+        "energy_mean": 0.2783,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 27.46,
+        "end": 27.6,
+        "duration": 0.14,
+        "pitch_center": 39.4868,
+        "pitch_curve": [
+          [
+            27.46,
+            39.4868
+          ],
+          [
+            27.6,
+            39.4868
+          ]
+        ],
+        "energy_curve": [
+          0.1217,
+          0.1217
+        ],
+        "energy_peak": 0.3631,
+        "energy_mean": 0.1217,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 27.6,
+        "end": 27.93,
+        "duration": 0.33,
+        "pitch_center": 36.9,
+        "pitch_curve": [
+          [
+            27.6,
+            36.9
+          ],
+          [
+            27.93,
+            36.9
+          ]
+        ],
+        "energy_curve": [
+          0.1634,
+          0.1634
+        ],
+        "energy_peak": 0.4329,
+        "energy_mean": 0.1634,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 27.93,
+        "end": 28.23,
+        "duration": 0.3,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            27.93,
+            39.05
+          ],
+          [
+            28.23,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.2277,
+          0.2277
+        ],
+        "energy_peak": 0.4683,
+        "energy_mean": 0.2277,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 28.23,
+        "end": 28.53,
+        "duration": 0.3,
+        "pitch_center": 41.05,
+        "pitch_curve": [
+          [
+            28.23,
+            41.05
+          ],
+          [
+            28.53,
+            41.05
+          ]
+        ],
+        "energy_curve": [
+          0.2079,
+          0.2079
+        ],
+        "energy_peak": 0.4802,
+        "energy_mean": 0.2079,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 28.53,
+        "end": 28.83,
+        "duration": 0.3,
+        "pitch_center": 42.05,
+        "pitch_curve": [
+          [
+            28.53,
+            42.05
+          ],
+          [
+            28.83,
+            42.05
+          ]
+        ],
+        "energy_curve": [
+          0.2989,
+          0.2989
+        ],
+        "energy_peak": 0.4589,
+        "energy_mean": 0.2989,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 28.83,
+        "end": 29.01,
+        "duration": 0.18,
+        "pitch_center": 40.15,
+        "pitch_curve": [
+          [
+            28.83,
+            40.15
+          ],
+          [
+            29.01,
+            40.15
+          ]
+        ],
+        "energy_curve": [
+          0.3077,
+          0.3077
+        ],
+        "energy_peak": 0.4708,
+        "energy_mean": 0.3077,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 29.01,
+        "end": 29.29,
+        "duration": 0.28,
+        "pitch_center": 44.05,
+        "pitch_curve": [
+          [
+            29.01,
+            44.05
+          ],
+          [
+            29.29,
+            44.05
+          ]
+        ],
+        "energy_curve": [
+          0.1284,
+          0.1284
+        ],
+        "energy_peak": 0.4297,
+        "energy_mean": 0.1284,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 29.29,
+        "end": 29.58,
+        "duration": 0.29,
+        "pitch_center": 45.45,
+        "pitch_curve": [
+          [
+            29.29,
+            45.45
+          ],
+          [
+            29.58,
+            45.45
+          ]
+        ],
+        "energy_curve": [
+          0.1618,
+          0.1618
+        ],
+        "energy_peak": 0.6025,
+        "energy_mean": 0.1618,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 29.58,
+        "end": 29.72,
+        "duration": 0.14,
+        "pitch_center": 49.2,
+        "pitch_curve": [
+          [
+            29.58,
+            49.2
+          ],
+          [
+            29.72,
+            49.2
+          ]
+        ],
+        "energy_curve": [
+          0.2063,
+          0.2063
+        ],
+        "energy_peak": 0.4383,
+        "energy_mean": 0.2063,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 29.72,
+        "end": 29.87,
+        "duration": 0.15,
+        "pitch_center": 45.75,
+        "pitch_curve": [
+          [
+            29.72,
+            45.75
+          ],
+          [
+            29.87,
+            45.75
+          ]
+        ],
+        "energy_curve": [
+          0.2449,
+          0.2449
+        ],
+        "energy_peak": 0.5214,
+        "energy_mean": 0.2449,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 29.87,
+        "end": 30.01,
+        "duration": 0.14,
+        "pitch_center": 39.4868,
+        "pitch_curve": [
+          [
+            29.87,
+            39.4868
+          ],
+          [
+            30.01,
+            39.4868
+          ]
+        ],
+        "energy_curve": [
+          0.1752,
+          0.1752
+        ],
+        "energy_peak": 0.36,
+        "energy_mean": 0.1752,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 30.01,
+        "end": 30.32,
+        "duration": 0.31,
+        "pitch_center": 36.95,
+        "pitch_curve": [
+          [
+            30.01,
+            36.95
+          ],
+          [
+            30.32,
+            36.95
+          ]
+        ],
+        "energy_curve": [
+          0.1567,
+          0.1567
+        ],
+        "energy_peak": 0.438,
+        "energy_mean": 0.1567,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 30.32,
+        "end": 30.49,
+        "duration": 0.17,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            30.32,
+            39.05
+          ],
+          [
+            30.49,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.3127,
+          0.3127
+        ],
+        "energy_peak": 0.4838,
+        "energy_mean": 0.3127,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 30.49,
+        "end": 30.61,
+        "duration": 0.12,
+        "pitch_center": 34.5,
+        "pitch_curve": [
+          [
+            30.49,
+            34.5
+          ],
+          [
+            30.61,
+            34.5
+          ]
+        ],
+        "energy_curve": [
+          0.1204,
+          0.1204
+        ],
+        "energy_peak": 0.3812,
+        "energy_mean": 0.1204,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 30.61,
+        "end": 30.92,
+        "duration": 0.31,
+        "pitch_center": 41.15,
+        "pitch_curve": [
+          [
+            30.61,
+            41.15
+          ],
+          [
+            30.92,
+            41.15
+          ]
+        ],
+        "energy_curve": [
+          0.194,
+          0.194
+        ],
+        "energy_peak": 0.4689,
+        "energy_mean": 0.194,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 30.92,
+        "end": 31.36,
+        "duration": 0.44,
+        "pitch_center": 42.05,
+        "pitch_curve": [
+          [
+            30.92,
+            42.05
+          ],
+          [
+            31.36,
+            42.05
+          ]
+        ],
+        "energy_curve": [
+          0.2298,
+          0.2298
+        ],
+        "energy_peak": 0.4808,
+        "energy_mean": 0.2298,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 31.36,
+        "end": 31.66,
+        "duration": 0.3,
+        "pitch_center": 41.45,
+        "pitch_curve": [
+          [
+            31.36,
+            41.45
+          ],
+          [
+            31.66,
+            41.45
+          ]
+        ],
+        "energy_curve": [
+          0.1578,
+          0.1578
+        ],
+        "energy_peak": 0.4303,
+        "energy_mean": 0.1578,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 31.66,
+        "end": 31.8,
+        "duration": 0.14,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            31.66,
+            39.05
+          ],
+          [
+            31.8,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.2432,
+          0.2432
+        ],
+        "energy_peak": 0.4627,
+        "energy_mean": 0.2432,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 31.8,
+        "end": 31.98,
+        "duration": 0.18,
+        "pitch_center": 41.05,
+        "pitch_curve": [
+          [
+            31.8,
+            41.05
+          ],
+          [
+            31.98,
+            41.05
+          ]
+        ],
+        "energy_curve": [
+          0.2677,
+          0.2677
+        ],
+        "energy_peak": 0.5078,
+        "energy_mean": 0.2677,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 31.98,
+        "end": 32.25,
+        "duration": 0.27,
+        "pitch_center": 41.6,
+        "pitch_curve": [
+          [
+            31.98,
+            41.6
+          ],
+          [
+            32.25,
+            41.6
+          ]
+        ],
+        "energy_curve": [
+          0.1833,
+          0.1833
+        ],
+        "energy_peak": 0.4299,
+        "energy_mean": 0.1833,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 32.25,
+        "end": 32.55,
+        "duration": 0.3,
+        "pitch_center": 43.85,
+        "pitch_curve": [
+          [
+            32.25,
+            43.85
+          ],
+          [
+            32.55,
+            43.85
+          ]
+        ],
+        "energy_curve": [
+          0.1773,
+          0.1773
+        ],
+        "energy_peak": 0.5264,
+        "energy_mean": 0.1773,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 32.55,
+        "end": 32.85,
+        "duration": 0.3,
+        "pitch_center": 45.45,
+        "pitch_curve": [
+          [
+            32.55,
+            45.45
+          ],
+          [
+            32.85,
+            45.45
+          ]
+        ],
+        "energy_curve": [
+          0.143,
+          0.143
+        ],
+        "energy_peak": 0.5292,
+        "energy_mean": 0.143,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 32.85,
+        "end": 33.01,
+        "duration": 0.16,
+        "pitch_center": 47.95,
+        "pitch_curve": [
+          [
+            32.85,
+            47.95
+          ],
+          [
+            33.01,
+            47.95
+          ]
+        ],
+        "energy_curve": [
+          0.2373,
+          0.2373
+        ],
+        "energy_peak": 0.4693,
+        "energy_mean": 0.2373,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 33.01,
+        "end": 33.16,
+        "duration": 0.15,
+        "pitch_center": 48.05,
+        "pitch_curve": [
+          [
+            33.01,
+            48.05
+          ],
+          [
+            33.16,
+            48.05
+          ]
+        ],
+        "energy_curve": [
+          0.1535,
+          0.1535
+        ],
+        "energy_peak": 0.2743,
+        "energy_mean": 0.1535,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 33.16,
+        "end": 33.32,
+        "duration": 0.16,
+        "pitch_center": 38.05,
+        "pitch_curve": [
+          [
+            33.16,
+            38.05
+          ],
+          [
+            33.32,
+            38.05
+          ]
+        ],
+        "energy_curve": [
+          0.1816,
+          0.1816
+        ],
+        "energy_peak": 0.4586,
+        "energy_mean": 0.1816,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 35.6,
+        "end": 35.74,
+        "duration": 0.14,
+        "pitch_center": 31.65,
+        "pitch_curve": [
+          [
+            35.6,
+            31.65
+          ],
+          [
+            35.74,
+            31.65
+          ]
+        ],
+        "energy_curve": [
+          0.1936,
+          0.1936
+        ],
+        "energy_peak": 0.4324,
+        "energy_mean": 0.1936,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 35.74,
+        "end": 36.29,
+        "duration": 0.55,
+        "pitch_center": 36.05,
+        "pitch_curve": [
+          [
+            35.74,
+            36.05
+          ],
+          [
+            36.29,
+            36.05
+          ]
+        ],
+        "energy_curve": [
+          0.1427,
+          0.1427
+        ],
+        "energy_peak": 0.5304,
+        "energy_mean": 0.1427,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 36.29,
+        "end": 36.75,
+        "duration": 0.46,
+        "pitch_center": 31.35,
+        "pitch_curve": [
+          [
+            36.29,
+            31.35
+          ],
+          [
+            36.75,
+            31.35
+          ]
+        ],
+        "energy_curve": [
+          0.2315,
+          0.2315
+        ],
+        "energy_peak": 0.576,
+        "energy_mean": 0.2315,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 38.06,
+        "end": 38.54,
+        "duration": 0.48,
+        "pitch_center": 34.05,
+        "pitch_curve": [
+          [
+            38.06,
+            34.05
+          ],
+          [
+            38.54,
+            34.05
+          ]
+        ],
+        "energy_curve": [
+          0.1705,
+          0.1705
+        ],
+        "energy_peak": 0.4865,
+        "energy_mean": 0.1705,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 38.54,
+        "end": 38.68,
+        "duration": 0.14,
+        "pitch_center": 33.75,
+        "pitch_curve": [
+          [
+            38.54,
+            33.75
+          ],
+          [
+            38.68,
+            33.75
+          ]
+        ],
+        "energy_curve": [
+          0.1729,
+          0.1729
+        ],
+        "energy_peak": 0.4057,
+        "energy_mean": 0.1729,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 38.68,
+        "end": 39.12,
+        "duration": 0.44,
+        "pitch_center": 39.05,
+        "pitch_curve": [
+          [
+            38.68,
+            39.05
+          ],
+          [
+            39.12,
+            39.05
+          ]
+        ],
+        "energy_curve": [
+          0.2748,
+          0.2748
+        ],
+        "energy_peak": 0.5643,
+        "energy_mean": 0.2748,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 40.35,
+        "end": 40.49,
+        "duration": 0.14,
+        "pitch_center": 33.55,
+        "pitch_curve": [
+          [
+            40.35,
+            33.55
+          ],
+          [
+            40.49,
+            33.55
+          ]
+        ],
+        "energy_curve": [
+          0.2064,
+          0.2064
+        ],
+        "energy_peak": 0.4203,
+        "energy_mean": 0.2064,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 40.49,
+        "end": 40.92,
+        "duration": 0.43,
+        "pitch_center": 39.15,
+        "pitch_curve": [
+          [
+            40.49,
+            39.15
+          ],
+          [
+            40.92,
+            39.15
+          ]
+        ],
+        "energy_curve": [
+          0.3013,
+          0.3013
+        ],
+        "energy_peak": 0.563,
+        "energy_mean": 0.3013,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 40.92,
+        "end": 41.21,
+        "duration": 0.29,
+        "pitch_center": 40.75,
+        "pitch_curve": [
+          [
+            40.92,
+            40.75
+          ],
+          [
+            41.21,
+            40.75
+          ]
+        ],
+        "energy_curve": [
+          0.1641,
+          0.1641
+        ],
+        "energy_peak": 0.4747,
+        "energy_mean": 0.1641,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 41.21,
+        "end": 41.52,
+        "duration": 0.31,
+        "pitch_center": 41.25,
+        "pitch_curve": [
+          [
+            41.21,
+            41.25
+          ],
+          [
+            41.52,
+            41.25
+          ]
+        ],
+        "energy_curve": [
+          0.1513,
+          0.1513
+        ],
+        "energy_peak": 0.5007,
+        "energy_mean": 0.1513,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      },
+      {
+        "start": 41.52,
+        "end": 41.96,
+        "duration": 0.44,
+        "pitch_center": 44.05,
+        "pitch_curve": [
+          [
+            41.52,
+            44.05
+          ],
+          [
+            41.96,
+            44.05
+          ]
+        ],
+        "energy_curve": [
+          0.2961,
+          0.2961
+        ],
+        "energy_peak": 0.4701,
+        "energy_mean": 0.2961,
+        "attack_time": 0.0,
+        "decay_time": 0.0
+      }
+    ],
+    "render": {
+      "y_axis": "pitch_midi",
+      "thickness": "energy",
+      "curve": "spline"
+    }
+  }
+}

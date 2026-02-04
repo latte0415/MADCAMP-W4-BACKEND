@@ -11,6 +11,17 @@ function formatDate(value) {
   return d.toLocaleString();
 }
 
+function formatStatus(status) {
+  const map = {
+    queued: "대기중",
+    queued_music: "음악 분석 대기중",
+    running: "분석 중",
+    done: "완료",
+    failed: "실패",
+  };
+  return map[status] || status || "-";
+}
+
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
@@ -213,7 +224,7 @@ async function loadProject() {
   const data = await res.json();
 
   $("#project-title").textContent = data.title || `프로젝트 #${data.id}`;
-  $("#project-status").textContent = data.status || "-";
+  $("#project-status").textContent = formatStatus(data.status);
   $("#project-mode").textContent = data.mode || "-";
   $("#project-created").textContent = formatDate(data.created_at);
   $("#project-finished").textContent = formatDate(data.finished_at);

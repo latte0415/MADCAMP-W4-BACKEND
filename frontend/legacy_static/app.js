@@ -1,7 +1,8 @@
 const userName = document.getElementById('user-name');
 const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
-const btnSubmit = document.getElementById('btn-submit');
+const btnMotion = document.getElementById('btn-motion');
+const btnMusic = document.getElementById('btn-music');
 const btnRefresh = document.getElementById('btn-refresh');
 const statusEl = document.getElementById('status');
 const libraryEl = document.getElementById('library');
@@ -13,6 +14,17 @@ const inputVideo = document.getElementById('video');
 
 function setStatus(msg) {
   statusEl.textContent = msg;
+}
+
+function formatStatus(status) {
+  const map = {
+    queued: '대기중',
+    queued_music: '음악 분석 대기중',
+    running: '분석 중',
+    done: '완료',
+    failed: '실패',
+  };
+  return map[status] || status || '-';
 }
 
 async function fetchMe() {
@@ -76,12 +88,12 @@ async function uploadMedia(file) {
   return data;
 }
 
-async function createAnalysis(videoId, audioId) {
+async function createAnalysis(videoId, audioId, paramsJson) {
   const payload = {
     video_id: videoId,
     audio_id: audioId || null,
     mode: inputMode.value,
-    params_json: null,
+    params_json: paramsJson || null,
     title: inputTitle.value || null,
     notes: null,
   };
@@ -130,7 +142,7 @@ function renderLibrary(items) {
       </div>
       <div>
         <div class="card__title">${duration}</div>
-        <div class="card__sub">${item.status}</div>
+        <div class="card__sub">${formatStatus(item.status)}</div>
       </div>
     `;
     libraryEl.appendChild(el);
@@ -150,25 +162,38 @@ btnLogin.addEventListener('click', () => {
 
 btnLogout.addEventListener('click', logout);
 
-btnSubmit.addEventListener('click', async () => {
+async function startAnalysis(type) {
   try {
     setStatus('업로드 중...');
     const video = inputVideo.files[0];
-    if (!video) throw new Error('영상 파일이 필요합니다.');
-
     const audio = inputAudio.files[0];
+
+    if (type === 'motion' && !video) {
+      throw new Error('영상 파일이 필요합니다.');
+    }
+    if (type === 'music') {
+      if (!audio) throw new Error('음악 파일이 필요합니다.');
+      if (!video) throw new Error('음악 분석에도 영상 파일이 필요합니다.');
+    }
+
     const videoRes = await uploadMedia(video);
     const audioRes = audio ? await uploadMedia(audio) : null;
 
     setStatus('분석 요청 생성 중...');
-    const req = await createAnalysis(videoRes.id, audioRes ? audioRes.id : null);
+    let paramsJson = null;
+    if (type === 'motion') {
+      paramsJson = { skip_music: true };
+    } else if (type === 'music') {
+      paramsJson = { music_only: true };
+    }
+    const req = await createAnalysis(videoRes.id, audioRes ? audioRes.id : null, paramsJson);
     setStatus('요청 완료. 진행률 확인 중...');
 
     const timer = setInterval(async () => {
       try {
         const st = await pollStatus(req.id);
         const p = st.progress != null ? Math.round(st.progress * 100) : null;
-        const msg = st.message || st.status;
+        const msg = st.message || formatStatus(st.status);
         const detail = p != null ? `${msg} (${p}%)` : msg;
         setStatus(detail);
         if (st.log) {
@@ -187,7 +212,10 @@ btnSubmit.addEventListener('click', async () => {
   } catch (err) {
     setStatus(`에러: ${err.message}`);
   }
-});
+}
+
+btnMotion.addEventListener('click', () => startAnalysis('motion'));
+btnMusic.addEventListener('click', () => startAnalysis('music'));
 
 btnRefresh.addEventListener('click', loadLibrary);
 

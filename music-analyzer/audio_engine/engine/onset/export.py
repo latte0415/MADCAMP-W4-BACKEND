@@ -376,12 +376,16 @@ def write_streams_sections_json(
     keypoints_by_band: Optional[dict[str, list[dict]]] = None,
     texture_blocks_by_band: Optional[dict[str, list[dict]]] = None,
     bass: Optional[dict] = None,
+    vocal: Optional[dict] = None,
+    other: Optional[dict] = None,
 ) -> Path:
     """
     스트림·섹션·키포인트·(선택) events 저장 (07 전용).
     events: 정밀도 기반 P0/P1/P2 역할(roles) 포함 시 레이어 표시용.
     keypoints_by_band, texture_blocks_by_band: 드럼 대역별 키포인트/텍스처 블록 (11 확장).
-    bass: 베이스 curve/keypoints (engine/bass run_bass_pipeline 반환값).
+    bass: 베이스 키포인트 (engine/bass run_bass_v4 / build_bass_output 반환값: notes, render).
+    vocal: 보컬 곡선+키포인트 (engine/vocal build_vocal_output 반환값).
+    other: other 스템 곡선/영역 (engine/other build_other_output 반환값).
     """
     path = Path(path)
     _ensure_dir(path)
@@ -401,6 +405,10 @@ def write_streams_sections_json(
         out["texture_blocks_by_band"] = texture_blocks_by_band
     if bass is not None:
         out["bass"] = bass
+    if vocal is not None:
+        out["vocal"] = vocal
+    if other is not None:
+        out["other"] = other
     with open(path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     if project_root is not None:

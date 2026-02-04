@@ -14,6 +14,12 @@ export interface MotionKeypoint {
   intensity: number;
 }
 
+export interface BassNote {
+  time: number;
+  duration?: number;
+  [key: string]: unknown;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -26,5 +32,7 @@ export interface Project {
   completedAt?: Date;
   musicKeypoints: MusicKeypoint[];
   motionKeypoints: MotionKeypoint[];
+  bassNotes?: BassNote[];
   status: ProjectStatus;
+  errorMessage?: string;
 }

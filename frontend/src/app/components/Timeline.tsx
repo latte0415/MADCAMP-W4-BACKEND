@@ -9,6 +9,7 @@ interface TimelineProps {
   musicKeypoints: MusicKeypoint[];
   motionKeypoints: MotionKeypoint[];
   onSeek: (time: number) => void;
+  onHoverTime?: (time: number | null) => void;
 }
 
 export function Timeline({
@@ -17,6 +18,7 @@ export function Timeline({
   musicKeypoints,
   motionKeypoints,
   onSeek,
+  onHoverTime,
 }: TimelineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,13 +28,27 @@ export function Timeline({
   const pixelsPerSecond = 100 * zoom;
   const timelineWidth = duration * pixelsPerSecond;
 
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onHoverTime) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const time = rect.width > 0 ? (x / rect.width) * duration : 0;
+    onHoverTime(Math.max(0, Math.min(duration, time)));
+  };
+
+  const handleCanvasMouseLeave = () => {
+    onHoverTime?.(null);
+  };
+
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const time = (x / canvas.width) * duration;
+    const time = rect.width > 0 ? (x / rect.width) * duration : 0;
     onSeek(Math.max(0, Math.min(duration, time)));
   };
 
@@ -61,7 +77,7 @@ export function Timeline({
     ctx.scale(dpr, dpr);
 
     // Clear canvas
-    ctx.fillStyle = '#18181b';
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, timelineWidth, rect.height);
 
     const height = rect.height;
@@ -69,7 +85,7 @@ export function Timeline({
     const motionLayerHeight = height * 0.4;
 
     // Draw time markers
-    ctx.strokeStyle = '#3f3f46';
+    ctx.strokeStyle = '#262626';
     ctx.lineWidth = 1;
     const secondInterval = Math.max(1, Math.floor(10 / zoom));
     for (let i = 0; i <= duration; i += secondInterval) {
@@ -80,16 +96,16 @@ export function Timeline({
       ctx.stroke();
 
       // Time labels
-      ctx.fillStyle = '#71717a';
-      ctx.font = '11px -apple-system, system-ui, sans-serif';
+      ctx.fillStyle = '#606060';
+      ctx.font = '10px -apple-system, system-ui, sans-serif';
       ctx.fillText(`${i}s`, x + 4, 14);
     }
 
     // Draw music keypoints (3 frequency layers)
     const frequencyColors = {
-      low: '#ef4444',    // red
-      mid: '#22c55e',    // green
-      high: '#3b82f6',   // blue
+      low: '#a3a3a3',
+      mid: '#737373',
+      high: '#525252',
     };
 
     const frequencyLayers = {
@@ -121,8 +137,8 @@ export function Timeline({
       if (kp.type === 'hit') {
         // Hit: full height bar
         const gradient = ctx.createLinearGradient(0, motionStartY, 0, height);
-        gradient.addColorStop(0, '#a855f7');
-        gradient.addColorStop(1, '#ec4899');
+        gradient.addColorStop(0, '#f59e0b');
+        gradient.addColorStop(1, '#f97316');
         
         ctx.fillStyle = gradient;
         ctx.globalAlpha = 0.4 + kp.intensity * 0.4;
@@ -133,7 +149,7 @@ export function Timeline({
         const endX = ((kp.time + kp.duration) / duration) * timelineWidth;
         const holdY = motionStartY + 10;
         
-        ctx.strokeStyle = '#fbbf24';
+        ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 3;
         ctx.globalAlpha = 0.5 + kp.intensity * 0.3;
         ctx.beginPath();
@@ -143,7 +159,7 @@ export function Timeline({
         ctx.globalAlpha = 1;
         ctx.lineWidth = 1;
       } else if (kp.type === 'appear' || kp.type === 'vanish') {
-        const color = kp.type === 'appear' ? '#34d399' : '#fb923c';
+        const color = kp.type === 'appear' ? '#84cc16' : '#fb923c';
         ctx.fillStyle = color;
         ctx.globalAlpha = 0.4 + kp.intensity * 0.4;
         ctx.fillRect(x - 2, motionStartY, 4, motionLayerHeight);
@@ -153,7 +169,7 @@ export function Timeline({
 
     // Draw playhead
     const playheadX = (currentTime / duration) * timelineWidth;
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = '#fafafa';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
@@ -161,7 +177,7 @@ export function Timeline({
     ctx.stroke();
 
     // Playhead circle
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#fafafa';
     ctx.beginPath();
     ctx.arc(playheadX, height / 2, 4, 0, Math.PI * 2);
     ctx.fill();
@@ -183,12 +199,12 @@ export function Timeline({
   }, [currentTime, duration, timelineWidth]);
 
   return (
-    <div className="flex flex-col gap-3 bg-zinc-900/50 rounded-lg border border-white/10 p-4">
+    <div className="flex flex-col gap-3 rounded border border-neutral-800 bg-neutral-950/80 p-4">
       {/* Timeline header */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-white">Integrated Timeline</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-[11px] text-neutral-500 mt-0.5 uppercase tracking-[0.25em]">
             Music Keypoints (Low/Mid/High) + Motion (Hit/Hold)
           </p>
         </div>
@@ -197,18 +213,18 @@ export function Timeline({
             variant="outline"
             size="sm"
             onClick={() => setZoom(prev => Math.max(0.5, prev * 0.8))}
-            className="bg-white/5 border-white/10 hover:bg-white/10"
+            className="bg-transparent border-neutral-700 hover:bg-white/5"
           >
             <ZoomOut className="size-4" />
           </Button>
-          <span className="text-xs text-zinc-400 min-w-12 text-center">
+          <span className="text-[10px] text-neutral-400 min-w-12 text-center uppercase tracking-widest">
             {Math.round(zoom * 100)}%
           </span>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setZoom(prev => Math.min(5, prev * 1.2))}
-            className="bg-white/5 border-white/10 hover:bg-white/10"
+            className="bg-transparent border-neutral-700 hover:bg-white/5"
           >
             <ZoomIn className="size-4" />
           </Button>
@@ -216,39 +232,39 @@ export function Timeline({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 text-xs">
+      <div className="flex items-center gap-6 text-[11px]">
         <div className="flex items-center gap-4">
-          <span className="text-zinc-400">Music:</span>
+          <span className="text-neutral-400 uppercase tracking-widest">Music</span>
           <div className="flex items-center gap-1.5">
-            <div className="size-2 rounded-full bg-red-500" />
-            <span className="text-zinc-500">Low</span>
+            <div className="size-2 rounded-full bg-neutral-400" />
+            <span className="text-neutral-500">Low</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2 rounded-full bg-green-500" />
-            <span className="text-zinc-500">Mid</span>
+            <div className="size-2 rounded-full bg-neutral-500" />
+            <span className="text-neutral-500">Mid</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2 rounded-full bg-blue-500" />
-            <span className="text-zinc-500">High</span>
+            <div className="size-2 rounded-full bg-neutral-600" />
+            <span className="text-neutral-500">High</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-zinc-400">Motion:</span>
+          <span className="text-neutral-400 uppercase tracking-widest">Motion</span>
           <div className="flex items-center gap-1.5">
-            <div className="size-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
-            <span className="text-zinc-500">Hit</span>
+            <div className="size-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
+            <span className="text-neutral-500">Hit</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-4 h-0.5 rounded-full bg-yellow-500" />
-            <span className="text-zinc-500">Hold</span>
+            <div className="w-4 h-0.5 rounded-full bg-amber-500" />
+            <span className="text-neutral-500">Hold</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2 rounded-full bg-emerald-400" />
-            <span className="text-zinc-500">Appear</span>
+            <div className="size-2 rounded-full bg-lime-400" />
+            <span className="text-neutral-500">Appear</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2 rounded-full bg-orange-400" />
-            <span className="text-zinc-500">Vanish</span>
+            <span className="text-neutral-500">Vanish</span>
           </div>
         </div>
       </div>
@@ -256,12 +272,14 @@ export function Timeline({
       {/* Timeline canvas */}
       <div
         ref={containerRef}
-        className="relative h-40 overflow-x-auto overflow-y-hidden bg-zinc-950 rounded border border-white/5"
+        className="relative h-40 overflow-x-auto overflow-y-hidden bg-neutral-950 rounded border border-neutral-800"
         onWheel={handleWheel}
       >
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseLeave={handleCanvasMouseLeave}
           className="cursor-pointer"
         />
       </div>

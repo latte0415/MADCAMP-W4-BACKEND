@@ -35,4 +35,4 @@ if __name__ == "__main__":
     path = Path(_sys.argv[1])
     sr = int(_sys.argv[2]) if len(_sys.argv) > 2 else None
     out = run(path, sr=sr)
-    print(f"other_curve: {len(out.get('other_curve', []))} points, other_regions: {len(out.get('other_regions', []))}")
+    print(f"other_curve: {len(out.get('other_curve', []))} points, other_regions: {len(out.get('other_regions', []))}, other_keypoints: {len(out.get('other_keypoints', []))}")

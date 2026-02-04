@@ -19,17 +19,19 @@
 | L3 | `onset/features/spectral.py` | `compute_spectral` |
 | L3 | `onset/features/context.py` | `compute_context_dependency` |
 | L4 | `onset/scoring.py` | `normalize_metrics_per_track`, `assign_roles_by_band` (band 기반 역할 할당) |
-| L2-ext | `onset/streams.py` | `build_streams(band_onset_times, band_onset_strengths)` |
-| L2-ext | `onset/sections.py` | `segment_sections(streams, duration)` |
-| L2-ext | `onset/band_onset_merge.py` | `merge_close_onsets`, `merge_close_band_onsets`, `filter_by_strength`, `filter_transient_mid_high` (쉐이커·클랩 병합·트랜지언트 필터) |
-| L2-ext | `onset/stream_simplify.py` | `simplify_shaker_clap_streams` (mid/high 고밀도 스트림 temporal pooling) |
-| L2-ext | `onset/stream_layer.py` | `assign_layer_to_streams` (스트림별 P0/P1/P2) |
-| L2-ext | `onset/cnn_band_pipeline.py` | `compute_cnn_band_onsets_with_odf` (CNN+ODF band onset) |
-| L2-ext | `onset/cnn_band_onsets.py` | `compute_cnn_band_onsets` (madmom CNN band onset) |
-| L2-ext | `onset/drum_band_energy.py` | `compute_drum_band_energy` |
+| L2-ext (레거시) | `onset/legacy/streams.py` | `build_streams(band_onset_times, band_onset_strengths)` |
+| L2-ext (레거시) | `onset/legacy/sections.py` | `segment_sections(streams, duration)` |
+| L2-ext (레거시) | `onset/legacy/stream_simplify.py` | `simplify_shaker_clap_streams` (mid/high 고밀도 스트림 temporal pooling) |
+| L2-ext (레거시) | `onset/legacy/stream_layer.py` | `assign_layer_to_streams` (스트림별 P0/P1/P2) |
+| L2-ext (드럼) | `onset/drum/band_onset_merge.py` | `merge_close_onsets`, `merge_close_band_onsets`, `filter_by_strength`, `filter_transient_mid_high` |
+| L2-ext (드럼) | `onset/drum/drum_band_energy.py` | `compute_drum_band_energy`, `compute_band_onset_energies` |
+| L2-ext (드럼) | `onset/drum/key_onset_selector.py` | `select_key_onsets_by_band` |
+| L2-ext (드럼) | `onset/drum/texture_block_merge.py` | `merge_texture_blocks_by_band` |
+| L2-ext (드럼) | `onset/drum/cnn_band_pipeline.py` | `compute_cnn_band_onsets_with_odf` (CNN+ODF band onset) |
+| L2-ext (드럼) | `onset/drum/cnn_band_onsets.py` | `compute_cnn_band_onsets` (madmom CNN band onset) |
 | L2-ext | `onset/madmom_drum_band.py` | `compute_madmom_drum_band_keypoints` |
 | L5 | `onset/export.py` | `write_energy_json`, …, `write_layered_json`, `write_streams_sections_json`, `write_drum_band_energy_json` |
-| L6 | `audio_engine/scripts/onset_layered/01_energy.py` ~ `06_layered_export.py`, `scripts/drum/run.py`, `scripts/bass/run.py`, `scripts/export/run_stem_folder.py` | 엔트리 스크립트 |
+| L6 | `audio_engine/scripts/onset_layered/01_energy.py` ~ `06_layered_export.py`, `scripts/drum/run.py`, `scripts/bass/run.py`, `scripts/vocal/run.py`, `scripts/other/run.py`, `scripts/export/run_stem_folder.py` | 엔트리 스크립트 |
 
 ---
 
@@ -55,18 +57,23 @@ from audio_engine.engine.onset import (
     build_context,
     build_context_with_band_evidence,
     compute_band_hz,
-    # L2-ext (streams / CNN / drum band)
+    # L2-ext (legacy: streams / sections)
     build_streams,
     segment_sections,
-    compute_cnn_band_onsets_with_odf,
-    compute_cnn_band_onsets,
-    compute_drum_band_energy,
-    compute_madmom_drum_band_keypoints,
     assign_layer_to_streams,
     simplify_shaker_clap_streams,
+    # L2-ext (drum: CNN band onset → keypoints / texture blocks)
     merge_close_onsets,
     merge_close_band_onsets,
     filter_by_strength,
+    filter_transient_mid_high,
+    compute_drum_band_energy,
+    compute_band_onset_energies,
+    select_key_onsets_by_band,
+    merge_texture_blocks_by_band,
+    compute_cnn_band_onsets,
+    compute_cnn_band_onsets_with_odf,
+    compute_madmom_drum_band_keypoints,
     # L3
     compute_energy,
     compute_clarity,

@@ -280,7 +280,8 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
   const keypoints = vocal?.vocal_keypoints ?? [];
   const phrases = vocal?.vocal_phrases ?? [];
   const turns = vocal?.vocal_turns ?? [];
-  const useTurnsMode = turns.length > 0;
+  const onsets = vocal?.vocal_onsets ?? [];
+  const useTurnsMode = turns.length > 0 || onsets.length > 0;
   const hasVocal = Array.isArray(curve) && curve.length > 0;
 
   const dur = data?.duration_sec ?? (duration || 1);
@@ -333,6 +334,7 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
     (ph) => ph.end >= visibleStart && ph.start <= visibleEnd
   );
   const visibleTurns = turns.filter((t) => t.t >= visibleStart && t.t <= visibleEnd);
+  const visibleOnsets = onsets.filter((o) => o.t >= visibleStart && o.t <= visibleEnd);
   const allGestures = useTurnsMode ? [] : phrases.flatMap((ph) =>
     ph.gestures
       .filter((g) => g.type !== "phrase_start")
@@ -408,7 +410,7 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
             </div>
             <div className="tab15-track tab15-track-pitch">
               <div className="tab15-track-label">
-                보컬 · {useTurnsMode ? "pitch 선 하나, ▲ 전환(2~4개/20초)" : "phrase 단위 피치 선, ● onset(발음·강세)"}
+                보컬 · {useTurnsMode ? "pitch 선 하나, ▲ 전환 ● onset" : "phrase 단위 피치 선, ● onset(발음·강세)"}
               </div>
               {dur > 0 && stripWidth > 1 && (
                 <div
@@ -504,7 +506,9 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                           />
                         );
                       })
-                      : visibleGesturesWithPhrase.map(({ g, ph }, i: number) => {
+                      : null}
+                      {/* onset 마커는 일단 비표시 */}
+                      {!useTurnsMode && visibleGesturesWithPhrase.map(({ g, ph }, i: number) => {
                         const nearest = curve.length > 0
                           ? curve.reduce((a, b) =>
                               Math.abs(b.t - g.t) < Math.abs(a.t - g.t) ? b : a
@@ -574,8 +578,8 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
             <summary>보컬 곡선 설명</summary>
             <p className="tab15-desc">
               {useTurnsMode
-                ? "y축 = 피치(log scale). pitch 선 하나. ▲ 전환: 멜로디가 위↔아래로 꺾이는 지점(20초당 2~4개). 마커에 마우스를 올리면 설명이 보입니다."
-                : "y축 = 피치(log scale). phrase 안에서만 보임. phrase당 onset peak 3~4개(파란 점). 마커에 마우스를 올리면 설명이 보입니다."}
+                ? "y축 = 피치(log scale). pitch 선 하나. ▲ 전환: 멜로디가 꺾이는 지점. 마커에 마우스를 올리면 설명이 보입니다."
+                : "y축 = 피치(log scale). phrase 안에서만 보임. 마커에 마우스를 올리면 설명이 보입니다."}
             </p>
           </details>
         </>

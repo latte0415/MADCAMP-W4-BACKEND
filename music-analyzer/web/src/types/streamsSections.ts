@@ -166,18 +166,30 @@ export interface VocalTurn {
   score?: number;
 }
 
+/** vocal onset (activation peak, Turn과 별도로 얹는 용도) */
+export interface VocalOnset {
+  t: number;
+  type: "onset";
+  strength?: number;
+  score?: number;
+}
+
 export interface VocalData {
   vocal_curve: VocalCurvePoint[];
   vocal_keypoints: VocalKeypoint[];
   vocal_phrases?: VocalPhrase[];
   vocal_turns?: VocalTurn[];
+  vocal_onsets?: VocalOnset[];
   vocal_curve_meta?: { pitch_unit?: string; amp?: string; y_axis_hint?: string };
 }
 
-/** Other 곡선 한 점 (시간–밀도) */
+/** Other 곡선 한 점 (시간–멜로디/밀도) */
 export interface OtherCurvePoint {
   t: number;
-  density: number;
+  density?: number;
+  pitch?: number | null;
+  amp?: number;
+  voiced?: boolean;
 }
 
 /** Other 패드 영역 (반투명 밴드) */
@@ -186,6 +198,7 @@ export interface OtherRegion {
   end: number;
   intensity?: number;
   flux_mean?: number;
+  pitch_mean?: number;
 }
 
 export interface OtherData {

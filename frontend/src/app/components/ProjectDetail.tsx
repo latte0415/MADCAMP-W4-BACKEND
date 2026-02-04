@@ -1,25 +1,38 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Project } from '../types';
 import { Header } from './Header';
 import { VideoPlayer, VideoPlayerHandle } from './VideoPlayer';
 import { Timeline } from './Timeline';
-import { Calendar, Clock, Activity } from 'lucide-react';
+import { AudioWaveformTimeline } from './AudioWaveformTimeline';
+import { MusicAnalysisSection } from './MusicAnalysisSection';
+import { Button } from './ui/button';
+import { Upload, Music, Loader2 } from 'lucide-react';
 
 interface ProjectDetailProps {
   project: Project;
   onBack: () => void;
+  onOpenUploadDialog?: () => void;
   userName?: string;
   onLogin?: () => void;
   onLogout?: () => void;
 }
 
-export function ProjectDetail({ project, onBack, userName = '게스트', onLogin, onLogout }: ProjectDetailProps) {
+export function ProjectDetail({
+  project,
+  onBack,
+  onOpenUploadDialog,
+  userName = '게스트',
+  onLogin,
+  onLogout,
+}: ProjectDetailProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [hoverTime, setHoverTime] = useState<number | null>(null);
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
 
   const handlePlayPause = () => {
-    setIsPlaying(prev => !prev);
+    setIsPlaying((prev) => !prev);
   };
 
   const handleTimeUpdate = (time: number) => {
@@ -31,8 +44,14 @@ export function ProjectDetail({ project, onBack, userName = '게스트', onLogin
     setCurrentTime(time);
   };
 
+  useEffect(() => {
+    const el = previewVideoRef.current;
+    if (!el || hoverTime === null) return;
+    el.currentTime = hoverTime;
+  }, [hoverTime]);
+
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('ko-KR', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -41,11 +60,10 @@ export function ProjectDetail({ project, onBack, userName = '게스트', onLogin
     }).format(date);
   };
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}m ${secs}s`;
-  };
+  const lastEditedAt = project.completedAt ?? project.createdAt;
+  const isAnalyzing = project.status === 'queued' || project.status === 'running';
+  const hasNoMusicResult =
+    project.status === 'done' && project.musicKeypoints.length === 0 && !project.audioUrl;
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
@@ -53,99 +71,121 @@ export function ProjectDetail({ project, onBack, userName = '게스트', onLogin
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Project meta */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white mb-3">{project.title}</h1>
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Calendar className="size-4" />
-                <span>Created {formatDate(project.createdAt)}</span>
+          {/* 정보 섹션 */}
+          <section className="mb-8">
+            <h1 className="text-2xl font-bold text-white mb-2">{project.title}</h1>
+            <div className="text-sm text-zinc-400">
+              마지막 편집일: {formatDate(lastEditedAt)}
+            </div>
+          </section>
+
+          {/* 비디오 섹션 */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-white mb-4">비디오</h2>
+            {!project.videoUrl ? (
+              <div className="rounded-lg border border-white/10 bg-zinc-900/50 p-8 text-center">
+                <p className="text-zinc-400 mb-4">영상이 없습니다.</p>
+                <Button
+                  variant="outline"
+                  className="bg-white/5 border-white/10 hover:bg-white/10"
+                  onClick={onOpenUploadDialog}
+                >
+                  <Upload className="size-4 mr-2" />
+                  영상 업로드
+                </Button>
+                <p className="text-xs text-zinc-500 mt-2">
+                  새 프로젝트에서 영상을 업로드할 수 있습니다.
+                </p>
               </div>
-              {project.completedAt && (
-                <div className="flex items-center gap-2 text-zinc-400">
-                  <Clock className="size-4" />
-                  <span>Completed {formatDate(project.completedAt)}</span>
+            ) : (
+              <>
+                <div className="relative mb-4">
+                  <VideoPlayer
+                    ref={videoPlayerRef}
+                    videoUrl={project.videoUrl}
+                    isPlaying={isPlaying}
+                    onPlayPause={handlePlayPause}
+                    onTimeUpdate={handleTimeUpdate}
+                    currentTime={currentTime}
+                  />
+                  {hoverTime !== null && project.videoUrl && (
+                    <div className="absolute bottom-4 left-4 z-10 w-40 overflow-hidden rounded border border-white/20 bg-black/80 shadow-lg">
+                      <video
+                        ref={previewVideoRef}
+                        src={project.videoUrl}
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="w-full aspect-video object-contain pointer-events-none"
+                      />
+                      <div className="px-2 py-1 text-xs text-zinc-300 text-center">
+                        {Math.floor(hoverTime)}s
+                      </div>
+                    </div>
+                  )}
                 </div>
+                <Timeline
+                  duration={project.duration}
+                  currentTime={currentTime}
+                  musicKeypoints={project.musicKeypoints}
+                  motionKeypoints={project.motionKeypoints}
+                  onSeek={handleSeek}
+                  onHoverTime={setHoverTime}
+                />
+              </>
+            )}
+          </section>
+
+          {/* 오디오 섹션 */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-white mb-4">오디오</h2>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              {!project.audioUrl ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/5 border-white/10 hover:bg-white/10"
+                    onClick={onOpenUploadDialog}
+                  >
+                    <Music className="size-4 mr-2" />
+                    음악 업로드
+                  </Button>
+                  <span className="text-xs text-zinc-500">
+                    오디오는 새 프로젝트 생성 시 함께 업로드할 수 있습니다.
+                  </span>
+                </>
+              ) : null}
+              {isAnalyzing && (
+                <span className="flex items-center gap-2 text-sm text-zinc-400">
+                  <Loader2 className="size-4 animate-spin" />
+                  분석 중...
+                </span>
               )}
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Activity className="size-4" />
-                <span className="capitalize">{project.mode} Mode</span>
-              </div>
+              {hasNoMusicResult && (
+                <span className="text-sm text-zinc-500">
+                  이 프로젝트는 음악 분석이 완료되지 않았습니다.
+                </span>
+              )}
             </div>
-          </div>
-
-          {/* Stats cards */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-zinc-900/50 rounded-lg border border-white/10 p-4">
-              <div className="text-zinc-500 text-sm mb-1">Duration</div>
-              <div className="text-white text-xl font-semibold">
-                {formatDuration(project.duration)}
-              </div>
+            <div className="space-y-4">
+              <AudioWaveformTimeline
+                audioUrl={project.audioUrl}
+                duration={project.duration}
+                currentTime={currentTime}
+                onSeek={handleSeek}
+              />
+              {(project.musicKeypoints.length > 0 || (project.bassNotes?.length ?? 0) > 0) && (
+                <MusicAnalysisSection
+                  duration={project.duration}
+                  currentTime={currentTime}
+                  musicKeypoints={project.musicKeypoints}
+                  bassNotes={project.bassNotes}
+                  onSeek={handleSeek}
+                />
+              )}
             </div>
-            <div className="bg-zinc-900/50 rounded-lg border border-white/10 p-4">
-              <div className="text-zinc-500 text-sm mb-1">Music Keypoints</div>
-              <div className="text-white text-xl font-semibold">
-                {project.musicKeypoints.length}
-              </div>
-              <div className="text-xs text-zinc-600 mt-1">
-                Low: {project.musicKeypoints.filter(k => k.frequency === 'low').length} | 
-                Mid: {project.musicKeypoints.filter(k => k.frequency === 'mid').length} | 
-                High: {project.musicKeypoints.filter(k => k.frequency === 'high').length}
-              </div>
-            </div>
-            <div className="bg-zinc-900/50 rounded-lg border border-white/10 p-4">
-              <div className="text-zinc-500 text-sm mb-1">Motion Keypoints</div>
-              <div className="text-white text-xl font-semibold">
-                {project.motionKeypoints.length}
-              </div>
-              <div className="text-xs text-zinc-600 mt-1">
-                Hit: {project.motionKeypoints.filter(k => k.type === 'hit').length} | 
-                Hold: {project.motionKeypoints.filter(k => k.type === 'hold').length} | 
-                Appear: {project.motionKeypoints.filter(k => k.type === 'appear').length} | 
-                Vanish: {project.motionKeypoints.filter(k => k.type === 'vanish').length}
-              </div>
-            </div>
-          </div>
-
-          {/* Video player */}
-          <div className="mb-6">
-            <VideoPlayer
-              ref={videoPlayerRef}
-              videoUrl={project.videoUrl}
-              isPlaying={isPlaying}
-              onPlayPause={handlePlayPause}
-              onTimeUpdate={handleTimeUpdate}
-              currentTime={currentTime}
-            />
-          </div>
-
-          {/* Timeline */}
-          <Timeline
-            duration={project.duration}
-            currentTime={currentTime}
-            musicKeypoints={project.musicKeypoints}
-            motionKeypoints={project.motionKeypoints}
-            onSeek={handleSeek}
-          />
-
-          {/* Analysis insights */}
-          <div className="mt-6 bg-zinc-900/50 rounded-lg border border-white/10 p-5">
-            <h3 className="text-sm font-semibold text-white mb-3">Analysis Insights</h3>
-            <div className="space-y-2 text-sm text-zinc-400">
-              <p>
-                • Detected {project.musicKeypoints.length} musical keypoints across low, mid, and high frequencies
-              </p>
-              <p>
-                • Identified {project.motionKeypoints.filter(k => k.type === 'hit').length} hit movements,{' '}
-                {project.motionKeypoints.filter(k => k.type === 'hold').length} hold segments,{' '}
-                {project.motionKeypoints.filter(k => k.type === 'appear').length} appear events, and{' '}
-                {project.motionKeypoints.filter(k => k.type === 'vanish').length} vanish events
-              </p>
-              <p>
-                • Average sync accuracy is optimal for {project.mode} performances
-              </p>
-            </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>

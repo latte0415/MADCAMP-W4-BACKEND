@@ -302,25 +302,21 @@ flowchart LR
 - **Band 기반 역할 할당** (layering.md): `assign_roles_by_band(energy_extras, dependency=..., focus=...)` → role_composition. P0 = 대역별 에너지 argmax, P1 = MVP 생략, P2 = dependency/focus gate + P0 제외 나머지 대역.
 - **저장**: `write_layered_json(ctx, metrics, role_composition, path, ...)` → `onset_events_layered.json`. events[].**bands** `[{ band, role }]`, 호환용 **layer** (deprecated).
 
-**07_streams_sections.py**
+**legacy/streams_sections.py (실행 비활성)**
 
 - **입력**: `build_context_with_band_evidence()` → `band_onset_times`, `band_onset_strengths`.
 - **흐름**: `build_streams(band_onset_times, band_onset_strengths)` → 스트림 목록. `segment_sections(streams, duration)` → 섹션 목록. 섹션 경계 + 스트림 accent → keypoints.
 - **저장**: `write_streams_sections_json(..., streams, sections, keypoints, events, ...)` → `streams_sections.json`. 작업 과정 상세는 [work_process.md](work_process.md) §1.3 참고.
 
-**08_drum_band_energy.py, 09_madmom_drum_band.py**
+**drum/cnn_band_onsets.py, drum/madmom_band.py (선택)**
 
-- **08**: stem 폴더 기반 low/mid/high 대역 에너지. `compute_drum_band_energy`, `write_drum_band_energy_json`.
-- **09**: madmom 드럼 대역 키포인트. `compute_madmom_drum_band_keypoints`.
+- CNN band onset만: `compute_cnn_band_onsets` → drum_band_energy JSON(선택). madmom: `compute_madmom_drum_band_keypoints`.
+- 메인 드럼 파이프라인: drum/run.py → `compute_cnn_band_onsets_with_odf` → keypoints_by_band, texture_blocks_by_band (스트림 미사용).
 
-**10_cnn_band_onsets.py**
+**export/run_stem_folder.py (드럼+베이스+보컬+Other 통합)**
 
-- CNN + ODF band onset/strength. `compute_cnn_band_onsets`, `compute_cnn_band_onsets_with_odf` 내부용.
-
-**export/run_stem_folder.py (드럼+베이스 통합)**
-
-- **입력**: stem 폴더명. **흐름**: drum/run(CNN band onset → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(조건부).
-- **저장**: `write_streams_sections_json(..., keypoints_by_band=..., texture_blocks_by_band=..., bass=bass_dict)` → `streams_sections_cnn.json`.
+- **입력**: stem 폴더명. **흐름**: drum/run(CNN band onset → keypoints_by_band, texture_blocks_by_band, **스트림/섹션 호출 없음**) + bass/run(bass.wav 있으면) + vocal/run(vocals.wav 있으면) + other/run(other.wav 있으면).
+- **저장**: `write_streams_sections_json(..., keypoints_by_band=..., texture_blocks_by_band=..., bass=bass_dict, vocal=vocal_dict, other=other_dict)` → `streams_sections_cnn.json`.
 
 ---
 
@@ -392,12 +388,16 @@ drums stem 확보 → 01_explore·03_visualize_point 드럼 입력으로 사용.
 
 ### 3.5 audio_engine/engine/
 
-| 파일 | 역할 | 비고 |
-|------|------|------|
+| 파일/디렉터리 | 역할 | 비고 |
+|---------------|------|------|
 | stems.py | Demucs 래퍼 | 비-WAV는 WAV 변환 후 실행, stem별 wav 경로 반환 |
 | schemas.py | 결과 스키마 | 스텁(주석) |
 | keypoints.py | 키포인트 추출 | 스텁(주석) |
 | viz.py | 시각화 유틸 | 스텁(주석) |
+| **tempo/** | BPM·마디 파이프라인 | bpm.py(infer_bpm), bars.py(bars_from_bpm), pipeline.py(run_tempo_pipeline), export.py(build_tempo_output). 스크립트: tempo/run.py → tempo_bars.json |
+| **bass/** | 베이스 노트·렌더 | bass_v4.py(run_bass_v4, 메인), bass_v2/v3(레거시), export.py(build_bass_output) |
+| **vocal/** | 보컬 곡선·프레이즈·키포인트 | vocal_curve.py, vocal_phrases.py, vocal_onsets.py, export.py(build_vocal_output). USE_PHRASE 시 phrases, 아니면 turns+onsets |
+| **other/** | Other 밀도·패드 | other_pipeline.py(run_other_pipeline), export.py(build_other_output) |
 
 ---
 

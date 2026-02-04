@@ -12,10 +12,11 @@ def build_vocal_output(
     vocal_curve_meta: dict[str, Any] | None = None,
     vocal_phrases: list[dict[str, Any]] | None = None,
     vocal_turns: list[dict[str, Any]] | None = None,
+    vocal_onsets: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """
-    vocal_curve + vocal_keypoints + (선택) vocal_phrases / vocal_turns + meta → JSON 호환 dict.
-    USE_PHRASE=False 시 vocal_turns만 사용 (phrase 없이 Turn 포인트만).
+    vocal_curve + vocal_keypoints + (선택) vocal_phrases / vocal_turns / vocal_onsets + meta.
+    USE_PHRASE=False: vocal_turns + vocal_onsets(activation peak).
     """
     meta = vocal_curve_meta or {}
     out: dict[str, Any] = {
@@ -27,4 +28,6 @@ def build_vocal_output(
         out["vocal_phrases"] = vocal_phrases
     if vocal_turns is not None:
         out["vocal_turns"] = vocal_turns
+    if vocal_onsets is not None:
+        out["vocal_onsets"] = vocal_onsets
     return out

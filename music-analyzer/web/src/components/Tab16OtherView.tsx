@@ -102,6 +102,10 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
   const other = data?.other;
   const curve = other?.other_curve ?? [];
   const regions = other?.other_regions ?? [];
+  const keypoints = other?.other_keypoints ?? [];
+  const hasPitchCurve = curve.some(
+    (p) => p.pitch != null && Number.isFinite(p.pitch as number)
+  );
   const hasOther = (Array.isArray(curve) && curve.length > 0) || (Array.isArray(regions) && regions.length > 0);
 
   const dur = data?.duration_sec ?? (duration || 1);
@@ -119,6 +123,16 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
     (density: number) => {
       const v = Math.max(0, Math.min(1, density));
       const innerH = Math.max(0, STRIP_HEIGHT - 2 * PADDING_VERTICAL);
+      return PADDING_VERTICAL + (1 - v) * innerH;
+    },
+    []
+  );
+
+  const pitchToY = useCallback(
+    (pitch: number, minPitch: number, maxPitch: number) => {
+      const innerH = Math.max(0, STRIP_HEIGHT - 2 * PADDING_VERTICAL);
+      const range = Math.max(1, maxPitch - minPitch);
+      const v = (pitch - minPitch) / range;
       return PADDING_VERTICAL + (1 - v) * innerH;
     },
     []
@@ -149,6 +163,44 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
   const visibleRegions = regions.filter(
     (r) => r.end >= visibleStart && r.start <= visibleEnd
   );
+  const visibleKeypoints = keypoints.filter(
+    (k) => k.t >= visibleStart && k.t <= visibleEnd
+  );
+  const visiblePitchVals = visibleCurvePoints
+    .map((v) => v.pitch)
+    .filter((v): v is number => v != null && Number.isFinite(v));
+  const visiblePitchMin = visiblePitchVals.length ? Math.min(...visiblePitchVals) : 0;
+  const visiblePitchMax = visiblePitchVals.length ? Math.max(...visiblePitchVals) : 1;
+
+  /** 키포인트 시점 t에서 곡선 보간 density (y 계산용) */
+  const densityAtT = useCallback(
+    (t: number): number => {
+      if (curve.length === 0) return 0.5;
+      const i = curve.findIndex((p) => p.t >= t);
+      if (i <= 0) return curve[0]?.density ?? 0.5;
+      if (i >= curve.length) return curve[curve.length - 1]?.density ?? 0.5;
+      const a = curve[i - 1]!;
+      const b = curve[i]!;
+      const frac = (t - a.t) / (b.t - a.t);
+      return (a.density ?? 0.5) + frac * ((b.density ?? 0.5) - (a.density ?? 0.5));
+    },
+    [curve]
+  );
+
+  const pitchAtT = useCallback(
+    (t: number): number | null => {
+      if (curve.length === 0) return null;
+      const i = curve.findIndex((p) => p.t >= t);
+      if (i <= 0) return curve[0]?.pitch ?? null;
+      if (i >= curve.length) return curve[curve.length - 1]?.pitch ?? null;
+      const a = curve[i - 1]!;
+      const b = curve[i]!;
+      if (a.pitch == null || b.pitch == null) return a.pitch ?? b.pitch ?? null;
+      const frac = (t - a.t) / (b.t - a.t);
+      return a.pitch + frac * (b.pitch - a.pitch);
+    },
+    [curve]
+  );
 
   if (!data) {
     return (
@@ -173,6 +225,7 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
       <div className="tab16-meta">
         <span className="tab16-meta-count">
           곡선 {curve.length}점, 영역 {regions.length}개
+          {keypoints.length > 0 ? `, 키포인트 ${keypoints.length}개` : ""}
         </span>
         {data.source && <span className="tab16-meta-source">{data.source}</span>}
       </div>
@@ -206,7 +259,9 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
             </div>
             {curve.length > 0 && (
               <div className="tab16-track tab16-track-density">
-                <div className="tab16-track-label">Other · onset 밀도 곡선</div>
+                <div className="tab16-track-label">
+                  {hasPitchCurve ? "Other · 멜로디 피치 곡선" : "Other · onset 밀도 곡선"}
+                </div>
                 <div
                   className="tab16-strip-inner"
                   style={{
@@ -233,19 +288,114 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                       visibleCurvePoints.map((p: OtherCurvePoint, i: number) => {
                         if (i === 0) return null;
                         const prev = visibleCurvePoints[i - 1]!;
+                        const hasPitchRange = Number.isFinite(visiblePitchMin) && Number.isFinite(visiblePitchMax);
+                        const lineWidth = Math.max(1.5, 1.5 + (p.amp ?? 0) * 2);
+                        if (hasPitchCurve) {
+                          if (prev.pitch == null || p.pitch == null || !hasPitchRange) return null;
+                          return (
+                            <line
+                              key={`d-${i}`}
+                              x1={xScale(prev.t)}
+                              y1={pitchToY(prev.pitch, visiblePitchMin, visiblePitchMax)}
+                              x2={xScale(p.t)}
+                              y2={pitchToY(p.pitch, visiblePitchMin, visiblePitchMax)}
+                              stroke="#2c3e50"
+                              strokeWidth={lineWidth}
+                              strokeLinecap="round"
+                            />
+                          );
+                        }
                         return (
                           <line
                             key={`d-${i}`}
                             x1={xScale(prev.t)}
-                            y1={densityToY(prev.density)}
+                            y1={densityToY(prev.density ?? 0.5)}
                             x2={xScale(p.t)}
-                            y2={densityToY(p.density)}
+                            y2={densityToY(p.density ?? 0.5)}
                             stroke="#27ae60"
                             strokeWidth={2}
                             strokeLinecap="round"
                           />
                         );
                       })}
+                    <g style={{ pointerEvents: "auto" }}>
+                      {visibleKeypoints.map((kp, i) => {
+                        const cx = xScale(kp.t);
+                        const density = densityAtT(kp.t);
+                        const pitch = pitchAtT(kp.t);
+                        const cy = hasPitchCurve && pitch != null
+                          ? pitchToY(pitch, visiblePitchMin, visiblePitchMax)
+                          : densityToY(density);
+                        if (kp.type === "density_peak") {
+                          const size = 5;
+                          const pts = `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`;
+                          return (
+                            <polygon
+                              key={`kp-${i}-${kp.t}`}
+                              points={pts}
+                              fill="#e67e22"
+                              stroke="#fff"
+                              strokeWidth={1}
+                              title="density peak: 리듬이 가장 쌓인 시점"
+                            />
+                          );
+                        }
+                        if (kp.type === "phrase_start") {
+                          const size = 5;
+                          const pts = `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`;
+                          return (
+                            <polygon
+                              key={`kp-${i}-${kp.t}`}
+                              points={pts}
+                              fill="#16a085"
+                              stroke="#fff"
+                              strokeWidth={1}
+                              title="phrase_start: 멜로디 시작"
+                            />
+                          );
+                        }
+                        if (kp.type === "pitch_turn") {
+                          const size = 4;
+                          const pts = `${cx},${cy - size} ${cx - size},${cy} ${cx},${cy + size} ${cx + size},${cy}`;
+                          return (
+                            <polygon
+                              key={`kp-${i}-${kp.t}`}
+                              points={pts}
+                              fill="#8e44ad"
+                              stroke="#fff"
+                              strokeWidth={1}
+                              title="pitch_turn: 멜로디 전환점"
+                            />
+                          );
+                        }
+                        if (kp.type === "accent") {
+                          return (
+                            <circle
+                              key={`kp-${i}-${kp.t}`}
+                              cx={cx}
+                              cy={cy}
+                              r={4}
+                              fill="#e74c3c"
+                              stroke="#fff"
+                              strokeWidth={1}
+                              title="accent: 에너지 강조"
+                            />
+                          );
+                        }
+                        return (
+                          <circle
+                            key={`kp-${i}-${kp.t}`}
+                            cx={cx}
+                            cy={cy}
+                            r={3}
+                            fill="#3498db"
+                            stroke="#fff"
+                            strokeWidth={1}
+                            title="onset: 타격/어택 시점"
+                          />
+                        );
+                      })}
+                    </g>
                     {duration > 0 && (
                       <line
                         x1={xScale(currentTime)}
@@ -262,7 +412,7 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
             )}
             {regions.length > 0 && (
               <div className="tab16-track tab16-track-regions">
-                <div className="tab16-track-label">Other · 패드/유지 영역 (반투명 밴드)</div>
+                <div className="tab16-track-label">Other · 멜로디 활성 구간 (반투명 밴드)</div>
                 <div
                   className="tab16-strip-inner"
                   style={{
@@ -315,7 +465,7 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
           <details className="tab16-details">
             <summary>Other 설명</summary>
             <p className="tab16-desc">
-              리듬적: onset 밀도 곡선. 패드/앰비언트: RMS 기반 유지 구간(반투명 밴드).
+              멜로디: 피치 곡선 + 전환점/강조 지점. 멜로디 활성 구간은 반투명 밴드로 표시.
             </p>
           </details>
         </>

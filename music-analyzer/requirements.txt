@@ -21,3 +21,7 @@ madmom>=0.16.0
 # Optional: Stem separation (나중에 필요하면)
 # demucs>=4.0.0
 # spleeter>=2.3.0
+
+# Optional: Melody f0 tracking (GPU 가능)
+# torch>=2.1.0
+# torchcrepe>=0.0.23

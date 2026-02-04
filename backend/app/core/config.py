@@ -29,6 +29,7 @@ BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8000")
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
 WORKER_ENABLED = os.environ.get("WORKER_ENABLED", "true").lower() == "true"
+WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "1"))
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MUSIC_ANALYZER_ROOT = os.environ.get("MUSIC_ANALYZER_ROOT", str(PROJECT_ROOT / "music-analyzer"))
 DEMUCS_MODEL = os.environ.get("DEMUCS_MODEL", "htdemucs")

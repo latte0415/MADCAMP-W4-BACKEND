@@ -7,7 +7,7 @@ from authlib.integrations.starlette_client import OAuth, OAuthError
 
 from ..db import models
 from ..core.config import BASE_URL, FRONTEND_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-from ..core.deps import get_db
+from ..core.deps import get_db, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -67,13 +67,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
 
 @router.get("/me")
-def me(request: Request, db: Session = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+def me(user: models.User = Depends(get_current_user)):
     return {
         "id": user.id,
         "email": user.email,

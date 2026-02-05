@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, Dict, Any
+from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
@@ -95,6 +96,8 @@ def get_analysis_status(db: Session, request_id: int) -> Dict[str, Any]:
     req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="not found")
+    if req.is_deleted:
+        raise HTTPException(status_code=404, detail="not found")
     job = get_job(request_id, db=db) or {}
     return {
         "id": req.id,
@@ -166,6 +169,16 @@ def _delete_result_keys(res: Optional[models.AnalysisResult], keys: list[str]) -
         pass
 
 
+def _delete_keys(keys: list[str]) -> None:
+    to_delete = [key for key in keys if key]
+    if not to_delete:
+        return
+    try:
+        delete_keys(to_delete)
+    except Exception:
+        pass
+
+
 def update_analysis_audio(
     db: Session,
     user_id: int,
@@ -224,6 +237,48 @@ def update_analysis_video(
         req.params_json = params
     db.commit()
     return video_id
+
+
+def delete_analysis_request(
+    db: Session,
+    user_id: int,
+    request_id: int,
+) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.is_deleted:
+        return
+
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).first()
+    keys = []
+    if res:
+        keys.extend(
+            [
+                res.motion_json_s3_key,
+                res.music_json_s3_key,
+                res.magic_json_s3_key,
+                res.overlay_video_s3_key,
+            ]
+        )
+    if edit:
+        keys.extend([edit.motion_markers_s3_key, edit.edited_overlay_s3_key])
+    _delete_keys(keys)
+
+    if res:
+        db.delete(res)
+    if edit:
+        db.delete(edit)
+    db.query(models.AnalysisJob).filter(models.AnalysisJob.request_id == req.id).delete()
+
+    req.is_deleted = True
+    req.status = "failed"
+    req.error_message = "deleted"
+    req.finished_at = datetime.utcnow()
+    db.commit()
 
 
 def remove_analysis_audio(

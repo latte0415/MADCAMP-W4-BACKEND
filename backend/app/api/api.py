@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from typing import Optional
+from datetime import datetime, timedelta
+import asyncio
+import json
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, aliased
 
 from ..core.deps import get_db, get_current_user
 from ..core.config import MONITORING_PUBLIC
 from ..db import models
+from ..db.base import SessionLocal
 from ..schemas import (
     MediaCreateResponse,
     MediaPresignRequest,
@@ -24,6 +29,7 @@ from ..schemas import (
     LibraryResponse,
     MusicResultResponse,
     MonitoringResponse,
+    MonitoringHealthResponse,
 )
 from ..services import analysis as analysis_service
 from ..services import media as media_service
@@ -95,6 +101,59 @@ def create_analysis(
 def analysis_status(request_id: int, db: Session = Depends(get_db)):
     data = analysis_service.get_analysis_status(db, request_id)
     return AnalysisStatusResponse(**data)
+
+
+@router.get("/analysis/{request_id}/events")
+async def analysis_events(request_id: int):
+    async def event_stream():
+        last_payload: Optional[dict] = None
+        try:
+            while True:
+                db: Session = SessionLocal()
+                try:
+                    try:
+                        data = analysis_service.get_analysis_status(db, request_id)
+                    except HTTPException as exc:
+                        if exc.status_code == 404:
+                            payload = {
+                                "id": request_id,
+                                "status": "failed",
+                                "error_message": "not found",
+                            }
+                            yield f"data: {json.dumps(payload)}\n\n"
+                            return
+                        raise
+
+                    payload = {
+                        "id": request_id,
+                        "status": data.get("status"),
+                        "message": data.get("message"),
+                        "progress": data.get("progress"),
+                        "error_message": data.get("error_message"),
+                        "log": data.get("log"),
+                    }
+
+                    if payload != last_payload:
+                        last_payload = payload
+                        yield f"data: {json.dumps(payload)}\n\n"
+
+                    if payload["status"] in ("done", "failed"):
+                        return
+                finally:
+                    db.close()
+
+                await asyncio.sleep(1.0)
+        except asyncio.CancelledError:
+            return
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.post("/analysis/{request_id}/status")
@@ -193,22 +252,103 @@ def monitoring(
                 models.AnalysisResult,
                 models.AnalysisEdit,
                 audio,
+                models.AnalysisJob,
             )
             .outerjoin(video, video.id == models.AnalysisRequest.video_id)
             .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
             .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
             .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
+            .outerjoin(models.AnalysisJob, models.AnalysisJob.request_id == models.AnalysisRequest.id)
             .filter(models.AnalysisRequest.status == status_value)
             .filter(models.AnalysisRequest.is_deleted == False)
             .order_by(models.AnalysisRequest.created_at.desc())
             .limit(limit)
         )
-        return [presenters.build_library_item(req, video_row, res, edit, audio_row) for req, video_row, res, edit, audio_row in q.all()]
+        return [
+            presenters.build_monitoring_item(req, video_row, res, edit, audio_row, job)
+            for req, video_row, res, edit, audio_row, job in q.all()
+        ]
 
     return MonitoringResponse(
         queued=_fetch("queued"),
         queued_music=_fetch("queued_music"),
         running=_fetch("running"),
+        failed=_fetch("failed"),
+    )
+
+
+@router.get("/monitoring/health", response_model=MonitoringHealthResponse)
+def monitoring_health(db: Session = Depends(get_db)):
+    if not MONITORING_PUBLIC:
+        raise HTTPException(status_code=401, detail="monitoring disabled")
+
+    now = datetime.utcnow()
+    since_24h = now - timedelta(hours=24)
+    active_cutoff = now - timedelta(minutes=2)
+    stale_cutoff = now - timedelta(minutes=10)
+
+    total_running = (
+        db.query(models.AnalysisRequest)
+        .filter(models.AnalysisRequest.status == "running")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .count()
+    )
+    total_queued = (
+        db.query(models.AnalysisRequest)
+        .filter(models.AnalysisRequest.status == "queued")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .count()
+    )
+    total_queued_music = (
+        db.query(models.AnalysisRequest)
+        .filter(models.AnalysisRequest.status == "queued_music")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .count()
+    )
+    total_failed_24h = (
+        db.query(models.AnalysisRequest)
+        .filter(models.AnalysisRequest.status == "failed")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .filter(models.AnalysisRequest.finished_at != None)
+        .filter(models.AnalysisRequest.finished_at >= since_24h)
+        .count()
+    )
+    total_done_24h = (
+        db.query(models.AnalysisRequest)
+        .filter(models.AnalysisRequest.status == "done")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .filter(models.AnalysisRequest.finished_at != None)
+        .filter(models.AnalysisRequest.finished_at >= since_24h)
+        .count()
+    )
+
+    active_running = (
+        db.query(models.AnalysisJob)
+        .join(models.AnalysisRequest, models.AnalysisJob.request_id == models.AnalysisRequest.id)
+        .filter(models.AnalysisRequest.status == "running")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .filter(models.AnalysisJob.updated_at != None)
+        .filter(models.AnalysisJob.updated_at >= active_cutoff)
+        .count()
+    )
+    stale_running = (
+        db.query(models.AnalysisJob)
+        .join(models.AnalysisRequest, models.AnalysisJob.request_id == models.AnalysisRequest.id)
+        .filter(models.AnalysisRequest.status == "running")
+        .filter(models.AnalysisRequest.is_deleted == False)
+        .filter(models.AnalysisJob.updated_at != None)
+        .filter(models.AnalysisJob.updated_at <= stale_cutoff)
+        .count()
+    )
+
+    return MonitoringHealthResponse(
+        total_running=total_running,
+        total_queued=total_queued,
+        total_queued_music=total_queued_music,
+        total_failed_24h=total_failed_24h,
+        total_done_24h=total_done_24h,
+        active_running=active_running,
+        stale_running=stale_running,
     )
 
 
@@ -281,6 +421,17 @@ def remove_analysis_video(
     return {"ok": True}
 
 
+@router.delete("/analysis/{request_id}")
+def delete_analysis_request(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청을 삭제(soft delete)합니다."""
+    analysis_service.delete_analysis_request(db, user.id, request_id)
+    return {"ok": True}
+
+
 @router.patch("/analysis/{request_id}/extract-audio")
 def update_extract_audio(
     request_id: int,
@@ -330,7 +481,7 @@ def run_music_only(
 @router.get("/project/{request_id}")
 def project_detail(request_id: int, db: Session = Depends(get_db)):
     req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
-    if not req:
+    if not req or req.is_deleted:
         raise HTTPException(status_code=404, detail="not found")
     video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first()
     audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first() if req.audio_id else None

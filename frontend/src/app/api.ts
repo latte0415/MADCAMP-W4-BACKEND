@@ -120,9 +120,31 @@ export async function getAnalysisStatus(id: number) {
   );
 }
 
-export async function uploadFileToS3(url: string, file: File) {
-  const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
-  if (!res.ok) throw new Error('S3 upload failed');
+export function uploadFileToS3(
+  url: string,
+  file: File,
+  onProgress?: (percent: number) => void
+) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url, true);
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.upload.onprogress = (evt) => {
+      if (!evt.lengthComputable) return;
+      const percent = Math.round((evt.loaded / evt.total) * 100);
+      onProgress?.(percent);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+      } else {
+        reject(new Error('S3 upload failed'));
+      }
+    };
+    xhr.onerror = () => reject(new Error('S3 upload failed'));
+    xhr.send(file);
+  });
 }
 
 function clamp01(value: number) {

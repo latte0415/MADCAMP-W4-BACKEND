@@ -3,7 +3,9 @@ import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-do
 // import { ProjectLibrary } from './components/ProjectLibrary';
 import { ProjectDetail } from './components/ProjectDetail';
 import { UploadDialog } from './components/UploadDialog';
+import { Progress } from './components/ui/progress';
 import { LandingPage } from './components/landing/LandingPage';
+import type { NewProjectData } from './components/landing/DJStudio';
 import { Project, ProjectMode } from './types';
 import {
   getLibrary,
@@ -29,6 +31,9 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<null | { label: string; progress: number }>(
+    null
+  );
   const [userName, setUserName] = useState<string>('게스트');
   const [loadingProject, setLoadingProject] = useState(false);
   const navigate = useNavigate();
@@ -74,6 +79,16 @@ export default function App() {
 
   const handleNewProject = () => {
     setUploadDialogOpen(true);
+  };
+
+  const handleCreateProject = (data: NewProjectData) => {
+    handleUpload({
+      title: data.title,
+      mode: data.mode,
+      video: data.videoFile,
+      audio: data.audioFile,
+      extractAudio: data.extractAudio,
+    });
   };
 
   const startStatusPolling = (requestId: number) => {
@@ -199,6 +214,7 @@ export default function App() {
       }
 
       setUploadDialogOpen(false);
+      setUploadStatus({ label: 'Preparing upload...', progress: 0 });
 
       const localVideoUrl = data.video ? URL.createObjectURL(data.video) : undefined;
       const localAudioUrl = data.audio ? URL.createObjectURL(data.audio) : undefined;
@@ -227,7 +243,10 @@ export default function App() {
         let videoMedia: { id: number } | null = null;
         if (data.video) {
           const videoPresign = await presignUpload(data.video, 'video');
-          await uploadFileToS3(videoPresign.upload_url, data.video);
+          setUploadStatus({ label: 'Uploading video...', progress: 0 });
+          await uploadFileToS3(videoPresign.upload_url, data.video, (p) =>
+            setUploadStatus({ label: 'Uploading video...', progress: p })
+          );
           videoMedia = await commitMedia({
             s3_key: videoPresign.s3_key,
             type: 'video',
@@ -239,7 +258,10 @@ export default function App() {
         let audioId: number | null = null;
         if (data.audio) {
           const audioPresign = await presignUpload(data.audio, 'audio');
-          await uploadFileToS3(audioPresign.upload_url, data.audio);
+          setUploadStatus({ label: 'Uploading audio...', progress: 0 });
+          await uploadFileToS3(audioPresign.upload_url, data.audio, (p) =>
+            setUploadStatus({ label: 'Uploading audio...', progress: p })
+          );
           const audioMedia = await commitMedia({
             s3_key: audioPresign.s3_key,
             type: 'audio',
@@ -249,6 +271,7 @@ export default function App() {
           audioId = audioMedia.id;
         }
 
+        setUploadStatus({ label: 'Starting analysis...', progress: 100 });
         const req = await createAnalysis({
           video_id: videoMedia?.id ?? null,
           audio_id: audioId,
@@ -268,6 +291,7 @@ export default function App() {
         );
 
         startStatusPolling(req.id);
+        setTimeout(() => setUploadStatus(null), 800);
       } catch (err) {
         console.error(err);
           setSelectedProject(prev =>
@@ -276,6 +300,7 @@ export default function App() {
               : prev
           );
         alert('업로드 또는 분석 요청에 실패했습니다. 다시 시도해 주세요.');
+        setUploadStatus(null);
       }
     })();
   };
@@ -340,6 +365,15 @@ export default function App() {
 
   return (
     <div className="size-full bg-zinc-950 text-white">
+      {uploadStatus && (
+        <div className="fixed left-1/2 top-6 z-50 w-[320px] -translate-x-1/2 rounded-xl border border-white/10 bg-neutral-900/90 px-4 py-3 shadow-xl backdrop-blur">
+          <div className="text-xs uppercase tracking-[0.3em] text-neutral-500 mb-2">
+            Upload
+          </div>
+          <div className="text-sm text-white mb-2">{uploadStatus.label}</div>
+          <Progress value={uploadStatus.progress} className="h-2 bg-white/10" />
+        </div>
+      )}
       <Routes>
         <Route
           path="/"
@@ -347,7 +381,7 @@ export default function App() {
             <LandingPage
               projects={projects}
               onSelectProject={handleSelectProject}
-              onNewProject={handleNewProject}
+              onCreateProject={handleCreateProject}
               {...authProps}
             />
           }

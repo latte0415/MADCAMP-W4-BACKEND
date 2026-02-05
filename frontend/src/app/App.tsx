@@ -207,66 +207,6 @@ export default function App() {
           activeStreamsRef.current.delete(requestId);
           if (st.status === 'done') {
             await handleAnalysisComplete(requestId);
-  const handleCreateProject = (data: NewProjectData) => {
-    handleUpload({
-      title: data.title,
-      mode: data.mode,
-      video: data.videoFile,
-      audio: data.audioFile,
-      extractAudio: data.extractAudio,
-    });
-  };
-
-  const handleDeleteProject = async (project: Project) => {
-    try {
-      await deleteProject(Number(project.id));
-      setProjects(prev => prev.filter(p => p.id !== project.id));
-      if (selectedProject?.id === project.id) {
-        setSelectedProject(null);
-        navigate('/');
-      }
-    } catch (err) {
-      console.error('Failed to delete project:', err);
-      alert('프로젝트 삭제에 실패했습니다.');
-    }
-  };
-
-  const startStatusPolling = (requestId: number) => {
-    const poll = setInterval(async () => {
-      const st = await getAnalysisStatus(requestId);
-        if (st.status === 'done' || st.status === 'failed') {
-          clearInterval(poll);
-          if (st.status === 'done') {
-          const detail = await getProjectDetail(requestId);
-          const musicJson = await fetchJson(detail.results?.music_json);
-          const motionJson = await fetchJson(detail.results?.motion_json);
-          const magicJson = await fetchJson(detail.results?.magic_json);
-          const musicKeypoints = parseMusicKeypoints(musicJson);
-          const motionKeypoints = [
-            ...parseMotionKeypoints(motionJson),
-            ...parseMotionKeypoints(magicJson),
-          ];
-          const bassNotes = parseBassNotes(musicJson);
-          const mapped = mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes);
-          setSelectedProject(prev => {
-            if (prev?.id !== String(requestId)) return prev;
-            if (prev.videoUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.videoUrl);
-            if (prev.audioUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.audioUrl);
-            return mapped;
-          });
-          } else {
-            setSelectedProject(prev =>
-              prev?.id === String(requestId)
-                ? { ...prev, status: 'failed', errorMessage: st.error_message ?? '분석에 실패했습니다.' }
-                : prev
-            );
-            setProjects(prev =>
-              prev.map(p =>
-                p.id === String(requestId)
-                  ? { ...p, status: 'failed', errorMessage: st.error_message ?? '분석에 실패했습니다.' }
-                  : p
-              )
-            );
           }
           await refreshLibrary();
         }
@@ -286,18 +226,21 @@ export default function App() {
     if (project.audioUrl?.startsWith('blob:')) URL.revokeObjectURL(project.audioUrl);
   };
 
-  const handleDeleteProject = async () => {
-    if (!selectedProject) return;
-    const projectId = selectedProject.id;
+  const handleDeleteProject = async (project?: Project) => {
+    const targetProject = project ?? selectedProject;
+    if (!targetProject) return;
+    const projectId = targetProject.id;
     const confirmDelete = window.confirm(
       '이 프로젝트를 삭제할까요?\n삭제하면 복구할 수 없습니다.'
     );
     if (!confirmDelete) return;
 
-    cleanupProjectUrls(selectedProject);
+    cleanupProjectUrls(targetProject);
     setProjects(prev => prev.filter(p => p.id !== projectId));
-    setSelectedProject(null);
-    navigate('/');
+    if (selectedProject?.id === projectId) {
+      setSelectedProject(null);
+      navigate('/');
+    }
 
     if (isTempId(projectId)) {
       deletedTempIdsRef.current.add(projectId);
@@ -305,7 +248,7 @@ export default function App() {
     }
 
     try {
-      await deleteAnalysisRequest(Number(projectId));
+      await deleteProject(Number(projectId));
       await refreshLibrary();
     } catch (err) {
       console.error(err);

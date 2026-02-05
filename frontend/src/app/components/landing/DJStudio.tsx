@@ -202,8 +202,14 @@ export function DJStudio({
                 {projects.length === 0 ? (
                   <div className="text-center px-4">
                     <p className="text-neutral-500 text-sm mb-4">no records</p>
-                    {onNewProject && (
-                      <button onClick={onNewProject} className="text-xs text-white px-4 py-2" style={{ border: '1px solid #444', background: 'transparent' }}>add first</button>
+                    {(onNewProject || onCreateProject) && (
+                      <button
+                        onClick={onCreateProject ? handleStartRecording : onNewProject}
+                        className="text-xs text-white px-4 py-2"
+                        style={{ border: '1px solid #444', background: 'transparent' }}
+                      >
+                        add first
+                      </button>
                     )}
                   </div>
                 ) : (

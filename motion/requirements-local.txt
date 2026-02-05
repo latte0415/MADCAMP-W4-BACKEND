@@ -2,7 +2,7 @@ fastapi
 uvicorn
 paramiko
 python-multipart
-mediapipe
+mediapipe==0.10.8
 opencv-python
 numpy
 scipy

@@ -63,8 +63,7 @@ export function AudioWaveformTimeline({
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, timelineWidth, height);

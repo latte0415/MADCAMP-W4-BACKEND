@@ -15,6 +15,7 @@ import {
   parseMusicKeypoints,
   parseMotionKeypoints,
   parseBassNotes,
+  parseMusicDetail,
   mapProjectDetail,
   presignUpload,
   uploadFileToS3,
@@ -46,47 +47,220 @@ export default function App() {
   const lastLoadedRef = useRef<string | null>(null);
   const activeStreamsRef = useRef<Set<number>>(new Set());
   const deletedTempIdsRef = useRef<Set<string>>(new Set());
+  const detailCacheRef = useRef<Map<string, { project: Project; fetchedAt: number }>>(new Map());
+  const jsonCacheRef = useRef<Map<string, { data: any; fetchedAt: number }>>(new Map());
+  const inflightRef = useRef<Map<string, Promise<Project | null>>>(new Map());
+  const cacheOrderRef = useRef<string[]>([]);
+
+  const DETAIL_TTL = 30_000;
+  const JSON_TTL = 5 * 60_000;
+  const MAX_DETAIL_CACHE = 10;
 
   const isTempId = (id: string) => id.startsWith('temp-');
 
-  const refreshLibrary = async () => {
-    const items = await getLibrary();
-    setProjects(items.map(mapLibraryItem));
+  const touchLRU = (id: string) => {
+    const order = cacheOrderRef.current;
+    const idx = order.indexOf(id);
+    if (idx >= 0) order.splice(idx, 1);
+    order.unshift(id);
   };
 
-  const openProjectById = async (id: string) => {
-    setLoadingProject(true);
-    try {
-      const detail = await getProjectDetail(id);
-      const musicJson = await fetchJson(detail.results?.music_json);
-      const motionJson = await fetchJson(detail.results?.motion_json);
-      const magicJson = await fetchJson(detail.results?.magic_json);
-      const musicKeypoints = parseMusicKeypoints(musicJson);
-      const motionKeypoints = [
-        ...parseMotionKeypoints(motionJson),
-        ...parseMotionKeypoints(magicJson),
-      ];
-      const bassNotes = parseBassNotes(musicJson);
-      setSelectedProject(mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes));
-      if (detail.status === 'queued' || detail.status === 'running' || detail.status === 'queued_music') {
-        startStatusStreaming(Number(detail.id));
-      }
-    } catch (err) {
-      const status = (err as { status?: number }).status;
-      if (status === 404) {
-        setSelectedProject(null);
-        navigate('/', { replace: true });
-        return;
-      }
-      console.error(err);
-    } finally {
-      setLoadingProject(false);
+  const evictIfNeeded = () => {
+    const order = cacheOrderRef.current;
+    while (order.length > MAX_DETAIL_CACHE) {
+      const evictId = order.pop();
+      if (!evictId) break;
+      detailCacheRef.current.delete(evictId);
     }
+  };
+
+  const isStale = (entry: { fetchedAt: number } | undefined, ttl: number) => {
+    if (!entry) return true;
+    return Date.now() - entry.fetchedAt > ttl;
+  };
+
+  const getCachedProject = (id: string) => {
+    const entry = detailCacheRef.current.get(id);
+    if (entry) touchLRU(id);
+    return entry;
+  };
+
+  const setCachedProject = (id: string, project: Project) => {
+    detailCacheRef.current.set(id, { project, fetchedAt: Date.now() });
+    touchLRU(id);
+    evictIfNeeded();
+  };
+
+  const patchProjectCache = (projectId: string, fields: Partial<Project>) => {
+    const entry = detailCacheRef.current.get(projectId);
+    if (!entry) return;
+    const updated = { ...entry.project, ...fields };
+    detailCacheRef.current.set(projectId, { project: updated, fetchedAt: entry.fetchedAt });
+    touchLRU(projectId);
+  };
+
+  const fetchJsonCached = async (url?: string | null) => {
+    if (!url) return null;
+    const cached = jsonCacheRef.current.get(url);
+    if (cached && !isStale(cached, JSON_TTL)) return cached.data;
+    const data = await fetchJson(url);
+    if (data !== null) {
+      jsonCacheRef.current.set(url, { data, fetchedAt: Date.now() });
+    }
+    return data;
+  };
+
+  const mergeLibraryWithCache = (items: ReturnType<typeof mapLibraryItem>[]) => {
+    return items.map((summary) => {
+      const cached = detailCacheRef.current.get(summary.id)?.project;
+      if (!cached) return summary;
+      return {
+        ...summary,
+        videoUrl: cached.videoUrl ?? summary.videoUrl,
+        audioUrl: cached.audioUrl ?? summary.audioUrl,
+        thumbnailUrl: cached.thumbnailUrl ?? summary.thumbnailUrl,
+        musicKeypoints: cached.musicKeypoints?.length ? cached.musicKeypoints : summary.musicKeypoints,
+        motionKeypoints: cached.motionKeypoints?.length ? cached.motionKeypoints : summary.motionKeypoints,
+        bassNotes: cached.bassNotes?.length ? cached.bassNotes : summary.bassNotes,
+        musicDetail: cached.musicDetail ?? summary.musicDetail,
+        stemUrls: cached.stemUrls ?? summary.stemUrls,
+        duration: summary.duration || cached.duration,
+        errorMessage: summary.errorMessage ?? cached.errorMessage,
+        statusMessage: summary.statusMessage ?? cached.statusMessage,
+        statusLog: summary.statusLog ?? cached.statusLog,
+        uploadVideoProgress: summary.uploadVideoProgress ?? cached.uploadVideoProgress,
+        uploadAudioProgress: summary.uploadAudioProgress ?? cached.uploadAudioProgress,
+        motionProgress: summary.motionProgress ?? cached.motionProgress,
+        audioProgress: summary.audioProgress ?? cached.audioProgress,
+      };
+    });
+  };
+
+  const refreshLibrary = async () => {
+    const items = await getLibrary();
+    const mapped = items.map(mapLibraryItem);
+    setProjects(mergeLibraryWithCache(mapped));
+  };
+
+  const openProjectById = async (
+    id: string,
+    onProgress?: (value: number, label?: string) => void
+  ) => {
+    const cached = getCachedProject(id);
+    if (cached) {
+      setSelectedProject(cached.project);
+      setLoadingProject(false);
+    } else {
+      setLoadingProject(true);
+    }
+
+    const needsRevalidate = () => {
+      if (!cached) return true;
+      if (cached.project.status !== 'done') return true;
+      if (isStale(cached, DETAIL_TTL)) return true;
+      const hasMusic =
+        cached.project.musicKeypoints.length > 0 ||
+        (cached.project.bassNotes?.length ?? 0) > 0 ||
+        Boolean(cached.project.musicDetail);
+      const hasMotion = cached.project.motionKeypoints.length > 0;
+      const needsMusic = Boolean(cached.project.audioUrl);
+      const needsMotion = Boolean(cached.project.videoUrl);
+      if (needsMusic && !hasMusic) return true;
+      if (needsMotion && !hasMotion) return true;
+      return false;
+    };
+
+    if (!needsRevalidate()) {
+      // Show gradual progress even for cached projects
+      onProgress?.(30, '캐시에서 불러오는 중');
+      await new Promise(r => setTimeout(r, 150));
+      onProgress?.(70, '데이터 준비 중');
+      await new Promise(r => setTimeout(r, 150));
+      onProgress?.(100, '준비 완료');
+      return true;
+    }
+
+    const inflight = inflightRef.current.get(id);
+    if (inflight) {
+      onProgress?.(40, '이미 로딩 중');
+      const result = await inflight;
+      onProgress?.(100, '준비 완료');
+      return Boolean(result);
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        onProgress?.(10, '프로젝트 불러오는 중');
+        const detail = await getProjectDetail(id);
+        onProgress?.(35, '음악 결과 불러오는 중');
+        const musicJson = await fetchJsonCached(detail.results?.music_json);
+        onProgress?.(65, '모션 결과 불러오는 중');
+        const motionJson = await fetchJsonCached(detail.results?.motion_json);
+        onProgress?.(85, '매직 결과 불러오는 중');
+        const magicJson = await fetchJsonCached(detail.results?.magic_json);
+        const musicKeypoints = parseMusicKeypoints(musicJson);
+        const motionKeypoints = [
+          ...parseMotionKeypoints(motionJson),
+          ...parseMotionKeypoints(magicJson),
+        ];
+        const bassNotes = parseBassNotes(musicJson);
+        const musicDetail = parseMusicDetail(musicJson);
+        const mapped = mapProjectDetail(
+          detail,
+          musicKeypoints,
+          motionKeypoints,
+          bassNotes,
+          musicDetail
+        );
+        setSelectedProject((prev) => (prev?.id === String(id) || !prev ? mapped : prev));
+        setProjects((prev) =>
+          prev.map((p) => (p.id === String(id) ? { ...p, ...mapped } : p))
+        );
+        setCachedProject(String(id), mapped);
+        if (
+          detail.status === 'queued' ||
+          detail.status === 'running' ||
+          detail.status === 'queued_music'
+        ) {
+          startStatusStreaming(Number(detail.id));
+        }
+        onProgress?.(100, '준비 완료');
+        return mapped;
+      } catch (err) {
+        const status = (err as { status?: number }).status;
+        if (status === 404) {
+          setSelectedProject(null);
+          navigate('/', { replace: true });
+          return null;
+        }
+        console.error(err);
+        return null;
+      } finally {
+        setLoadingProject(false);
+        inflightRef.current.delete(id);
+      }
+    })();
+
+    inflightRef.current.set(id, fetchPromise);
+    const result = await fetchPromise;
+    return Boolean(result);
   };
 
   const handleSelectProject = async (project: Project) => {
     setSelectedProject(project);
     navigate(`/project/${project.id}`);
+  };
+
+  const handleEnterProject = async (
+    project: Project,
+    onProgress?: (value: number, label?: string) => void
+  ): Promise<boolean> => {
+    if (isTempId(project.id)) {
+      return true; // Let DJStudio handle navigation
+    }
+    lastLoadedRef.current = project.id;
+    const ok = await openProjectById(project.id, onProgress);
+    return ok; // Return success, don't navigate - let DJStudio do it after showing progress
   };
 
   const handleBack = () => {
@@ -147,26 +321,30 @@ export default function App() {
         ? { ...prev, ...progressUpdate }
         : prev
     );
+    patchProjectCache(String(requestId), progressUpdate);
   };
 
   const handleAnalysisComplete = async (requestId: number) => {
     const detail = await getProjectDetail(requestId);
-    const musicJson = await fetchJson(detail.results?.music_json);
-    const motionJson = await fetchJson(detail.results?.motion_json);
-    const magicJson = await fetchJson(detail.results?.magic_json);
+    const musicJson = await fetchJsonCached(detail.results?.music_json);
+    const motionJson = await fetchJsonCached(detail.results?.motion_json);
+    const magicJson = await fetchJsonCached(detail.results?.magic_json);
     const musicKeypoints = parseMusicKeypoints(musicJson);
     const motionKeypoints = [
       ...parseMotionKeypoints(motionJson),
       ...parseMotionKeypoints(magicJson),
     ];
     const bassNotes = parseBassNotes(musicJson);
-    const mapped = mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes);
+    const musicDetail = parseMusicDetail(musicJson);
+    const mapped = mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes, musicDetail);
     setSelectedProject(prev => {
       if (prev?.id !== String(requestId)) return prev;
       if (prev.videoUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.videoUrl);
       if (prev.audioUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.audioUrl);
       return mapped;
     });
+    setProjects(prev => prev.map(p => (p.id === String(requestId) ? { ...p, ...mapped } : p)));
+    setCachedProject(String(requestId), mapped);
   };
 
   const handleCreateProject = (data: NewProjectData) => {
@@ -260,6 +438,7 @@ export default function App() {
   const updateProjectFields = (projectId: string, fields: Partial<Project>) => {
     setProjects(prev => prev.map(p => (p.id === projectId ? { ...p, ...fields } : p)));
     setSelectedProject(prev => (prev?.id === projectId ? { ...prev, ...fields } : prev));
+    patchProjectCache(projectId, fields);
   };
 
   const handleReplaceAudio = (file: File) => {
@@ -453,6 +632,7 @@ export default function App() {
       };
       setProjects(prev => [tempProject, ...prev]);
       setSelectedProject(tempProject);
+      setCachedProject(tempId, tempProject);
       navigate(`/project/${tempId}`);
 
       try {
@@ -522,38 +702,29 @@ export default function App() {
         }
 
         navigate(`/project/${req.id}`, { replace: true });
+        const finalizedProject: Partial<Project> = {
+          id: String(req.id),
+          status: 'queued',
+          progress: 0,
+          statusMessage: undefined,
+          errorMessage: undefined,
+          statusLog: undefined,
+          uploadVideoProgress: data.video ? 1 : undefined,
+          uploadAudioProgress: data.audio ? 1 : undefined,
+        };
         setProjects(prev =>
-          prev.map(p =>
-            p.id === tempId
-              ? {
-                  ...p,
-                  id: String(req.id),
-                  status: 'queued',
-                  progress: 0,
-                  statusMessage: undefined,
-                  errorMessage: undefined,
-                  statusLog: undefined,
-                  uploadVideoProgress: data.video ? 1 : undefined,
-                  uploadAudioProgress: data.audio ? 1 : undefined,
-                }
-              : p
-          )
+          prev.map(p => (p.id === tempId ? { ...p, ...finalizedProject } : p))
         );
         setSelectedProject(prev =>
-          prev?.id === tempId
-            ? {
-                ...prev,
-                id: String(req.id),
-                status: 'queued',
-                progress: 0,
-                statusMessage: undefined,
-                errorMessage: undefined,
-                statusLog: undefined,
-                uploadVideoProgress: data.video ? 1 : undefined,
-                uploadAudioProgress: data.audio ? 1 : undefined,
-              }
-            : prev
+          prev?.id === tempId ? { ...prev, ...finalizedProject } : prev
         );
+        const tempEntry = detailCacheRef.current.get(tempId);
+        detailCacheRef.current.delete(tempId);
+        cacheOrderRef.current = cacheOrderRef.current.filter(id => id !== tempId);
+        if (tempEntry) {
+          const updated = { ...tempEntry.project, ...finalizedProject } as Project;
+          setCachedProject(String(req.id), updated);
+        }
 
         startStatusStreaming(req.id);
         setTimeout(() => setUploadStatus(null), 800);
@@ -649,6 +820,7 @@ export default function App() {
             <LandingPage
               projects={projects}
               onSelectProject={handleSelectProject}
+              onEnterProject={handleEnterProject}
               onCreateProject={handleCreateProject}
               onDeleteProject={handleDeleteProject}
               {...authProps}

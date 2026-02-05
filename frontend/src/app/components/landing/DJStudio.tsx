@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Project, ProjectMode } from '../../types';
 import { GenerativeAlbumArt } from './GenerativeAlbumArt';
 import { RecordingOverlay } from './RecordingOverlay';
+import { Progress } from '../ui/progress';
 
 export interface NewProjectData {
   title: string;
@@ -15,6 +16,10 @@ export interface NewProjectData {
 interface DJStudioProps {
   projects: Project[];
   onOpenProject: (project: Project) => void;
+  onEnterProject?: (
+    project: Project,
+    onProgress?: (value: number, label?: string) => void
+  ) => Promise<boolean> | boolean | void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
   onDeleteProject?: (project: Project) => void;
@@ -26,6 +31,7 @@ interface DJStudioProps {
 export function DJStudio({
   projects,
   onOpenProject,
+  onEnterProject,
   onNewProject,
   onCreateProject,
   onDeleteProject,
@@ -42,8 +48,16 @@ export function DJStudio({
   const [isRecording, setIsRecording] = useState(false);
   const [recordingLpVisible, setRecordingLpVisible] = useState(false);
 
+  // Loading state - starts when play is clicked
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loadLabel, setLoadLabel] = useState('프로젝트 불러오는 중');
+  const [loadSuccess, setLoadSuccess] = useState(false);
+
   const currentProject = projects[selectedIndex];
   const isPlaying = loadedProject !== null;
+  const targetProject = loadedProject ?? currentProject;
+  const canEnter = isPlaying && loadProgress >= 100 && loadSuccess;
 
   const handleStartRecording = () => {
     if (isTransitioning || isRecording) return;
@@ -52,6 +66,9 @@ export function DJStudio({
       setLoadedProject(null);
       setIsSpinning(false);
       setShowLpOnAlbum(true);
+      setIsLoading(false);
+      setLoadProgress(0);
+      setLoadSuccess(false);
     }
     setIsRecording(true);
     setRecordingLpVisible(true);
@@ -75,7 +92,7 @@ export function DJStudio({
   };
 
   const handleSelectAlbum = (index: number) => {
-    if (isTransitioning) return;
+    if (isTransitioning || isLoading) return;
     if (index !== selectedIndex) {
       setLpVisible(false);
       setSelectedIndex(index);
@@ -86,10 +103,41 @@ export function DJStudio({
   };
 
   const handleLoadToTurntable = () => {
-    if (currentProject && currentProject.status === 'done' && !isTransitioning) {
+    if (currentProject && currentProject.status === 'done' && !isTransitioning && !isLoading) {
+      // Start transition animation
       setIsTransitioning(true);
       setLoadedProject(currentProject);
       setShowLpOnAlbum(false);
+
+      // Start loading data simultaneously
+      setIsLoading(true);
+      setLoadProgress(0);
+      setLoadLabel('프로젝트 불러오는 중');
+      setLoadSuccess(false);
+
+      if (onEnterProject) {
+        Promise.resolve(
+          onEnterProject(currentProject, (value, label) => {
+            setLoadProgress(Math.max(0, Math.min(100, Math.round(value))));
+            if (label) setLoadLabel(label);
+          })
+        )
+          .then((success) => {
+            setLoadSuccess(success !== false);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setLoadSuccess(false);
+            setIsLoading(false);
+          });
+      } else {
+        // No onEnterProject, simulate instant load
+        setLoadProgress(100);
+        setLoadLabel('준비 완료');
+        setLoadSuccess(true);
+        setIsLoading(false);
+      }
+
       setTimeout(() => {
         setIsSpinning(true);
         setIsTransitioning(false);
@@ -101,16 +149,16 @@ export function DJStudio({
     setLoadedProject(null);
     setIsSpinning(false);
     setShowLpOnAlbum(true);
+    setIsLoading(false);
+    setLoadProgress(0);
+    setLoadSuccess(false);
   };
 
   const handleEnterProject = () => {
-    if (loadedProject) {
-      onOpenProject(loadedProject);
-      return;
-    }
-    if (currentProject) {
-      onOpenProject(currentProject);
-    }
+    if (!canEnter) return;
+    const project = loadedProject;
+    if (!project) return;
+    onOpenProject(project);
   };
 
   useEffect(() => {
@@ -125,7 +173,7 @@ export function DJStudio({
         }
         return;
       }
-      if (isRecording) return; // Don't handle other keys during recording
+      if (isRecording) return;
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (!isPlaying) setSelectedIndex((prev) => Math.max(0, prev - 1));
@@ -134,19 +182,19 @@ export function DJStudio({
         if (!isPlaying) setSelectedIndex((prev) => Math.min(projects.length - 1, prev + 1));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (loadedProject) {
+        if (canEnter) {
           handleEnterProject();
-        } else if (currentProject && currentProject.status === 'done') {
+        } else if (!isPlaying && currentProject && currentProject.status === 'done') {
           handleLoadToTurntable();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, projects.length, currentProject, loadedProject, isPlaying, isTransitioning, isRecording]);
+  }, [selectedIndex, projects.length, currentProject, loadedProject, isPlaying, isTransitioning, isRecording, isLoading, canEnter]);
 
   const handleWheel = (e: React.WheelEvent) => {
-    if (isPlaying || isTransitioning || isRecording) return;
+    if (isPlaying || isTransitioning || isRecording || isLoading) return;
     const delta = e.deltaY > 0 ? 1 : -1;
     setSelectedIndex((prev) => Math.max(0, Math.min(projects.length - 1, prev + delta)));
   };
@@ -196,8 +244,8 @@ export function DJStudio({
       <div className="absolute inset-0 flex items-center overflow-hidden">
         {/* Left: Vinyl stack */}
         <div className="absolute left-0 h-full flex items-center">
-          <div className="pl-8 w-[280px]">
-            <div className="relative" style={{ height: 500 }}>
+          <div className="pl-10 w-[320px]">
+            <div className="relative" style={{ height: 580 }}>
               <div className="absolute -left-3 -right-3 -top-3 -bottom-3" style={{ border: '1px solid #2a2a2a', background: '#0a0a0a' }} />
               <div className="relative h-full flex flex-col justify-center">
                 {projects.length === 0 ? (
@@ -217,17 +265,17 @@ export function DJStudio({
                   projects.map((project, index) => {
                     const offset = index - selectedIndex;
                     const isSelected = offset === 0;
-                    const y = offset * 44;
+                    const y = offset * 52;
                     if (Math.abs(offset) > 5) return null;
 
                     return (
                       <motion.div
                         key={project.id}
                         className="absolute left-0 right-0 cursor-pointer"
-                        style={{ height: 40 }}
+                        style={{ height: 46 }}
                         animate={{
                           y,
-                          x: isSelected ? 30 : 0,
+                          x: isSelected ? 35 : 0,
                           opacity: isSelected ? 1 : Math.max(0.2, 0.5 - Math.abs(offset) * 0.08),
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -249,14 +297,13 @@ export function DJStudio({
                             borderBottom: '1px solid #1a1a1a',
                           }}
                         >
-                          <div className="absolute left-2 w-8 h-8 rounded-full" style={{ background: '#0c0c0c', border: '1px solid #333' }}>
+                          <div className="absolute left-3 w-9 h-9 rounded-full" style={{ background: '#0c0c0c', border: '1px solid #333' }}>
                             <div className="absolute inset-[28%] rounded-full" style={{ background: project.mode === 'magic' ? '#5a5a9a' : '#e8e8e8' }} />
                           </div>
-                          <div className="ml-14 flex-1 pr-3">
-                            <div className="text-[10px] font-medium truncate" style={{ color: isSelected ? '#eee' : '#666' }}>{project.title}</div>
-                            <div className="text-[8px] uppercase tracking-wider" style={{ color: isSelected ? (project.mode === 'magic' ? '#8888cc' : '#888') : '#444' }}>{project.mode}</div>
+                          <div className="ml-[52px] flex-1 pr-3 flex items-center">
+                            <div className="text-[14px] font-medium truncate" style={{ color: isSelected ? '#eee' : '#666' }}>{project.title}</div>
                           </div>
-                          <div className="absolute right-3 text-[9px] font-mono" style={{ color: isSelected ? '#666' : '#333' }}>{String(index + 1).padStart(2, '0')}</div>
+                          <div className="absolute right-3 text-[12px] font-mono" style={{ color: isSelected ? '#666' : '#333' }}>{String(index + 1).padStart(2, '0')}</div>
                           {isSelected && <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: '#d97706' }} />}
                         </div>
                       </motion.div>
@@ -265,22 +312,22 @@ export function DJStudio({
                 )}
               </div>
             </div>
-            <div className="mt-6 flex items-center gap-3">
-              <button onClick={() => setSelectedIndex((prev) => Math.max(0, prev - 1))} className="text-neutral-500 hover:text-white text-sm">▲</button>
-              <span className="text-neutral-500 text-xs font-mono">{projects.length > 0 ? `${selectedIndex + 1}/${projects.length}` : '—'}</span>
-              <button onClick={() => setSelectedIndex((prev) => Math.min(projects.length - 1, prev + 1))} className="text-neutral-500 hover:text-white text-sm">▼</button>
+            <div className="mt-6 flex items-center gap-4">
+              <button onClick={() => setSelectedIndex((prev) => Math.max(0, prev - 1))} className="text-neutral-500 hover:text-white text-base">▲</button>
+              <span className="text-neutral-500 text-sm font-mono">{projects.length > 0 ? `${selectedIndex + 1}/${projects.length}` : '—'}</span>
+              <button onClick={() => setSelectedIndex((prev) => Math.min(projects.length - 1, prev + 1))} className="text-neutral-500 hover:text-white text-base">▼</button>
             </div>
           </div>
         </div>
 
-        {/* Center: Album display */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center z-10" style={{ marginLeft: -100 }}>
+        {/* Album display - positioned relative to left list */}
+        <div className="absolute h-full flex items-center z-10" style={{ left: 400, marginTop: -60 }}>
           <AnimatePresence mode="wait">
             {isRecording ? (
               <motion.div
                 key="recording"
                 className="relative"
-                style={{ width: 550, height: 550 }}
+                style={{ width: 680, height: 680 }}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -295,26 +342,26 @@ export function DJStudio({
               <motion.div
                 key={currentProject.id}
                 className="relative"
-                style={{ width: 550, height: 550 }}
+                style={{ width: 680, height: 680 }}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{
                   opacity: 1,
-                  scale: isPlaying ? 0.75 : 1,
-                  x: isPlaying ? -80 : 0,
-                  y: isPlaying ? 30 : 0,
+                  scale: isPlaying ? 0.70 : 1,
+                  x: isPlaying ? -120 : 0,
+                  y: isPlaying ? 50 : 0,
                 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
               >
-                {/* Album sleeve */}
+                {/* Album sleeve - ENLARGED */}
                 <motion.div
                   className="absolute overflow-hidden"
                   style={{
-                    width: 450,
-                    height: 450,
+                    width: 580,
+                    height: 580,
                     left: 0,
                     top: 50,
-                    zIndex: 1,
+                    zIndex: 2,
                     background: currentProject.thumbnailUrl ? `url(${currentProject.thumbnailUrl})` : 'transparent',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
@@ -330,20 +377,20 @@ export function DJStudio({
                     <GenerativeAlbumArt
                       seed={currentProject.id + currentProject.title}
                       mode={currentProject.mode === 'magic' ? 'magic' : 'dance'}
-                      size={450}
+                      size={580}
                     />
                   )}
                   {/* Gradient overlay */}
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 40%, transparent 55%, rgba(0,0,0,0.65) 100%)' }} />
-                  <div className="absolute top-8 left-8 right-8 z-10">
-                    <div className="text-[11px] uppercase tracking-[0.2em] mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>{currentProject.mode} mode</div>
-                    <div className="text-xl font-medium leading-tight text-white">{currentProject.title}</div>
+                  <div className="absolute top-10 left-10 right-10 z-10">
+                    <div className="text-[12px] uppercase tracking-[0.2em] mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>{currentProject.mode} mode</div>
+                    <div className="text-2xl font-medium leading-tight text-white">{currentProject.title}</div>
                   </div>
-                  <div className="absolute bottom-8 left-8 right-8 z-10">
-                    <div className="text-[11px] tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{Math.round(currentProject.duration)}s · {currentProject.status}</div>
-                    <div className="text-[10px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>D+M LAB</div>
+                  <div className="absolute bottom-10 left-10 right-10 z-10">
+                    <div className="text-[12px] tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{Math.round(currentProject.duration)}s · {currentProject.status}</div>
+                    <div className="text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>D+M LAB</div>
                   </div>
-                  <div className="absolute top-8 right-8 text-[12px] font-mono z-10" style={{ color: 'rgba(255,255,255,0.5)' }}>{String(selectedIndex + 1).padStart(2, '0')}</div>
+                  <div className="absolute top-10 right-10 text-[14px] font-mono z-10" style={{ color: 'rgba(255,255,255,0.5)' }}>{String(selectedIndex + 1).padStart(2, '0')}</div>
 
                   {/* Delete button - corner icon */}
                   {onDeleteProject && !isPlaying && (
@@ -354,12 +401,12 @@ export function DJStudio({
                           onDeleteProject(currentProject);
                         }
                       }}
-                      className="absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center rounded-full transition-all opacity-30 hover:opacity-100 z-20"
+                      className="absolute bottom-4 right-4 w-9 h-9 flex items-center justify-center rounded-full transition-all opacity-30 hover:opacity-100 z-20"
                       style={{ background: 'rgba(0,0,0,0.5)' }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.8)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#fff' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#fff' }}>
                         <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
                       </svg>
                     </button>
@@ -372,12 +419,12 @@ export function DJStudio({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         {[0, 1, 2].map((i) => (
                           <motion.div
                             key={i}
-                            className="w-1 bg-amber-500 rounded-full"
-                            animate={{ height: [8, 20, 8] }}
+                            className="w-1.5 bg-amber-500 rounded-full"
+                            animate={{ height: [10, 24, 10] }}
                             transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
                           />
                         ))}
@@ -386,26 +433,24 @@ export function DJStudio({
                   )}
                 </motion.div>
 
-                {/* Buttons */}
+                {/* Buttons - only show when not playing */}
                 {!isPlaying && (
-                  <div className="absolute -bottom-2 left-0 right-0 flex items-center" style={{ zIndex: 2 }}>
-                    <div className="flex items-center gap-3">
-                      {currentProject.status === 'done' && !isTransitioning && (
-                        <button
-                          onClick={handleLoadToTurntable}
-                          className="text-xs px-4 py-2 transition-colors"
-                          style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
-                        >
-                          play →
-                        </button>
-                      )}
-                      {currentProject.status !== 'done' && (
-                        <span className="text-xs text-neutral-500">{currentProject.status === 'failed' ? 'failed' : 'processing...'}</span>
-                      )}
-                      {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
-                    </div>
+                  <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
+                    {currentProject.status === 'done' && !isTransitioning && (
+                      <button
+                        onClick={handleLoadToTurntable}
+                        className="text-sm px-5 py-2.5 transition-colors"
+                        style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
+                      >
+                        play →
+                      </button>
+                    )}
+                    {currentProject.status !== 'done' && (
+                      <span className="text-sm text-neutral-500">{currentProject.status === 'failed' ? 'failed' : 'processing...'}</span>
+                    )}
+                    {isTransitioning && <span className="text-sm text-neutral-400">loading...</span>}
                   </div>
                 )}
               </motion.div>
@@ -420,98 +465,129 @@ export function DJStudio({
           animate={{ x: isPlaying || isTransitioning || isRecording ? 0 : 400 }}
           transition={{ type: 'spring', stiffness: 180, damping: 28 }}
         >
-          <div className="relative mr-[-80px]" style={{ width: 500, height: 550, transformStyle: 'preserve-3d', transform: 'rotateY(-12deg)' }}>
+          <div className="relative mr-[-80px]" style={{ width: 520, height: 580, transformStyle: 'preserve-3d', transform: 'rotateY(-12deg)' }}>
             <div className="absolute inset-0" style={{ background: 'linear-gradient(145deg, #151515 0%, #0c0c0c 100%)', border: '1px solid #333', boxShadow: '-10px 0 40px rgba(0,0,0,0.5)' }}>
               <div className="absolute top-0 bottom-0 -left-4 w-4" style={{ background: 'linear-gradient(90deg, #0a0a0a 0%, #111 100%)', transform: 'rotateY(90deg)', transformOrigin: 'right' }} />
               <div className="absolute inset-4" style={{ border: '1px solid #2a2a2a' }} />
 
               {/* Gear */}
-              <div className="absolute" style={{ top: 20, left: 20, width: 45, height: 45, border: '2px solid #3a3a3a', borderRadius: '50%' }}>
+              <div className="absolute" style={{ top: 20, left: 20, width: 50, height: 50, border: '2px solid #3a3a3a', borderRadius: '50%' }}>
                 <motion.div className="absolute inset-1 rounded-full" style={{ border: '1px dashed #333' }} animate={{ rotate: isSpinning ? 360 : 0 }} transition={{ duration: 4, ease: 'linear', repeat: isSpinning ? Infinity : 0 }} />
               </div>
 
               {/* Platter */}
-              <div className="absolute rounded-full" style={{ top: 70, left: 70, width: 320, height: 320, background: 'radial-gradient(circle, #141414 0%, #0a0a0a 100%)', border: '3px solid #333', boxShadow: 'inset 0 0 30px rgba(0,0,0,0.8)' }}>
+              <div className="absolute rounded-full" style={{ top: 80, left: 80, width: 340, height: 340, background: 'radial-gradient(circle, #141414 0%, #0a0a0a 100%)', border: '3px solid #333', boxShadow: 'inset 0 0 30px rgba(0,0,0,0.8)' }}>
                 <div className="absolute inset-3 rounded-full" style={{ border: '1px solid #2a2a2a' }} />
                 <div className="absolute inset-6 rounded-full" style={{ border: '1px solid #252525' }} />
                 <div className="absolute inset-10 rounded-full" style={{ border: '1px solid #202020' }} />
 
-                <div className="absolute rounded-full z-10" style={{ top: '50%', left: '50%', width: 16, height: 16, transform: 'translate(-50%, -50%)', background: '#222', border: '1px solid #444' }} />
+                <div className="absolute rounded-full z-10" style={{ top: '50%', left: '50%', width: 18, height: 18, transform: 'translate(-50%, -50%)', background: '#222', border: '1px solid #444' }} />
               </div>
 
               <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {isRecording ? (
                     <motion.div
-                      className="w-2 h-2"
+                      className="w-2.5 h-2.5"
                       style={{ background: '#ef4444' }}
                       animate={{ opacity: [1, 0.3, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     />
                   ) : (
-                    <div className="w-2 h-2" style={{ background: loadedProject ? '#d97706' : '#2a2a2a' }} />
+                    <div className="w-2.5 h-2.5" style={{ background: loadedProject ? '#d97706' : '#2a2a2a' }} />
                   )}
-                  <span className="text-[8px]" style={{ color: isRecording ? '#ef4444' : '#666' }}>
+                  <span className="text-[9px]" style={{ color: isRecording ? '#ef4444' : '#666' }}>
                     {isRecording ? 'REC' : 'POWER'}
                   </span>
                 </div>
-                <span className="text-[9px] text-neutral-500 tracking-wider">33 RPM</span>
+                <span className="text-[10px] text-neutral-500 tracking-wider">33 RPM</span>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Controls */}
+        {/* Controls - show when playing */}
         <AnimatePresence>
           {loadedProject && (
             <motion.div
-              className="absolute bottom-20 right-10 flex items-center gap-6 z-50"
+              className="absolute bottom-24 right-12 flex flex-col items-end gap-4 z-50"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ delay: 0.2 }}
             >
-              <button onClick={handleBack} className="text-xs text-neutral-400 hover:text-white transition-colors">← back</button>
-              <button
-                onClick={handleEnterProject}
-                className="text-sm px-5 py-2 transition-colors"
-                style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
-              >
-                enter project →
-              </button>
+              {/* Loading progress */}
+              <div className="w-[280px]">
+                <div className="flex items-center justify-between text-[11px] mb-2">
+                  <span style={{ color: loadProgress >= 100 ? '#fbbf24' : '#a1a1aa' }}>{loadLabel}</span>
+                  <span style={{ color: loadProgress >= 100 ? '#fbbf24' : '#a1a1aa' }}>{loadProgress}%</span>
+                </div>
+                <Progress
+                  value={loadProgress}
+                  className="h-2 bg-white/10"
+                  indicatorClassName={loadProgress >= 100 ? 'bg-amber-400' : 'bg-amber-400/60'}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-6">
+                <button onClick={handleBack} className="text-sm text-neutral-400 hover:text-white transition-colors">← back</button>
+                <button
+                  onClick={handleEnterProject}
+                  disabled={!canEnter}
+                  className="text-sm px-6 py-2.5 transition-all"
+                  style={{
+                    border: canEnter ? '1px solid #d97706' : '1px solid #444',
+                    color: canEnter ? '#d97706' : '#555',
+                    background: 'transparent',
+                    opacity: canEnter ? 1 : 0.5,
+                    cursor: canEnter ? 'pointer' : 'not-allowed',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!canEnter) return;
+                    e.currentTarget.style.background = '#d97706';
+                    e.currentTarget.style.color = '#080808';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = canEnter ? '#d97706' : '#555';
+                  }}
+                >
+                  {canEnter ? 'enter project →' : isLoading ? 'loading...' : 'enter project →'}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Floating LP - animates between album and turntable */}
-      {lpVisible && !isRecording && (currentProject || loadedProject) && (
+      {/* Floating LP - animates between album and turntable - slides out from behind album */}
+      {!isRecording && (currentProject || loadedProject) && (
         <motion.div
           key={`lp-${currentProject?.id ?? loadedProject?.id}`}
           className="absolute pointer-events-none"
-          style={{ zIndex: 5 }}
+          style={{ zIndex: 1 }}
           initial={{
-            left: 'calc(50% - 375px)',
-            top: 'calc(50% - 210px)',
-            width: 420,
-            height: 420,
+            left: 380,
+            top: 'calc(50% - 310px)',
+            width: 560,
+            height: 560,
             opacity: 0,
           }}
           animate={{
-            left: showLpOnAlbum ? 'calc(50% - 175px)' : 'calc(100% - 325px)',
-            top: showLpOnAlbum ? 'calc(50% - 210px)' : 'calc(50% - 185px)',
-            width: showLpOnAlbum ? 420 : 280,
-            height: showLpOnAlbum ? 420 : 280,
-            opacity: 1,
+            left: showLpOnAlbum ? (lpVisible ? 620 : 420) : 'calc(100% - 340px)',
+            top: showLpOnAlbum ? 'calc(50% - 310px)' : 'calc(50% - 190px)',
+            width: showLpOnAlbum ? 560 : 300,
+            height: showLpOnAlbum ? 560 : 300,
+            opacity: lpVisible ? 1 : 0,
           }}
           transition={{
             type: 'spring',
-            stiffness: 120,
-            damping: 20,
+            stiffness: 100,
+            delay: lpVisible ? 0.35 : 0,
+            damping: 18,
           }}
-          >
+        >
           <motion.div
             className="w-full h-full rounded-full relative"
             animate={{ rotate: isSpinning ? 360 : 0 }}
@@ -540,9 +616,9 @@ export function DJStudio({
             <div className="absolute rounded-full" style={{ bottom: '25%', right: '15%', width: '20%', height: '6%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', transform: 'rotate(45deg)', filter: 'blur(2px)' }} />
             <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: '28%', height: '28%', transform: 'translate(-50%, -50%)', background: (loadedProject || currentProject)?.mode === 'magic' ? '#5a5a9a' : '#f0f0f0', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)' }}>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-[8px] uppercase tracking-widest" style={{ color: (loadedProject || currentProject)?.mode === 'magic' ? '#ccc' : '#555' }}>D+M</div>
+                <div className="text-[9px] uppercase tracking-widest" style={{ color: (loadedProject || currentProject)?.mode === 'magic' ? '#ccc' : '#555' }}>D+M</div>
               </div>
-              <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: 12, height: 12, transform: 'translate(-50%, -50%)', background: '#0a0a0a', border: '1px solid #333' }} />
+              <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: 14, height: 14, transform: 'translate(-50%, -50%)', background: '#0a0a0a', border: '1px solid #333' }} />
             </div>
           </motion.div>
         </motion.div>
@@ -552,22 +628,22 @@ export function DJStudio({
       {(isPlaying || isTransitioning) && (
         <motion.div
           className="absolute pointer-events-none"
-          style={{ zIndex: 15, right: 45, top: 'calc(50% - 220px)' }}
+          style={{ zIndex: 15, right: 50, top: 'calc(50% - 230px)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
           {/* Pivot */}
-          <div className="absolute rounded-full" style={{ top: 0, right: 0, width: 26, height: 26, background: '#1a1a1a', border: '2px solid #3a3a3a' }} />
+          <div className="absolute rounded-full" style={{ top: 0, right: 0, width: 28, height: 28, background: '#1a1a1a', border: '2px solid #3a3a3a' }} />
           {/* Arm */}
           <motion.div
             className="absolute"
-            style={{ top: 8, right: 5, width: 145, height: 3, background: 'linear-gradient(180deg, #3a3a3a 0%, #252525 100%)', transformOrigin: 'right center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+            style={{ top: 9, right: 6, width: 155, height: 3, background: 'linear-gradient(180deg, #3a3a3a 0%, #252525 100%)', transformOrigin: 'right center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
             animate={{ rotate: isSpinning ? -50 : -28 }}
             transition={{ type: 'spring', stiffness: 80, damping: 15 }}
           >
-            <div className="absolute" style={{ left: -6, top: -5, width: 16, height: 13, background: '#3a3a3a' }} />
-            <div className="absolute" style={{ left: -2, top: 10, width: 2, height: 6, background: '#d97706' }} />
+            <div className="absolute" style={{ left: -6, top: -5, width: 18, height: 14, background: '#3a3a3a' }} />
+            <div className="absolute" style={{ left: -2, top: 11, width: 2, height: 7, background: '#d97706' }} />
           </motion.div>
         </motion.div>
       )}
@@ -579,17 +655,17 @@ export function DJStudio({
             className="absolute pointer-events-none"
             style={{ zIndex: 5 }}
             initial={{
-              left: 120,
+              left: 140,
               top: 'calc(50% - 20px)',
-              width: 40,
-              height: 40,
+              width: 45,
+              height: 45,
               opacity: 0,
             }}
             animate={{
-              left: 'calc(100% - 325px)',
-              top: 'calc(50% - 185px)',
-              width: 280,
-              height: 280,
+              left: 'calc(100% - 340px)',
+              top: 'calc(50% - 190px)',
+              width: 300,
+              height: 300,
               opacity: 1,
             }}
             exit={{
@@ -629,9 +705,9 @@ export function DJStudio({
               {/* Empty center - blank LP */}
               <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: '28%', height: '28%', transform: 'translate(-50%, -50%)', background: '#1a1a1a', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)' }}>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-[8px] uppercase tracking-widest text-neutral-600">NEW</div>
+                  <div className="text-[9px] uppercase tracking-widest text-neutral-600">NEW</div>
                 </div>
-                <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: 12, height: 12, transform: 'translate(-50%, -50%)', background: '#0a0a0a', border: '1px solid #333' }} />
+                <div className="absolute rounded-full" style={{ top: '50%', left: '50%', width: 14, height: 14, transform: 'translate(-50%, -50%)', background: '#0a0a0a', border: '1px solid #333' }} />
               </div>
             </motion.div>
           </motion.div>
@@ -642,22 +718,22 @@ export function DJStudio({
       {isRecording && (
         <motion.div
           className="absolute pointer-events-none"
-          style={{ zIndex: 15, right: 45, top: 'calc(50% - 220px)' }}
+          style={{ zIndex: 15, right: 50, top: 'calc(50% - 230px)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="absolute rounded-full" style={{ top: 0, right: 0, width: 26, height: 26, background: '#1a1a1a', border: '2px solid #3a3a3a' }} />
+          <div className="absolute rounded-full" style={{ top: 0, right: 0, width: 28, height: 28, background: '#1a1a1a', border: '2px solid #3a3a3a' }} />
           <motion.div
             className="absolute"
-            style={{ top: 8, right: 5, width: 145, height: 3, background: 'linear-gradient(180deg, #3a3a3a 0%, #252525 100%)', transformOrigin: 'right center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+            style={{ top: 9, right: 6, width: 155, height: 3, background: 'linear-gradient(180deg, #3a3a3a 0%, #252525 100%)', transformOrigin: 'right center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
             animate={{ rotate: -50 }}
             transition={{ type: 'spring', stiffness: 80, damping: 15, delay: 0.3 }}
           >
-            <div className="absolute" style={{ left: -6, top: -5, width: 16, height: 13, background: '#3a3a3a' }} />
+            <div className="absolute" style={{ left: -6, top: -5, width: 18, height: 14, background: '#3a3a3a' }} />
             <motion.div
               className="absolute"
-              style={{ left: -2, top: 10, width: 2, height: 6, background: '#ef4444' }}
+              style={{ left: -2, top: 11, width: 2, height: 7, background: '#ef4444' }}
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             />
@@ -665,15 +741,15 @@ export function DJStudio({
         </motion.div>
       )}
 
-      <div className="absolute bottom-8 left-10 text-neutral-500 text-xs tracking-wide">
-        {isRecording ? '녹음 중... 파일을 업로드하세요' : isPlaying ? 'esc to go back · enter to open' : '↑ ↓ select · enter to play'}
+      <div className="absolute bottom-8 left-10 text-neutral-500 text-sm tracking-wide">
+        {isRecording ? '녹음 중... 파일을 업로드하세요' : isPlaying ? (canEnter ? 'enter to open project' : 'loading...') : '↑ ↓ select · enter to play'}
       </div>
 
       <AnimatePresence>
         {loadedProject && (
           <motion.div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-3" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-            <div className="w-2 h-2 rounded-full" style={{ background: '#d97706' }} />
-            <span className="text-neutral-300 text-xs">now playing: <span className="text-white">{loadedProject.title}</span></span>
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#d97706' }} />
+            <span className="text-neutral-300 text-sm">now playing: <span className="text-white">{loadedProject.title}</span></span>
           </motion.div>
         )}
       </AnimatePresence>

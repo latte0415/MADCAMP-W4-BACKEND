@@ -6,6 +6,10 @@ import { DJStudio, NewProjectData } from './DJStudio';
 interface LandingPageProps {
   projects: Project[];
   onSelectProject: (project: Project) => void;
+  onEnterProject?: (
+    project: Project,
+    onProgress?: (value: number, label?: string) => void
+  ) => Promise<boolean> | boolean | void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
   onDeleteProject?: (project: Project) => void;
@@ -17,6 +21,7 @@ interface LandingPageProps {
 export function LandingPage({
   projects,
   onSelectProject,
+  onEnterProject,
   onNewProject,
   onCreateProject,
   onDeleteProject,
@@ -86,6 +91,7 @@ export function LandingPage({
         <DJStudio
           projects={projects}
           onOpenProject={onSelectProject}
+          onEnterProject={onEnterProject}
           onNewProject={onNewProject}
           onCreateProject={onCreateProject}
           onDeleteProject={onDeleteProject}

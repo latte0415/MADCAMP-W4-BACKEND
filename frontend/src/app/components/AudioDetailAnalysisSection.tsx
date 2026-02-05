@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { MusicKeypoint, BassNote } from '../types';
+import type {
+  MusicKeypoint,
+  BassNote,
+  StemUrls,
+  MusicAnalysisDetail,
+  DrumKeypointByBandItem,
+  TextureBlockItem,
+  VocalCurvePoint,
+  OtherCurvePoint,
+} from '../types';
 
 interface AudioDetailAnalysisSectionProps {
   audioUrl?: string | null;
+  stemUrls?: StemUrls;
+  musicDetail?: MusicAnalysisDetail;
   duration: number;
   currentTime: number;
   selectionStart: number;
@@ -14,7 +25,7 @@ interface AudioDetailAnalysisSectionProps {
 
 type DrumBand = 'low' | 'mid' | 'high';
 
-type DetailTab = 'drums' | 'bass' | 'vocal';
+type DetailTab = 'drums' | 'bass' | 'vocal' | 'other';
 
 const BAR_SECONDS = 4;
 const WAVEFORM_HEIGHT = 120;
@@ -26,6 +37,7 @@ const STEM_COLORS: Record<DetailTab | DrumBand, string> = {
   drums: '#f59e0b',
   bass: '#10b981',
   vocal: '#f472b6',
+  other: '#38bdf8',
   low: '#f59e0b',
   mid: '#fbbf24',
   high: '#fb7185',
@@ -42,6 +54,8 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 
 export function AudioDetailAnalysisSection({
   audioUrl,
+  stemUrls,
+  musicDetail,
   duration,
   currentTime,
   selectionStart,
@@ -61,6 +75,14 @@ export function AudioDetailAnalysisSection({
   const viewDuration = Math.max(0.001, selectionDuration);
   const pxPerSec = BASE_PX_PER_SEC * zoom;
   const timelineWidth = Math.max(viewDuration * pxPerSec, 480);
+  const barMarkers = useMemo(() => {
+    if (selectionDuration <= 0) return [];
+    const markers: number[] = [];
+    for (let t = selectionStart; t <= selectionEnd + 0.0001; t += BAR_SECONDS) {
+      markers.push(t);
+    }
+    return markers;
+  }, [selectionDuration, selectionStart, selectionEnd]);
 
   const drumEvents = useMemo(
     () => musicKeypoints.filter((kp) => kp.frequency === drumBand),
@@ -70,15 +92,43 @@ export function AudioDetailAnalysisSection({
     () => musicKeypoints.filter((kp) => kp.frequency === 'high'),
     [musicKeypoints]
   );
+  const otherEvents = useMemo(() => musicKeypoints.filter((kp) => kp.frequency === 'mid'), [musicKeypoints]);
+  const drumKeypointsByBand = musicDetail?.keypointsByBand ?? {};
+  const textureBlocksByBand = musicDetail?.textureBlocksByBand ?? {};
+  const bassDetail = musicDetail?.bass;
+  const vocalDetail = musicDetail?.vocal;
+  const otherDetail = musicDetail?.other;
+  const resolvedBassNotes = (bassDetail?.notes?.length ? bassDetail.notes : bassNotes) ?? [];
+  const vocalCurve = (vocalDetail?.vocal_curve ?? []).filter(
+    (p): p is VocalCurvePoint => Number.isFinite(Number(p?.t)) && Number.isFinite(Number(p?.pitch))
+  );
+  const vocalPhrases = (vocalDetail?.vocal_phrases ?? []).filter(
+    (p) => Number.isFinite(Number(p?.start)) && Number.isFinite(Number(p?.end))
+  );
+  const vocalTurns = (vocalDetail?.vocal_turns ?? []).filter((p) => Number.isFinite(Number(p?.t)));
+  const vocalOnsets = (vocalDetail?.vocal_onsets ?? []).filter((p) => Number.isFinite(Number(p?.t)));
+  const otherCurve = (otherDetail?.other_curve ?? []).filter(
+    (p): p is OtherCurvePoint => Number.isFinite(Number(p?.t))
+  );
+  const effectiveAudioUrl = useMemo(() => {
+    if (!stemUrls) return audioUrl ?? null;
+    if (activeTab === 'bass') return stemUrls.bass ?? audioUrl ?? null;
+    if (activeTab === 'vocal') return stemUrls.vocal ?? audioUrl ?? null;
+    if (activeTab === 'other') return stemUrls.other ?? audioUrl ?? null;
+    if (activeTab === 'drums') {
+      return stemUrls.drumBands?.[drumBand] ?? stemUrls.drums ?? audioUrl ?? null;
+    }
+    return audioUrl ?? null;
+  }, [activeTab, audioUrl, drumBand, stemUrls]);
 
   useEffect(() => {
-    if (!audioUrl || duration <= 0) {
+    if (!effectiveAudioUrl || duration <= 0) {
       setWaveformData(null);
       return;
     }
     let cancelled = false;
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    fetch(audioUrl)
+    fetch(effectiveAudioUrl)
       .then((res) => res.arrayBuffer())
       .then((buf) => ctx.decodeAudioData(buf))
       .then((buffer) => {
@@ -96,7 +146,7 @@ export function AudioDetailAnalysisSection({
       cancelled = true;
       ctx.close();
     };
-  }, [audioUrl, duration]);
+  }, [effectiveAudioUrl, duration]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -164,15 +214,28 @@ export function AudioDetailAnalysisSection({
   const playheadX = xScale(clampedTime);
 
   const renderOverlay = () => {
-    const keypointRadius = (intensity?: number) => {
-      const safe = clamp(intensity ?? 0.6, 0.1, 1);
-      return 2 + safe * 10;
-    };
-
     if (activeTab === 'bass') {
+      const groove = (bassDetail?.groove_curve ?? []).filter(
+        (p: [number, number]) => p[0] >= selectionStart && p[0] <= selectionEnd
+      );
+      const v3 = (bassDetail?.bass_curve_v3 ?? []).filter(
+        (p) => p.t >= selectionStart && p.t <= selectionEnd
+      );
+      const bassPitchToY = (midi: number) => {
+        const hz = 440 * Math.pow(2, (midi - 69) / 12);
+        const minHz = 50;
+        const maxHz = 250;
+        const logMin = Math.log(minHz);
+        const logMax = Math.log(maxHz);
+        const norm = (Math.log(Math.max(hz, minHz)) - logMin) / (logMax - logMin);
+        const clamped = clamp(norm, 0, 1);
+        const pad = 8;
+        const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+        return pad + (1 - clamped) * innerH;
+      };
       return (
         <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-          {bassNotes
+          {resolvedBassNotes
             .filter((note) => note.time >= selectionStart && note.time <= selectionEnd)
             .map((note, index) => {
               const x = xScale(note.time);
@@ -190,6 +253,291 @@ export function AudioDetailAnalysisSection({
                 />
               );
             })}
+          {v3.length > 1 &&
+            v3.slice(1).map((pt, index) => {
+              const prev = v3[index];
+              if (!prev) return null;
+              const amp = clamp(Math.max(prev.amp ?? 0, pt.amp ?? 0), 0, 1);
+              if (amp < 0.05) return null;
+              const stroke = 1 + amp * 6;
+              return (
+                <line
+                  key={`bass-v3-${index}`}
+                  x1={xScale(prev.t)}
+                  y1={bassPitchToY(prev.pitch)}
+                  x2={xScale(pt.t)}
+                  y2={bassPitchToY(pt.pitch)}
+                  stroke="#34d399"
+                  strokeWidth={stroke}
+                  strokeLinecap="round"
+                  opacity={0.25 + amp * 0.6}
+                />
+              );
+            })}
+          {groove.length > 1 &&
+            groove.slice(1).map((pt, index) => {
+              const prev = groove[index];
+              const t0 = prev?.[0] ?? 0;
+              const t1 = pt[0];
+              const v0 = clamp(prev?.[1] ?? 0, 0, 1);
+              const v1 = clamp(pt[1] ?? 0, 0, 1);
+              const y0 = WAVEFORM_HEIGHT * 0.85 - v0 * (WAVEFORM_HEIGHT * 0.55);
+              const y1 = WAVEFORM_HEIGHT * 0.85 - v1 * (WAVEFORM_HEIGHT * 0.55);
+              const stroke = 2 + Math.max(v0, v1) * 6;
+              return (
+                <line
+                  key={`groove-${index}`}
+                  x1={xScale(t0)}
+                  y1={y0}
+                  x2={xScale(t1)}
+                  y2={y1}
+                  stroke={STEM_COLORS.bass}
+                  strokeWidth={stroke}
+                  strokeLinecap="round"
+                  opacity={0.4 + Math.max(v0, v1) * 0.5}
+                />
+              );
+            })}
+          {groove.map((pt, index) => {
+            const t = pt[0];
+            const v = clamp(pt[1], 0, 1);
+            if (v < 0.15) return null;
+            const y = WAVEFORM_HEIGHT * 0.85 - v * (WAVEFORM_HEIGHT * 0.55);
+            const tailLen = 12 + v * 24;
+            const tailOpacity = 0.15 + v * 0.35;
+            return (
+              <line
+                key={`groove-tail-${index}`}
+                x1={xScale(t)}
+                y1={y}
+                x2={xScale(t + (tailLen / timelineWidth) * viewDuration)}
+                y2={y}
+                stroke={STEM_COLORS.bass}
+                strokeWidth={2 + v * 4}
+                strokeLinecap="round"
+                opacity={tailOpacity}
+              />
+            );
+          })}
+          <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
+        </svg>
+      );
+    }
+
+    if (activeTab === 'vocal') {
+      const pitchMinHz = 80;
+      const pitchMaxHz = 1000;
+      const logMin = Math.log(pitchMinHz);
+      const logMax = Math.log(pitchMaxHz);
+      const pitchToY = (midi: number) => {
+        const hz = 440 * Math.pow(2, (midi - 69) / 12);
+        const norm = (Math.log(Math.max(hz, pitchMinHz)) - logMin) / (logMax - logMin);
+        const clamped = clamp(norm, 0, 1);
+        const pad = 8;
+        const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+        return pad + (1 - clamped) * innerH;
+      };
+      const filtered = vocalCurve.filter((p) => p.t >= selectionStart && p.t <= selectionEnd);
+      if (filtered.length < 2) {
+        return (
+          <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+            {vocalEvents
+              .filter((kp) => kp.time >= selectionStart && kp.time <= selectionEnd)
+              .map((kp, index) => (
+                <circle
+                  key={`vocal-kp-${kp.time}-${index}`}
+                  cx={xScale(kp.time)}
+                  cy={WAVEFORM_HEIGHT / 2}
+                  r={2 + clamp(kp.intensity ?? 0.6, 0.1, 1) * 10}
+                  fill={STEM_COLORS.vocal}
+                  opacity={0.9}
+                />
+              ))}
+            <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
+          </svg>
+        );
+      }
+      const maxPoints = 800;
+      const step = filtered.length > maxPoints ? Math.ceil(filtered.length / maxPoints) : 1;
+      const sliced = step > 1 ? filtered.filter((_, i) => i % step === 0) : filtered;
+      const gridMidi = [36, 42, 48, 54, 60];
+      return (
+        <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+          {gridMidi.map((midi) => (
+            <line
+              key={`vocal-grid-${midi}`}
+              x1={0}
+              x2={timelineWidth}
+              y1={pitchToY(midi)}
+              y2={pitchToY(midi)}
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={1}
+              strokeDasharray="2 4"
+            />
+          ))}
+          {vocalPhrases
+            .filter((ph) => ph.end >= selectionStart && ph.start <= selectionEnd)
+            .map((ph, index) => {
+              const x = xScale(Math.max(ph.start, selectionStart));
+              const w = Math.max(2, xScale(Math.min(ph.end, selectionEnd)) - x);
+              return (
+                <rect
+                  key={`vocal-phrase-${index}`}
+                  x={x}
+                  y={2}
+                  width={w}
+                  height={WAVEFORM_HEIGHT - 4}
+                  fill={STEM_COLORS.vocal}
+                  opacity={index % 2 === 0 ? 0.08 : 0.14}
+                  rx={2}
+                />
+              );
+            })}
+          {sliced.slice(1).map((p, index) => {
+            const prev = sliced[index];
+            if (!prev) return null;
+            const amp = clamp(Math.max(Number(prev.amp ?? 0), Number(p.amp ?? 0)), 0, 1);
+            if (amp < 0.05) return null;
+            const stroke = 1 + amp * 6;
+            return (
+              <line
+                key={`vocal-${index}`}
+                x1={xScale(prev.t)}
+                y1={pitchToY(prev.pitch)}
+                x2={xScale(p.t)}
+                y2={pitchToY(p.pitch)}
+                stroke={STEM_COLORS.vocal}
+                strokeWidth={stroke}
+                strokeLinecap="round"
+                opacity={0.2 + amp * 0.7}
+              />
+            );
+          })}
+          {vocalTurns
+            .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
+            .map((t, index) => (
+              <circle
+                key={`vocal-turn-${index}`}
+                cx={xScale(t.t)}
+                cy={WAVEFORM_HEIGHT * 0.25}
+                r={4}
+                fill="#facc15"
+                opacity={0.9}
+              />
+            ))}
+          {vocalOnsets
+            .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
+            .map((t, index) => (
+              <circle
+                key={`vocal-onset-${index}`}
+                cx={xScale(t.t)}
+                cy={WAVEFORM_HEIGHT * 0.75}
+                r={3}
+                fill="#f472b6"
+                opacity={0.9}
+              />
+            ))}
+          <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
+        </svg>
+      );
+    }
+
+    if (activeTab === 'other') {
+      const regions = (otherDetail?.other_regions ?? []).filter(
+        (r) => r.end >= selectionStart && r.start <= selectionEnd
+      );
+      const keypoints = (otherDetail?.other_keypoints ?? []).filter(
+        (k) => k.t >= selectionStart && k.t <= selectionEnd
+      );
+      const curve = otherCurve.filter((p) => p.t >= selectionStart && p.t <= selectionEnd);
+      const pitchVals = curve
+        .map((p) => p.pitch)
+        .filter((v): v is number => v != null && Number.isFinite(v));
+      const pitchMin = pitchVals.length ? Math.min(...pitchVals) : 0;
+      const pitchMax = pitchVals.length ? Math.max(...pitchVals) : 1;
+      const hasPitch = pitchVals.length > 0;
+      const pitchToY = (pitch: number) => {
+        const pad = 8;
+        const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+        const range = Math.max(1, pitchMax - pitchMin);
+        const v = (pitch - pitchMin) / range;
+        return pad + (1 - v) * innerH;
+      };
+      const densityToY = (density: number) => {
+        const pad = 8;
+        const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+        const v = clamp(density, 0, 1);
+        return pad + (1 - v) * innerH;
+      };
+      if (regions.length === 0 && keypoints.length === 0 && curve.length < 2) {
+        return (
+          <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+            {otherEvents
+              .filter((kp) => kp.time >= selectionStart && kp.time <= selectionEnd)
+              .map((kp, index) => (
+                <circle
+                  key={`other-kp-${kp.time}-${index}`}
+                  cx={xScale(kp.time)}
+                  cy={WAVEFORM_HEIGHT / 2}
+                  r={2 + clamp(kp.intensity ?? 0.6, 0.1, 1) * 10}
+                  fill={STEM_COLORS.other}
+                  opacity={0.9}
+                />
+              ))}
+            <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
+          </svg>
+        );
+      }
+      return (
+        <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+          {regions.map((r, index) => {
+            const x = xScale(r.start);
+            const w = Math.max(2, xScale(r.end) - x);
+            return (
+              <rect
+                key={`other-region-${index}`}
+                x={x}
+                y={4}
+                width={w}
+                height={WAVEFORM_HEIGHT - 8}
+                fill={STEM_COLORS.other}
+                opacity={0.2 + clamp(r.intensity ?? 0.3, 0, 1) * 0.3}
+                rx={2}
+              />
+            );
+          })}
+          {curve.length > 1 &&
+            curve.slice(1).map((p, index) => {
+              const prev = curve[index];
+              if (!prev) return null;
+              const v0 = clamp(prev.density ?? prev.amp ?? 0.4, 0, 1);
+              const v1 = clamp(p.density ?? p.amp ?? 0.4, 0, 1);
+              const y0 = hasPitch && prev.pitch != null ? pitchToY(prev.pitch) : densityToY(v0);
+              const y1 = hasPitch && p.pitch != null ? pitchToY(p.pitch) : densityToY(v1);
+              return (
+                <line
+                  key={`other-curve-${index}`}
+                  x1={xScale(prev.t)}
+                  y1={y0}
+                  x2={xScale(p.t)}
+                  y2={y1}
+                  stroke={STEM_COLORS.other}
+                  strokeWidth={hasPitch ? 2 + Math.max(v0, v1) * 4 : 2}
+                  strokeLinecap="round"
+                  opacity={hasPitch ? 0.5 + Math.max(v0, v1) * 0.4 : 0.6}
+                />
+              );
+            })}
+          {keypoints.map((kp, index) => (
+            <circle
+              key={`other-kp-${index}`}
+              cx={xScale(kp.t)}
+              cy={hasPitch ? WAVEFORM_HEIGHT * 0.35 : WAVEFORM_HEIGHT * 0.6}
+              r={4}
+              fill={STEM_COLORS.other}
+              opacity={0.9}
+            />
+          ))}
           <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
         </svg>
       );
@@ -197,20 +545,56 @@ export function AudioDetailAnalysisSection({
 
     const events = activeTab === 'drums' ? drumEvents : vocalEvents;
     const color = activeTab === 'drums' ? STEM_COLORS[drumBand] : STEM_COLORS.vocal;
+    const drumBandKeypoints = drumKeypointsByBand[drumBand] ?? [];
+    const textureBlocks = (textureBlocksByBand[drumBand] ?? []) as TextureBlockItem[];
+    const selectedEvents: Array<MusicKeypoint | DrumKeypointByBandItem> =
+      activeTab === 'drums' && drumBandKeypoints.length > 0 ? drumBandKeypoints : events;
+    const scores = selectedEvents.map((kp: any) => {
+      const v = kp.score ?? kp.intensity ?? 0.5;
+      return clamp(Number(v), 0, 1);
+    });
+    const minS = scores.length ? Math.min(...scores) : 0;
+    const maxS = scores.length ? Math.max(...scores) : 1;
+    const range = maxS - minS || 1;
+    const scoreToRadius = (s: number) => 2 + ((s - minS) / range) * 12;
     return (
       <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-        {events
-          .filter((kp) => kp.time >= selectionStart && kp.time <= selectionEnd)
-          .map((kp, index) => (
-            <circle
-              key={`kp-${kp.time}-${index}`}
-              cx={xScale(kp.time)}
-              cy={WAVEFORM_HEIGHT / 2}
-              r={keypointRadius(kp.intensity)}
-              fill={color}
-              opacity={0.9}
-            />
-          ))}
+        {activeTab === 'drums' &&
+          textureBlocks
+            .filter((blk) => blk.end >= selectionStart && blk.start <= selectionEnd)
+            .map((blk, index) => {
+              const x = xScale(blk.start);
+              const w = Math.max(2, xScale(blk.end) - x);
+              const opacity = 0.18 + clamp(blk.intensity ?? blk.density ?? 0.3, 0, 1) * 0.25;
+              return (
+                <rect
+                  key={`tex-${index}`}
+                  x={x}
+                  y={2}
+                  width={w}
+                  height={WAVEFORM_HEIGHT - 4}
+                  fill={STEM_COLORS[drumBand]}
+                  opacity={opacity}
+                  rx={2}
+                />
+              );
+            })}
+        {selectedEvents
+          .filter((kp: any) => kp.time >= selectionStart && kp.time <= selectionEnd)
+          .map((kp: any, index: number) => {
+            const score = clamp(Number(kp.score ?? kp.intensity ?? 0.6), 0, 1);
+            const r = scoreToRadius(score);
+            return (
+              <circle
+                key={`kp-${kp.time}-${index}`}
+                cx={xScale(kp.time)}
+                cy={WAVEFORM_HEIGHT / 2}
+                r={r}
+                fill={color}
+                opacity={0.9}
+              />
+            );
+          })}
         <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
       </svg>
     );
@@ -253,6 +637,7 @@ export function AudioDetailAnalysisSection({
           { id: 'drums', label: '드럼 키포인트' },
           { id: 'bass', label: '베이스' },
           { id: 'vocal', label: '보컬' },
+          { id: 'other', label: '기타' },
         ] as const).map((tab) => (
           <button
             key={tab.id}
@@ -295,9 +680,24 @@ export function AudioDetailAnalysisSection({
         onClick={handleSeekClick}
         className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
       >
-        {audioUrl ? (
+        {effectiveAudioUrl ? (
           <>
             <canvas ref={canvasRef} style={{ width: timelineWidth, height: WAVEFORM_HEIGHT, display: 'block' }} />
+            <div
+              className="absolute left-0 top-0 pointer-events-none"
+              style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+            >
+              {barMarkers.map((t) => {
+                const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                return (
+                  <div
+                    key={`bar-${t}`}
+                    className="absolute top-0 bottom-0 w-px bg-neutral-600/75"
+                    style={{ left }}
+                  />
+                );
+              })}
+            </div>
             <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
               {renderOverlay()}
             </div>

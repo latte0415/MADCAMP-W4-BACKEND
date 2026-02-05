@@ -23,6 +23,7 @@ import {
   getAnalysisStatus,
   updateAnalysisAudio,
   rerunMusicAnalysis,
+  deleteProject,
   getMe,
   logout,
 } from './api';
@@ -89,6 +90,20 @@ export default function App() {
       audio: data.audioFile,
       extractAudio: data.extractAudio,
     });
+  };
+
+  const handleDeleteProject = async (project: Project) => {
+    try {
+      await deleteProject(Number(project.id));
+      setProjects(prev => prev.filter(p => p.id !== project.id));
+      if (selectedProject?.id === project.id) {
+        setSelectedProject(null);
+        navigate('/');
+      }
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      alert('프로젝트 삭제에 실패했습니다.');
+    }
   };
 
   const startStatusPolling = (requestId: number) => {
@@ -382,6 +397,7 @@ export default function App() {
               projects={projects}
               onSelectProject={handleSelectProject}
               onCreateProject={handleCreateProject}
+              onDeleteProject={handleDeleteProject}
               {...authProps}
             />
           }

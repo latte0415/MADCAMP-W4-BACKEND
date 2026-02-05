@@ -11,6 +11,7 @@ from typing import Optional
 from datetime import datetime
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from ..db.base import SessionLocal
 from ..db import models
@@ -346,8 +347,15 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                 if not res:
                     res = models.AnalysisResult(request_id=req.id)
                     db.add(res)
-                res.music_json_s3_key = result_key
-                db.commit()
+                    try:
+                        db.commit()
+                    except IntegrityError:
+                        db.rollback()
+                        res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+
+                if res:
+                    res.music_json_s3_key = result_key
+                    db.commit()
         except Exception:
             logger.exception("parallel music analysis failed")
         finally:

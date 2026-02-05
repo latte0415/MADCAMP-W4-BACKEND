@@ -93,6 +93,12 @@ export async function rerunMusicAnalysis(requestId: number) {
   });
 }
 
+export async function deleteProject(requestId: number) {
+  return apiFetch<{ ok: boolean; deleted_keys: number }>(`/api/project/${requestId}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function createAnalysis(payload: {
   video_id?: number | null;
   audio_id?: number | null;

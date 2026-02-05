@@ -17,6 +17,7 @@ interface DJStudioProps {
   onOpenProject: (project: Project) => void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
+  onDeleteProject?: (project: Project) => void;
   userName?: string;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -27,6 +28,7 @@ export function DJStudio({
   onOpenProject,
   onNewProject,
   onCreateProject,
+  onDeleteProject,
   userName = '게스트',
   onLogin,
   onLogout,
@@ -336,30 +338,51 @@ export function DJStudio({
                 </div>
 
                 {/* Buttons */}
-                <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
-                  <button
-                    onClick={() => onOpenProject(currentProject)}
-                    className="text-xs px-4 py-2 transition-colors"
-                    style={{
-                      border: '1px solid #333',
-                      color: '#ddd',
-                      background: 'transparent',
-                    }}
-                  >
-                    open
-                  </button>
-                  {currentProject.status === 'done' && !isPlaying && !isTransitioning && (
+                <div className="absolute -bottom-2 left-0 right-0 flex items-center justify-between" style={{ zIndex: 2 }}>
+                  <div className="flex items-center gap-3">
                     <button
-                      onClick={handleLoadToTurntable}
+                      onClick={() => onOpenProject(currentProject)}
                       className="text-xs px-4 py-2 transition-colors"
-                      style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
+                      style={{
+                        border: '1px solid #333',
+                        color: '#ddd',
+                        background: 'transparent',
+                      }}
                     >
-                      play →
+                      open
+                    </button>
+                    {currentProject.status === 'done' && !isPlaying && !isTransitioning && (
+                      <button
+                        onClick={handleLoadToTurntable}
+                        className="text-xs px-4 py-2 transition-colors"
+                        style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
+                      >
+                        play →
+                      </button>
+                    )}
+                    {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
+                  </div>
+                  {onDeleteProject && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`"${currentProject.title}" 프로젝트를 삭제하시겠습니까?\n관련된 모든 파일이 함께 삭제됩니다.`)) {
+                          onDeleteProject(currentProject);
+                        }
+                      }}
+                      className="text-xs px-3 py-2 transition-colors opacity-50 hover:opacity-100"
+                      style={{
+                        border: '1px solid #444',
+                        color: '#666',
+                        background: 'transparent',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#444'; e.currentTarget.style.color = '#666'; }}
+                    >
+                      delete
                     </button>
                   )}
-                  {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
                 </div>
               </motion.div>
             )}

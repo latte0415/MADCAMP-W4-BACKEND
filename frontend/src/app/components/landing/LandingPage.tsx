@@ -8,6 +8,7 @@ interface LandingPageProps {
   onSelectProject: (project: Project) => void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
+  onDeleteProject?: (project: Project) => void;
   userName?: string;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -18,6 +19,7 @@ export function LandingPage({
   onSelectProject,
   onNewProject,
   onCreateProject,
+  onDeleteProject,
   userName,
   onLogin,
   onLogout,
@@ -86,6 +88,7 @@ export function LandingPage({
           onOpenProject={onSelectProject}
           onNewProject={onNewProject}
           onCreateProject={onCreateProject}
+          onDeleteProject={onDeleteProject}
           userName={userName}
           onLogin={onLogin}
           onLogout={onLogout}

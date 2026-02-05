@@ -158,6 +158,7 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
         with tempfile.TemporaryDirectory() as tmpdir:
             music_thread = None
             if self._should_run_music(req):
+                logger.info("request %s: starting parallel music thread", req.id)
                 music_thread = threading.Thread(
                     target=self._run_music_for_request,
                     args=(req.id,),
@@ -215,6 +216,7 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
         with tempfile.TemporaryDirectory() as tmpdir:
             music_thread = None
             if self._should_run_music(req):
+                logger.info("request %s: starting parallel music thread", req.id)
                 music_thread = threading.Thread(
                     target=self._run_music_for_request,
                     args=(req.id,),
@@ -299,18 +301,27 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
     def _should_run_music(self, req: models.AnalysisRequest) -> bool:
         params = req.params_json or {}
         if params.get("skip_music"):
+            logger.info("request %s: skip_music is set, skipping music analysis", req.id)
             return False
-        return bool(req.audio_id or params.get("extract_audio"))
+        should_run = bool(req.audio_id or params.get("extract_audio"))
+        logger.info("request %s: _should_run_music=%s (audio_id=%s, extract_audio=%s)",
+                    req.id, should_run, req.audio_id, params.get("extract_audio"))
+        return should_run
 
     def _run_music_for_request(self, request_id: int) -> None:
         db = SessionLocal()
         try:
             req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
             if not req:
+                logger.warning("parallel music: request %s not found", request_id)
                 return
             res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
             if res and res.music_json_s3_key:
+                logger.info("parallel music: request %s already has music result", request_id)
                 return
+
+            logger.info("parallel music: starting for request %s, audio_id=%s, extract_audio=%s",
+                        request_id, req.audio_id, (req.params_json or {}).get("extract_audio"))
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 local_audio = None
@@ -318,6 +329,7 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                 if req.audio_id:
                     audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first()
                     if not audio:
+                        logger.warning("parallel music: audio_id %s not found", req.audio_id)
                         return
                     ext = "bin"
                     if audio.s3_key and "." in audio.s3_key:
@@ -330,16 +342,20 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                         elif "mp4" in audio.content_type or "m4a" in audio.content_type:
                             ext = "m4a"
                     local_audio = os.path.join(tmpdir, f"input_audio.{ext}")
+                    logger.info("parallel music: downloading audio %s", audio.s3_key)
                     with open(local_audio, "wb") as f:
                         download_fileobj(audio.s3_key, f)
                 elif (req.params_json or {}).get("extract_audio") and req.video_id:
                     video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first()
                     if not video:
+                        logger.warning("parallel music: video_id %s not found", req.video_id)
                         return
                     local_video = os.path.join(tmpdir, "input_video.mp4")
+                    logger.info("parallel music: downloading video %s for extraction", video.s3_key)
                     with open(local_video, "wb") as f:
                         download_fileobj(video.s3_key, f)
                     local_audio = os.path.join(tmpdir, "extracted_audio.wav")
+                    logger.info("parallel music: extracting audio with ffmpeg")
                     cmd = [
                         "ffmpeg",
                         "-y",
@@ -354,8 +370,11 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                     ]
                     proc = subprocess.run(cmd, capture_output=True, text=True)
                     if proc.returncode != 0:
+                        logger.error("parallel music: ffmpeg failed: %s", proc.stderr or proc.stdout)
                         return
+                    logger.info("parallel music: audio extracted successfully")
                 else:
+                    logger.warning("parallel music: no audio_id and extract_audio not set, skipping")
                     return
 
                 stem_out_dir = os.path.join(tmpdir, "stems")
@@ -377,8 +396,9 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                 if res:
                     res.music_json_s3_key = result_key
                     db.commit()
+                    logger.info("parallel music: completed successfully for request %s", request_id)
         except Exception:
-            logger.exception("parallel music analysis failed")
+            logger.exception("parallel music analysis failed for request %s", request_id)
         finally:
             db.close()
 

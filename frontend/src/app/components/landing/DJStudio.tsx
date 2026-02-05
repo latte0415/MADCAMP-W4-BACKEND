@@ -46,7 +46,13 @@ export function DJStudio({
   const isPlaying = loadedProject !== null;
 
   const handleStartRecording = () => {
-    if (isTransitioning || isPlaying || isRecording) return;
+    if (isTransitioning || isRecording) return;
+    // Stop playing if active
+    if (isPlaying) {
+      setLoadedProject(null);
+      setIsSpinning(false);
+      setShowLpOnAlbum(true);
+    }
     setIsRecording(true);
     setRecordingLpVisible(true);
   };
@@ -130,12 +136,8 @@ export function DJStudio({
         e.preventDefault();
         if (loadedProject) {
           handleEnterProject();
-        } else if (currentProject) {
-          if (currentProject.status === 'done') {
-            handleLoadToTurntable();
-          } else {
-            onOpenProject(currentProject);
-          }
+        } else if (currentProject && currentProject.status === 'done') {
+          handleLoadToTurntable();
         }
       }
     };
@@ -176,8 +178,7 @@ export function DJStudio({
           ) : null}
           {(onNewProject || onCreateProject) && (
             <button
-              onClick={onCreateProject ? handleStartRecording : onNewProject}
-              disabled={isRecording}
+              onClick={isRecording ? handleCancelRecording : (onCreateProject ? handleStartRecording : onNewProject)}
               className="text-xs text-white px-4 py-2 transition-colors"
               style={{
                 border: isRecording ? '1px solid #d97706' : '1px solid #444',
@@ -232,16 +233,11 @@ export function DJStudio({
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                         onClick={() => {
                           handleSelectAlbum(index);
-                          if (isSelected) {
-                            onOpenProject(project);
-                          }
                         }}
                         onDoubleClick={() => {
                           if (!isSelected) return;
                           if (project.status === 'done') {
                             handleLoadToTurntable();
-                          } else {
-                            onOpenProject(project);
                           }
                         }}
                       >
@@ -301,12 +297,17 @@ export function DJStudio({
                 className="relative"
                 style={{ width: 550, height: 550 }}
                 initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                animate={{
+                  opacity: 1,
+                  scale: isPlaying ? 0.75 : 1,
+                  x: isPlaying ? -80 : 0,
+                  y: isPlaying ? 30 : 0,
+                }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
               >
                 {/* Album sleeve */}
-                <div
+                <motion.div
                   className="absolute overflow-hidden"
                   style={{
                     width: 450,
@@ -320,7 +321,9 @@ export function DJStudio({
                     boxShadow: '8px 10px 40px rgba(0,0,0,0.7), 0 0 1px rgba(255,255,255,0.15)',
                     border: '1px solid rgba(255,255,255,0.08)',
                   }}
-                  onClick={() => onOpenProject(currentProject)}
+                  animate={{
+                    filter: isPlaying ? 'brightness(0.6)' : 'brightness(1)',
+                  }}
                 >
                   {/* Generative art background when no thumbnail */}
                   {!currentProject.thumbnailUrl && (
@@ -341,55 +344,70 @@ export function DJStudio({
                     <div className="text-[10px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>D+M LAB</div>
                   </div>
                   <div className="absolute top-8 right-8 text-[12px] font-mono z-10" style={{ color: 'rgba(255,255,255,0.5)' }}>{String(selectedIndex + 1).padStart(2, '0')}</div>
-                </div>
 
-                {/* Buttons */}
-                <div className="absolute -bottom-2 left-0 right-0 flex items-center justify-between" style={{ zIndex: 2 }}>
-                  <div className="flex items-center gap-3">
+                  {/* Delete button - corner icon */}
+                  {onDeleteProject && !isPlaying && (
                     <button
-                      onClick={() => onOpenProject(currentProject)}
-                      className="text-xs px-4 py-2 transition-colors"
-                      style={{
-                        border: '1px solid #333',
-                        color: '#ddd',
-                        background: 'transparent',
-                      }}
-                    >
-                      open
-                    </button>
-                    {currentProject.status === 'done' && !isPlaying && !isTransitioning && (
-                      <button
-                        onClick={handleLoadToTurntable}
-                        className="text-xs px-4 py-2 transition-colors"
-                        style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
-                      >
-                        play →
-                      </button>
-                    )}
-                    {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
-                  </div>
-                  {onDeleteProject && (
-                    <button
-                      onClick={() => {
-                        if (confirm(`"${currentProject.title}" 프로젝트를 삭제하시겠습니까?\n관련된 모든 파일이 함께 삭제됩니다.`)) {
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`"${currentProject.title}" 프로젝트를 삭제하시겠습니까?`)) {
                           onDeleteProject(currentProject);
                         }
                       }}
-                      className="text-xs px-3 py-2 transition-colors opacity-50 hover:opacity-100"
-                      style={{
-                        border: '1px solid #444',
-                        color: '#666',
-                        background: 'transparent',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#444'; e.currentTarget.style.color = '#666'; }}
+                      className="absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center rounded-full transition-all opacity-30 hover:opacity-100 z-20"
+                      style={{ background: 'rgba(0,0,0,0.5)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.8)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; }}
                     >
-                      delete
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#fff' }}>
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" />
+                      </svg>
                     </button>
                   )}
-                </div>
+
+                  {/* Playing indicator overlay */}
+                  {isPlaying && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center z-20"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <div className="flex items-center gap-1">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={i}
+                            className="w-1 bg-amber-500 rounded-full"
+                            animate={{ height: [8, 20, 8] }}
+                            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+
+                {/* Buttons */}
+                {!isPlaying && (
+                  <div className="absolute -bottom-2 left-0 right-0 flex items-center" style={{ zIndex: 2 }}>
+                    <div className="flex items-center gap-3">
+                      {currentProject.status === 'done' && !isTransitioning && (
+                        <button
+                          onClick={handleLoadToTurntable}
+                          className="text-xs px-4 py-2 transition-colors"
+                          style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
+                        >
+                          play →
+                        </button>
+                      )}
+                      {currentProject.status !== 'done' && (
+                        <span className="text-xs text-neutral-500">{currentProject.status === 'failed' ? 'failed' : 'processing...'}</span>
+                      )}
+                      {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

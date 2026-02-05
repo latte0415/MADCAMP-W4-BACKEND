@@ -33,7 +33,10 @@ export async function apiFetch<T>(url: string, options: RequestInit = {}): Promi
   const res = await fetch(url, { credentials: 'include', ...options });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || res.statusText);
+    const err = new Error(text || res.statusText) as Error & { status?: number; body?: string };
+    err.status = res.status;
+    err.body = text;
+    throw err;
   }
   return res.json() as Promise<T>;
 }
@@ -87,6 +90,12 @@ export async function updateAnalysisAudio(requestId: number, audioId: number) {
   });
 }
 
+export async function deleteAnalysisRequest(requestId: number) {
+  return apiFetch(`/api/analysis/${requestId}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function rerunMusicAnalysis(requestId: number) {
   return apiFetch(`/api/analysis/${requestId}/rerun-music`, {
     method: 'POST',
@@ -115,28 +124,69 @@ export async function createAnalysis(payload: {
 }
 
 export async function getAnalysisStatus(id: number) {
-  return apiFetch<{ status: string; message?: string; progress?: number; error_message?: string }>(
+  return apiFetch<{
+    status: string;
+    message?: string;
+    progress?: number;
+    error_message?: string;
+    log?: string;
+  }>(
     `/api/analysis/${id}/status`
   );
 }
 
-export function uploadFileToS3(
+export function streamAnalysisStatus(
+  requestId: number,
+  onUpdate: (data: { status: string; message?: string; progress?: number; error_message?: string; log?: string }) => void,
+  onError: (err?: any) => void
+) {
+  const source = new EventSource(`/api/analysis/${requestId}/events`, { withCredentials: true });
+
+  source.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data || '{}');
+      onUpdate(data);
+    } catch (err) {
+      onError(err);
+      source.close();
+    }
+  };
+
+  source.onerror = (err) => {
+    onError(err);
+    source.close();
+  };
+
+  return source;
+}
+
+export async function uploadFileToS3(
   url: string,
   file: File,
-  onProgress?: (percent: number) => void
+  onProgress?: (value: number) => void
+) {
+  return uploadFileToS3WithProgress(url, file, onProgress);
+}
+
+export function uploadFileToS3WithProgress(
+  url: string,
+  file: File,
+  onProgress?: (value: number) => void
 ) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url, true);
     xhr.setRequestHeader('Content-Type', file.type);
-    xhr.upload.onprogress = (evt) => {
-      if (!evt.lengthComputable) return;
-      const percent = Math.round((evt.loaded / evt.total) * 100);
-      onProgress?.(percent);
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+      const progress = event.total > 0 ? event.loaded / event.total : 0;
+      onProgress?.(Math.max(0, Math.min(1, progress)));
     };
+
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        onProgress?.(100);
+        onProgress?.(1);
         resolve();
       } else {
         reject(new Error('S3 upload failed'));
@@ -144,6 +194,28 @@ export function uploadFileToS3(
     };
     xhr.onerror = () => reject(new Error('S3 upload failed'));
     xhr.send(file);
+  });
+}
+
+export async function updateAnalysisVideo(requestId: number, videoId: number) {
+  return apiFetch(`/api/analysis/${requestId}/video`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ video_id: videoId }),
+  });
+}
+
+export async function updateAnalysisExtractAudio(requestId: number, enabled: boolean) {
+  return apiFetch(`/api/analysis/${requestId}/extract-audio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+export async function rerunMotionAnalysis(requestId: number) {
+  return apiFetch(`/api/analysis/${requestId}/rerun-motion`, {
+    method: 'POST',
   });
 }
 
@@ -250,6 +322,7 @@ export function parseMotionKeypoints(data: any): MotionKeypoint[] {
 
 export function mapLibraryItem(item: LibraryItem): Project {
   const status = (item.status as ProjectStatus) || 'draft';
+  const isDone = status === 'done';
   return {
     id: String(item.id),
     title: item.title ?? `프로젝트 #${item.id}`,
@@ -261,6 +334,8 @@ export function mapLibraryItem(item: LibraryItem): Project {
     motionKeypoints: [],
     bassNotes: [],
     status,
+    motionProgress: isDone ? 1 : undefined,
+    audioProgress: isDone ? 1 : undefined,
   };
 }
 
@@ -279,11 +354,13 @@ export function mapProjectDetail(
   const maxBass = bassNotes.reduce((m, n) => Math.max(m, n.time + (n.duration ?? 0)), 0);
   const duration = Math.max(
     Number(detail.video?.duration_sec ?? 0),
+    Number(detail.audio?.duration_sec ?? 0),
     maxMusic,
     maxMotion,
     maxBass,
     1
   );
+  const isDone = status === 'done';
   return {
     id: String(detail.id),
     title: detail.title ?? `프로젝트 #${detail.id}`,
@@ -298,5 +375,9 @@ export function mapProjectDetail(
     bassNotes,
     status,
     errorMessage: detail.error_message ?? undefined,
+    motionProgress: isDone && detail.video?.url ? 1 : undefined,
+    audioProgress: isDone && (detail.audio?.url || musicKeypoints.length > 0) ? 1 : undefined,
+    uploadVideoProgress: detail.video?.url ? 1 : undefined,
+    uploadAudioProgress: detail.audio?.url ? 1 : undefined,
   };
 }

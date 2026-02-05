@@ -35,4 +35,11 @@ export interface Project {
   bassNotes?: BassNote[];
   status: ProjectStatus;
   errorMessage?: string;
+  progress?: number;
+  statusMessage?: string;
+  statusLog?: string;
+  uploadVideoProgress?: number;
+  uploadAudioProgress?: number;
+  motionProgress?: number;
+  audioProgress?: number;
 }

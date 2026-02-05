@@ -1,6 +1,5 @@
 import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Play, Pause } from 'lucide-react';
-import { Button } from './ui/button';
+import { Play } from 'lucide-react';
 
 interface VideoPlayerProps {
   videoUrl?: string;
@@ -8,6 +7,8 @@ interface VideoPlayerProps {
   onPlayPause: () => void;
   onTimeUpdate: (time: number) => void;
   currentTime: number;
+  onDuration?: (duration: number) => void;
+  muted?: boolean;
 }
 
 export interface VideoPlayerHandle {
@@ -16,7 +17,7 @@ export interface VideoPlayerHandle {
 }
 
 export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
-  ({ videoUrl, isPlaying, onPlayPause, onTimeUpdate, currentTime }, ref) => {
+  ({ videoUrl, isPlaying, onPlayPause, onTimeUpdate, currentTime, onDuration, muted = true }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -44,20 +45,30 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     useEffect(() => {
       const video = videoRef.current;
       if (!video) return;
+      video.muted = muted;
+      video.volume = muted ? 0 : 1;
+    }, [muted]);
+
+    useEffect(() => {
+      const video = videoRef.current;
+      if (!video) return;
 
       const handleTimeUpdate = () => {
         onTimeUpdate(video.currentTime);
       };
+      const handleLoadedMetadata = () => {
+        if (Number.isFinite(video.duration)) {
+          onDuration?.(video.duration);
+        }
+      };
 
       video.addEventListener('timeupdate', handleTimeUpdate);
-      return () => video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      return () => {
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
     }, [onTimeUpdate]);
-
-    const formatTime = (seconds: number) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
 
     return (
       <div className="relative bg-neutral-950/80 rounded border border-neutral-800 overflow-hidden">
@@ -67,28 +78,8 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               ref={videoRef}
               className="w-full h-full object-contain"
               src={videoUrl}
+              muted={muted}
             />
-            
-            {/* Custom overlay controls */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-between">
-                <Button
-                  onClick={onPlayPause}
-                  size="lg"
-                  className="rounded-full bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-md border border-amber-500/30"
-                >
-                  {isPlaying ? (
-                    <Pause className="size-6 text-white" />
-                  ) : (
-                    <Play className="size-6 text-white ml-0.5" />
-                  )}
-                </Button>
-                
-                <div className="text-white font-medium text-xs uppercase tracking-widest bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md">
-                  {formatTime(currentTime)}
-                </div>
-              </div>
-            </div>
           </div>
         ) : (
           <div className="aspect-video bg-neutral-950/80 flex items-center justify-center">

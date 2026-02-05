@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Callable, Optional
 
 from ..core.config import MUSIC_ANALYZER_ROOT
 
@@ -18,6 +19,7 @@ def run_music_analysis(
     stem_out_dir: str,
     output_json_path: str,
     model_name: str = "htdemucs",
+    progress_cb: Optional[Callable[[str, float], None]] = None,
 ) -> str:
     """
     로컬 오디오 파일에 대해 스템 분리, 드럼/베이스 키포인트 추출, JSON 생성.
@@ -51,17 +53,24 @@ def run_music_analysis(
     stem_out_path = Path(stem_out_dir)
     track_name = audio_path.stem
 
+    def _emit(stage: str, progress: float) -> None:
+        if progress_cb:
+            progress_cb(stage, progress)
+
+    _emit("stems", 0.42)
     demucs_separate(str(audio_path), out_dir=str(stem_out_path), model_name=model_name)
 
     stem_dir = stem_out_path / model_name / track_name
     drums_path = stem_dir / "drums.wav"
     if drums_path.exists():
+        _emit("drum_bands", 0.5)
         y, sr = librosa.load(str(drums_path), sr=None, mono=True)
         y_low, y_mid, y_high = filter_y_into_bands(y, sr, BAND_HZ)
         sf.write(str(stem_dir / "drum_low.wav"), y_low, sr)
         sf.write(str(stem_dir / "drum_mid.wav"), y_mid, sr)
         sf.write(str(stem_dir / "drum_high.wav"), y_high, sr)
 
+    _emit("cnn_onsets", 0.62)
     stems_base_dir = stem_out_path / model_name
     band_onsets, band_strengths, duration, sr = compute_cnn_band_onsets_with_odf(
         track_name,
@@ -72,6 +81,7 @@ def run_music_analysis(
         "mid": stem_dir / "drum_mid.wav",
         "high": stem_dir / "drum_high.wav",
     }
+    _emit("keypoints", 0.72)
     keypoints_by_band = select_key_onsets_by_band(
         band_onsets,
         band_strengths,
@@ -79,16 +89,19 @@ def run_music_analysis(
         sr,
         band_audio_paths=band_audio_paths,
     )
+    _emit("textures", 0.8)
     texture_blocks_by_band = merge_texture_blocks_by_band(band_onsets, band_strengths)
 
     bass_dict = None
     bass_path = stem_dir / "bass.wav"
     if bass_path.exists():
         try:
+            _emit("bass", 0.86)
             bass_dict = run_bass_pipeline(str(bass_path), sr=sr)
         except Exception:
             bass_dict = None
 
+    _emit("write_json", 0.92)
     write_streams_sections_json(
         output_json_path,
         source=track_name,

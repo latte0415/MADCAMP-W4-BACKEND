@@ -15,27 +15,102 @@
       </div>
     </header>
 
-    <main class="container">
+    <main class="container monitoring">
+      <section class="panel panel-summary">
+        <div class="panel__header">
+          <div>
+            <h2 class="brand-title">백엔드 모니터링</h2>
+            <span class="panel-sub">워커 진행 상황과 파이프라인 현황을 한눈에 확인합니다.</span>
+          </div>
+          <div class="actions">
+            <input id="filter-input" class="input ghost" placeholder="제목/ID 필터" />
+            <select id="select-limit" class="input ghost">
+              <option value="10">최근 10건</option>
+              <option value="25" selected>최근 25건</option>
+              <option value="50">최근 50건</option>
+            </select>
+            <button id="toggle-auto" class="btn ghost">자동 갱신: ON</button>
+            <button id="btn-refresh" class="btn ghost">새로고침</button>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">모션 대기</div>
+            <div id="count-queued" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">음악 대기</div>
+            <div id="count-queued-music" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">진행중</div>
+            <div id="count-running" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">마지막 갱신</div>
+            <div id="last-refresh" class="summary-value">-</div>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">활성 러닝 (2분 내)</div>
+            <div id="count-active" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">스테일 러닝 (10분↑)</div>
+            <div id="count-stale" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">실패 (24h)</div>
+            <div id="count-failed" class="summary-value">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">완료 (24h)</div>
+            <div id="count-done" class="summary-value">0</div>
+          </div>
+        </div>
+        <div class="legend">
+          <span class="legend-title">파이프라인</span>
+          <span class="chip muted">Video</span>
+          <span class="chip muted">Audio</span>
+          <span class="chip muted">Motion</span>
+          <span class="chip muted">Music</span>
+          <span class="chip muted">Magic</span>
+          <span class="chip muted">Edit</span>
+          <span class="chip muted">Match</span>
+        </div>
+      </section>
+
       <section class="panel">
         <div class="panel__header">
           <h2>대기중 (모션)</h2>
-          <button id="btn-refresh" class="btn ghost">새로고침</button>
+          <span id="label-queued" class="panel-sub">0건</span>
         </div>
-        <div id="list-queued" class="library"></div>
+        <div id="list-queued" class="monitoring-list"></div>
       </section>
 
       <section class="panel">
         <div class="panel__header">
           <h2>대기중 (음악)</h2>
+          <span id="label-queued-music" class="panel-sub">0건</span>
         </div>
-        <div id="list-queued-music" class="library"></div>
+        <div id="list-queued-music" class="monitoring-list"></div>
       </section>
 
       <section class="panel">
         <div class="panel__header">
           <h2>진행중</h2>
+          <span id="label-running" class="panel-sub">0건</span>
         </div>
-        <div id="list-running" class="library"></div>
+        <div id="list-running" class="monitoring-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>실패</h2>
+          <span id="label-failed" class="panel-sub">0건</span>
+        </div>
+        <div id="list-failed" class="monitoring-list"></div>
       </section>
     </main>
 

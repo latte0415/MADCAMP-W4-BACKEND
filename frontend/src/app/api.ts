@@ -1,4 +1,17 @@
-import { BassNote, MotionKeypoint, MusicKeypoint, Project, ProjectMode, ProjectStatus } from './types';
+import {
+  BassNote,
+  MotionKeypoint,
+  MusicKeypoint,
+  Project,
+  ProjectMode,
+  ProjectStatus,
+  MusicAnalysisDetail,
+  DrumKeypointByBandItem,
+  TextureBlockItem,
+  BassAnalysisDetail,
+  VocalAnalysisDetail,
+  OtherAnalysisDetail,
+} from './types';
 
 type LibraryItem = {
   id: number;
@@ -24,13 +37,31 @@ type ProjectDetailResponse = {
     motion_json?: string | null;
     music_json?: string | null;
     magic_json?: string | null;
+    stems?: {
+      drums?: string | null;
+      bass?: string | null;
+      vocal?: string | null;
+      other?: string | null;
+      drum_low?: string | null;
+      drum_mid?: string | null;
+      drum_high?: string | null;
+    } | null;
   };
 };
 
 type PresignResponse = { upload_url: string; s3_key: string };
 
+const DEFAULT_API_BASE = 'https://madcamp-w4-backend-production.up.railway.app:8080';
+const API_BASE = (import.meta.env.VITE_API_URL || DEFAULT_API_BASE).replace(/\/+$/, '');
+
+function apiUrl(path: string) {
+  if (!path.startsWith('/')) return path;
+  if (!API_BASE) return path;
+  return `${API_BASE}${path}`;
+}
+
 export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(url, { credentials: 'include', ...options });
+  const res = await fetch(apiUrl(url), { credentials: 'include', ...options });
   if (!res.ok) {
     const text = await res.text();
     const err = new Error(text || res.statusText) as Error & { status?: number; body?: string };
@@ -140,7 +171,7 @@ export function streamAnalysisStatus(
   onUpdate: (data: { status: string; message?: string; progress?: number; error_message?: string; log?: string }) => void,
   onError: (err?: any) => void
 ) {
-  const source = new EventSource(`/api/analysis/${requestId}/events`, { withCredentials: true });
+  const source = new EventSource(apiUrl(`/api/analysis/${requestId}/events`), { withCredentials: true });
 
   source.onmessage = (event) => {
     try {
@@ -286,6 +317,84 @@ export function parseBassNotes(data: any): BassNote[] {
   return out;
 }
 
+const toNumber = (value: any, fallback = 0) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+export function parseMusicDetail(data: any): MusicAnalysisDetail | undefined {
+  if (!data) return undefined;
+  const keypointsByBand: MusicAnalysisDetail['keypointsByBand'] = {};
+  const rawKeypoints = data.keypoints_by_band ?? null;
+  if (rawKeypoints && typeof rawKeypoints === 'object') {
+    (['low', 'mid', 'high'] as const).forEach((band) => {
+      const items = Array.isArray(rawKeypoints[band]) ? rawKeypoints[band] : [];
+      if (items.length === 0) return;
+      keypointsByBand[band] = items.map((item: any) => ({
+        time: toNumber(item.time ?? item.t ?? 0),
+        score: Number.isFinite(Number(item.score)) ? Number(item.score) : undefined,
+        intensity: Number.isFinite(Number(item.intensity)) ? Number(item.intensity) : undefined,
+      })) as DrumKeypointByBandItem[];
+    });
+  }
+
+  const textureBlocksByBand: MusicAnalysisDetail['textureBlocksByBand'] = {};
+  const rawTextures = data.texture_blocks_by_band ?? null;
+  if (rawTextures && typeof rawTextures === 'object') {
+    (['low', 'mid', 'high'] as const).forEach((band) => {
+      const items = Array.isArray(rawTextures[band]) ? rawTextures[band] : [];
+      if (items.length === 0) return;
+      textureBlocksByBand[band] = items.map((item: any) => ({
+        start: toNumber(item.start ?? 0),
+        end: toNumber(item.end ?? 0),
+        intensity: Number.isFinite(Number(item.intensity)) ? Number(item.intensity) : undefined,
+        density: Number.isFinite(Number(item.density)) ? Number(item.density) : undefined,
+      })) as TextureBlockItem[];
+    });
+  }
+
+  const bass: BassAnalysisDetail | undefined = data.bass
+    ? {
+        notes: parseBassNotes(data),
+        groove_curve: Array.isArray(data.bass?.groove_curve) ? data.bass.groove_curve : undefined,
+        bass_curve_v3: Array.isArray(data.bass?.bass_curve_v3) ? data.bass.bass_curve_v3 : undefined,
+      }
+    : undefined;
+
+  const vocal: VocalAnalysisDetail | undefined = data.vocal
+    ? {
+        vocal_curve: Array.isArray(data.vocal?.vocal_curve) ? data.vocal.vocal_curve : undefined,
+        vocal_phrases: Array.isArray(data.vocal?.vocal_phrases) ? data.vocal.vocal_phrases : undefined,
+        vocal_turns: Array.isArray(data.vocal?.vocal_turns) ? data.vocal.vocal_turns : undefined,
+        vocal_onsets: Array.isArray(data.vocal?.vocal_onsets) ? data.vocal.vocal_onsets : undefined,
+      }
+    : undefined;
+
+  const other: OtherAnalysisDetail | undefined = data.other
+    ? {
+        other_curve: Array.isArray(data.other?.other_curve) ? data.other.other_curve : undefined,
+        other_regions: Array.isArray(data.other?.other_regions) ? data.other.other_regions : undefined,
+        other_keypoints: Array.isArray(data.other?.other_keypoints) ? data.other.other_keypoints : undefined,
+      }
+    : undefined;
+
+  const hasKeypoints = Object.keys(keypointsByBand).length > 0;
+  const hasTextures = Object.keys(textureBlocksByBand).length > 0;
+  const hasBass = bass?.notes?.length || bass?.groove_curve?.length || bass?.bass_curve_v3?.length;
+  const hasVocal = vocal?.vocal_curve?.length;
+  const hasOther = other?.other_curve?.length || other?.other_regions?.length || other?.other_keypoints?.length;
+
+  if (!hasKeypoints && !hasTextures && !hasBass && !hasVocal && !hasOther) return undefined;
+
+  return {
+    keypointsByBand: hasKeypoints ? keypointsByBand : undefined,
+    textureBlocksByBand: hasTextures ? textureBlocksByBand : undefined,
+    bass: hasBass ? bass : undefined,
+    vocal: hasVocal ? vocal : undefined,
+    other: hasOther ? other : undefined,
+  };
+}
+
 export function parseMotionKeypoints(data: any): MotionKeypoint[] {
   if (!data) return [];
   const out: MotionKeypoint[] = [];
@@ -343,7 +452,8 @@ export function mapProjectDetail(
   detail: ProjectDetailResponse,
   musicKeypoints: MusicKeypoint[],
   motionKeypoints: MotionKeypoint[],
-  bassNotes: BassNote[] = []
+  bassNotes: BassNote[] = [],
+  musicDetail?: MusicAnalysisDetail
 ): Project {
   const status = (detail.status as ProjectStatus) || 'draft';
   const maxMusic = musicKeypoints.reduce((m, k) => Math.max(m, k.time), 0);
@@ -361,6 +471,21 @@ export function mapProjectDetail(
     1
   );
   const isDone = status === 'done';
+  const stems = detail.results?.stems ?? null;
+  const stemUrls =
+    stems && (stems.drums || stems.bass || stems.vocal || stems.other || stems.drum_low || stems.drum_mid || stems.drum_high)
+      ? {
+          drums: stems.drums ?? undefined,
+          bass: stems.bass ?? undefined,
+          vocal: stems.vocal ?? undefined,
+          other: stems.other ?? undefined,
+          drumBands: {
+            low: stems.drum_low ?? undefined,
+            mid: stems.drum_mid ?? undefined,
+            high: stems.drum_high ?? undefined,
+          },
+        }
+      : undefined;
   return {
     id: String(detail.id),
     title: detail.title ?? `프로젝트 #${detail.id}`,
@@ -373,6 +498,8 @@ export function mapProjectDetail(
     musicKeypoints,
     motionKeypoints,
     bassNotes,
+    musicDetail,
+    stemUrls,
     status,
     errorMessage: detail.error_message ?? undefined,
     motionProgress: isDone && detail.video?.url ? 1 : undefined,

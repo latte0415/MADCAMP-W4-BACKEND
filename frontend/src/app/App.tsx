@@ -190,16 +190,17 @@ export default function App() {
     mode: ProjectMode;
     video?: File;
     audio?: File;
+    extractAudio?: boolean;
   }) => {
     (async () => {
-      if (!data.video) {
-        alert('영상 파일이 필요합니다.');
+      if (!data.video && !data.audio) {
+        alert('영상 또는 오디오 파일이 필요합니다.');
         return;
       }
 
       setUploadDialogOpen(false);
 
-      const localVideoUrl = URL.createObjectURL(data.video);
+      const localVideoUrl = data.video ? URL.createObjectURL(data.video) : undefined;
       const localAudioUrl = data.audio ? URL.createObjectURL(data.audio) : undefined;
       const tempId =
         typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -223,14 +224,17 @@ export default function App() {
       navigate(`/project/${tempId}`);
 
       try {
-        const videoPresign = await presignUpload(data.video, 'video');
-        await uploadFileToS3(videoPresign.upload_url, data.video);
-        const videoMedia = await commitMedia({
-          s3_key: videoPresign.s3_key,
-          type: 'video',
-          content_type: data.video.type,
-          duration_sec: null,
-        });
+        let videoMedia: { id: number } | null = null;
+        if (data.video) {
+          const videoPresign = await presignUpload(data.video, 'video');
+          await uploadFileToS3(videoPresign.upload_url, data.video);
+          videoMedia = await commitMedia({
+            s3_key: videoPresign.s3_key,
+            type: 'video',
+            content_type: data.video.type,
+            duration_sec: null,
+          });
+        }
 
         let audioId: number | null = null;
         if (data.audio) {
@@ -246,10 +250,11 @@ export default function App() {
         }
 
         const req = await createAnalysis({
-          video_id: videoMedia.id,
+          video_id: videoMedia?.id ?? null,
           audio_id: audioId,
           mode: data.mode,
           title: data.title,
+          params_json: data.extractAudio ? { extract_audio: true } : null,
         });
 
         navigate(`/project/${req.id}`, { replace: true });

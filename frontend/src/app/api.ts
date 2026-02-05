@@ -94,19 +94,20 @@ export async function rerunMusicAnalysis(requestId: number) {
 }
 
 export async function createAnalysis(payload: {
-  video_id: number;
+  video_id?: number | null;
   audio_id?: number | null;
   mode: ProjectMode;
   title?: string | null;
+  params_json?: Record<string, any> | null;
 }) {
   return apiFetch<{ id: number }>('/api/analysis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      video_id: payload.video_id,
+      video_id: payload.video_id ?? null,
       audio_id: payload.audio_id ?? null,
       mode: payload.mode,
-      params_json: null,
+      params_json: payload.params_json ?? null,
       title: payload.title ?? null,
       notes: null,
     }),

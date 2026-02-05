@@ -46,7 +46,7 @@ class AnalysisRequest(Base):
 
     id = Column(BigInteger, primary_key=True)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
-    video_id = Column(BigInteger, ForeignKey("media_files.id"), nullable=False)
+    video_id = Column(BigInteger, ForeignKey("media_files.id"))
     audio_id = Column(BigInteger, ForeignKey("media_files.id"))
     mode = Column(String, nullable=False)
     params_json = Column(JSON)
@@ -70,6 +70,8 @@ class AnalysisResult(Base):
     music_json_s3_key = Column(String)
     magic_json_s3_key = Column(String)
     overlay_video_s3_key = Column(String)
+    match_score = Column(Numeric)
+    match_details = Column(JSON)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 

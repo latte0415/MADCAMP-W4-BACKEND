@@ -16,6 +16,7 @@ from .core.config import (
     MUSIC_WORKER_CONCURRENCY,
 )
 from .db.base import Base, engine
+from .db.migrations import run_auto_migrations
 from .db import models  # noqa: F401
 from .api.auth import router as auth_router
 from .api.api import router as api_router
@@ -44,6 +45,7 @@ if os.path.isdir(LEGACY_STATIC):
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    run_auto_migrations(engine)
     if WORKER_ENABLED:
         motion_count = max(WORKER_CONCURRENCY, 1)
         for _ in range(motion_count):

@@ -19,13 +19,18 @@ interface MainTimelineSectionProps {
   onPlayPause: () => void;
   onSeek: (time: number) => void;
   videoKeypoints: MotionKeypoint[];
+  videoUrl?: string | null;
   audioUrl?: string | null;
+  audioDuration?: number;
   audioAvailable: boolean;
   audioSourceLabel?: string;
   hasAudioClip: boolean;
   onPlaceAudioClip: () => void;
   audioClipStart: number;
+  audioClipOffset: number;
   audioClipDuration: number;
+  onAudioClipDurationChange: (duration: number) => void;
+  onAudioClipOffsetChange: (offset: number) => void;
   onAudioClipChange: (start: number) => void;
   selectionStart: number;
   selectionDuration: number;
@@ -33,6 +38,8 @@ interface MainTimelineSectionProps {
   onSelectionBarsChange: (bars: number) => void;
   onSelectionStart: (start: number) => void;
   onHoverTime?: (time: number | null) => void;
+  loading?: boolean;
+  controlsDisabled?: boolean;
 }
 
 const KEYPOINT_COLORS: Record<MotionKeypoint['type'], string> = {
@@ -45,12 +52,12 @@ const KEYPOINT_COLORS: Record<MotionKeypoint['type'], string> = {
 const BAR_SECONDS = 4;
 const BAR_OPTIONS = [2, 4, 8, 16];
 const TRACK_HEADER_WIDTH = 160;
-const RULER_HEIGHT = 26;
-const ROW_HEIGHT = 36;
-const ROW_GAP = 8;
-const VIDEO_BAR_HEIGHT = 24;
-const AUDIO_BAR_HEIGHT = 28;
-const SELECTION_BAR_HEIGHT = 22;
+const RULER_HEIGHT = 28;
+const ROW_HEIGHT = 48;
+const ROW_GAP = 10;
+const VIDEO_BAR_HEIGHT = 32;
+const AUDIO_BAR_HEIGHT = 36;
+const SELECTION_BAR_HEIGHT = 30;
 
 const formatTime = (seconds: number) => {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
@@ -66,13 +73,18 @@ export function MainTimelineSection({
   onPlayPause,
   onSeek,
   videoKeypoints,
+  videoUrl,
   audioUrl,
+  audioDuration,
   audioAvailable,
   audioSourceLabel,
   hasAudioClip,
   onPlaceAudioClip,
   audioClipStart,
+  audioClipOffset,
   audioClipDuration,
+  onAudioClipDurationChange,
+  onAudioClipOffsetChange,
   onAudioClipChange,
   selectionStart,
   selectionDuration,
@@ -80,13 +92,61 @@ export function MainTimelineSection({
   onSelectionBarsChange,
   onSelectionStart,
   onHoverTime,
+  loading = false,
+  controlsDisabled = false,
 }: MainTimelineSectionProps) {
   const zoomLevels = [1, 1.5, 3, 6, 12];
   const [zoomIndex, setZoomIndex] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [videoWaveform, setVideoWaveform] = useState<Float32Array | null>(null);
+  const [audioWaveform, setAudioWaveform] = useState<Float32Array | null>(null);
+  const [audioWaveDuration, setAudioWaveDuration] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoWaveCanvasRef = useRef<HTMLCanvasElement>(null);
+  const audioWaveCanvasRef = useRef<HTMLCanvasElement>(null);
   const clipDragRef = useRef<{ startX: number; startTime: number } | null>(null);
+  const clipResizeRef = useRef<{ startX: number; startTime: number; startDuration: number; side: 'start' | 'end' } | null>(null);
   const selectionDragRef = useRef<{ startX: number; startTime: number } | null>(null);
+
+  const loadWaveform = (
+    url: string | null | undefined,
+    setTarget: (data: Float32Array | null) => void,
+    setDuration?: (duration: number) => void
+  ) => {
+    if (!url) {
+      setTarget(null);
+      setDuration?.(0);
+      return () => {};
+    }
+    let cancelled = false;
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    fetch(url)
+      .then((res) => res.arrayBuffer())
+      .then((buf) => ctx.decodeAudioData(buf))
+      .then((buffer) => {
+        if (cancelled) return;
+        setDuration?.(Number.isFinite(buffer.duration) ? buffer.duration : 0);
+        const ch = buffer.getChannelData(0);
+        const sampleCount = Math.max(200, Math.floor(buffer.duration * 80));
+        const step = Math.max(1, Math.floor(ch.length / sampleCount));
+        const samples: number[] = [];
+        for (let i = 0; i < ch.length; i += step) {
+          samples.push(Math.abs(ch[i]));
+        }
+        setTarget(new Float32Array(samples));
+      })
+      .catch(() => {
+        setTarget(null);
+        setDuration?.(0);
+      });
+    return () => {
+      cancelled = true;
+      ctx.close();
+    };
+  };
+
+  useEffect(() => loadWaveform(videoUrl, setVideoWaveform), [videoUrl]);
+  useEffect(() => loadWaveform(audioUrl, setAudioWaveform, setAudioWaveDuration), [audioUrl]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -109,6 +169,86 @@ export function MainTimelineSection({
   const maxSelectionStart = Math.max(0, duration - selectionDuration);
   const selectionEnd = selectionStart + selectionDuration;
   const currentBarsIndex = Math.max(0, BAR_OPTIONS.indexOf(selectionBars));
+
+  useEffect(() => {
+    const drawWave = (
+      canvas: HTMLCanvasElement | null,
+      data: Float32Array | null,
+      height: number,
+      color: string
+    ) => {
+      if (!canvas || !isReady || !data) return;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = timelineWidth * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${timelineWidth}px`;
+      canvas.style.height = `${height}px`;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, timelineWidth, height);
+      const centerY = height / 2;
+      const step = timelineWidth / data.length;
+      ctx.fillStyle = color;
+      for (let i = 0; i < data.length; i++) {
+        const x = i * step;
+        const v = data[i];
+        const barHeight = Math.max(2, v * centerY);
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(x, centerY - barHeight / 2, Math.max(1, step), barHeight);
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    drawWave(videoWaveCanvasRef.current, videoWaveform, ROW_HEIGHT, 'rgba(56, 189, 248, 0.35)');
+    if (audioWaveCanvasRef.current && audioWaveform && hasAudioClip) {
+      const canvas = audioWaveCanvasRef.current;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = timelineWidth * dpr;
+      canvas.height = ROW_HEIGHT * dpr;
+      canvas.style.width = `${timelineWidth}px`;
+      canvas.style.height = `${ROW_HEIGHT}px`;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, timelineWidth, ROW_HEIGHT);
+      const centerY = ROW_HEIGHT / 2;
+      const clipWidth = Math.max(1, audioClipDuration * pixelsPerSecond);
+      const clipX = audioClipStart * pixelsPerSecond;
+      const totalSamples = audioWaveform.length;
+      const audioBaseDuration = Math.max(
+        0.001,
+        audioWaveDuration > 0 ? audioWaveDuration : (audioDuration ?? duration)
+      );
+      const samplesPerSecond = totalSamples / audioBaseDuration;
+      const startIndex = Math.max(0, Math.floor(audioClipOffset * samplesPerSecond));
+      const endIndex = Math.min(totalSamples, Math.ceil((audioClipOffset + audioClipDuration) * samplesPerSecond));
+      const slice = audioWaveform.subarray(startIndex, endIndex);
+      const step = clipWidth / Math.max(1, slice.length);
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+      for (let i = 0; i < slice.length; i++) {
+        const x = clipX + i * step;
+        const v = slice[i];
+        const barHeight = Math.max(2, v * centerY);
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(x, centerY - barHeight / 2, Math.max(1, step), barHeight);
+      }
+      ctx.globalAlpha = 1;
+    }
+  }, [
+    isReady,
+    timelineWidth,
+    videoWaveform,
+    audioWaveform,
+    hasAudioClip,
+    audioClipStart,
+    audioClipDuration,
+    audioClipOffset,
+    audioWaveDuration,
+    audioDuration,
+    pixelsPerSecond,
+    duration,
+  ]);
 
   useEffect(() => {
     if (audioClipStart > maxClipStart) onAudioClipChange(maxClipStart);
@@ -143,8 +283,15 @@ export function MainTimelineSection({
     return markers;
   }, [duration, zoom]);
 
+  const barMarkers = useMemo(() => {
+    if (duration <= 0) return [];
+    const markers: number[] = [];
+    for (let t = 0; t <= duration + 0.0001; t += BAR_SECONDS) markers.push(t);
+    return markers;
+  }, [duration]);
+
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (duration <= 0) return;
+    if (controlsDisabled || duration <= 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left + e.currentTarget.scrollLeft;
     const time = (x / timelineWidth) * duration;
@@ -152,7 +299,7 @@ export function MainTimelineSection({
   };
 
   const handleTimelineMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!onHoverTime || duration <= 0) return;
+    if (controlsDisabled || !onHoverTime || duration <= 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left + e.currentTarget.scrollLeft;
     const time = (x / timelineWidth) * duration;
@@ -164,6 +311,7 @@ export function MainTimelineSection({
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (controlsDisabled) return;
     if (!e.ctrlKey) return;
     e.preventDefault();
     if (e.deltaY > 0) {
@@ -174,47 +322,109 @@ export function MainTimelineSection({
   };
 
   const handleClipPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!audioUrl || !hasAudioClip) return;
+    if (controlsDisabled || !audioUrl || !hasAudioClip) return;
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     clipDragRef.current = { startX: e.clientX, startTime: audioClipStart };
   };
 
   const handleClipPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!clipDragRef.current) return;
+    if (controlsDisabled || !clipDragRef.current) return;
     const delta = e.clientX - clipDragRef.current.startX;
     const next = clipDragRef.current.startTime + delta / pixelsPerSecond;
     onAudioClipChange(Math.max(0, Math.min(maxClipStart, next)));
   };
 
   const handleClipPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!clipDragRef.current) return;
+    if (controlsDisabled || !clipDragRef.current) return;
     clipDragRef.current = null;
     const snapped = Math.round(audioClipStart / BAR_SECONDS) * BAR_SECONDS;
     onAudioClipChange(Math.max(0, Math.min(maxClipStart, snapped)));
     e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
+  const handleClipResizeDown = (side: 'start' | 'end') => (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (controlsDisabled || !audioUrl || !hasAudioClip) return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    clipResizeRef.current = {
+      startX: e.clientX,
+      startTime: audioClipStart,
+      startDuration: audioClipDuration,
+      side,
+    };
+  };
+
+  const handleClipResizeMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (controlsDisabled || !clipResizeRef.current) return;
+    const { startX, startTime, startDuration, side } = clipResizeRef.current;
+    const delta = (e.clientX - startX) / pixelsPerSecond;
+    const effectiveAudioDuration =
+      audioWaveDuration > 0 ? audioWaveDuration : (audioDuration ?? duration);
+    if (side === 'start') {
+      const endTime = startTime + startDuration;
+      const maxStart = Math.max(0, endTime - 2);
+      const nextStart = Math.max(0, Math.min(startTime + delta, maxStart));
+      const trimDelta = nextStart - startTime;
+      let nextDuration = Math.max(2, endTime - nextStart);
+      let nextOffset = Math.max(0, audioClipOffset + trimDelta);
+      if (effectiveAudioDuration) {
+        const maxOffset = Math.max(0, effectiveAudioDuration - nextDuration);
+        nextOffset = Math.min(nextOffset, maxOffset);
+        nextDuration = Math.min(nextDuration, effectiveAudioDuration - nextOffset);
+      }
+      onAudioClipChange(nextStart);
+      onAudioClipOffsetChange(nextOffset);
+      onAudioClipDurationChange(nextDuration);
+    } else {
+      const maxByTimeline = Math.max(2, duration - startTime);
+      const maxByAudio = effectiveAudioDuration
+        ? Math.max(2, effectiveAudioDuration - audioClipOffset)
+        : maxByTimeline;
+      const nextDuration = Math.max(2, Math.min(startDuration + delta, maxByTimeline, maxByAudio));
+      onAudioClipDurationChange(nextDuration);
+    }
+  };
+
+  const handleClipResizeUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (controlsDisabled || !clipResizeRef.current) return;
+    clipResizeRef.current = null;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
   const handleSelectionPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (controlsDisabled) return;
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     selectionDragRef.current = { startX: e.clientX, startTime: selectionStart };
   };
 
   const handleSelectionPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!selectionDragRef.current) return;
+    if (controlsDisabled || !selectionDragRef.current) return;
     const delta = e.clientX - selectionDragRef.current.startX;
     const next = selectionDragRef.current.startTime + delta / pixelsPerSecond;
     onSelectionStart(Math.max(0, Math.min(maxSelectionStart, next)));
   };
 
   const handleSelectionPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!selectionDragRef.current) return;
+    if (controlsDisabled || !selectionDragRef.current) return;
     selectionDragRef.current = null;
     const snapped = Math.round(selectionStart / BAR_SECONDS) * BAR_SECONDS;
     onSelectionStart(Math.max(0, Math.min(maxSelectionStart, snapped)));
     e.currentTarget.releasePointerCapture(e.pointerId);
   };
+
+  if (loading) {
+    return (
+      <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-4 w-28 rounded bg-neutral-800 animate-pulse" />
+          <div className="h-7 w-28 rounded bg-neutral-800 animate-pulse" />
+        </div>
+        <div className="h-40 w-full rounded bg-neutral-800 animate-pulse" />
+      </div>
+    );
+  }
 
   if (duration <= 0) {
     return (
@@ -239,6 +449,7 @@ export function MainTimelineSection({
             size="sm"
             onClick={onPlayPause}
             className="bg-transparent border-neutral-700 hover:bg-white/5"
+            disabled={controlsDisabled}
           >
             {isPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
           </Button>
@@ -255,6 +466,7 @@ export function MainTimelineSection({
                   BAR_OPTIONS[Math.max(0, currentBarsIndex - 1)] ?? selectionBars
                 )
               }
+              disabled={controlsDisabled}
             >
               <ChevronLeft className="size-4" />
             </Button>
@@ -264,6 +476,7 @@ export function MainTimelineSection({
               size="sm"
               className="h-8 px-3 rounded-none border-0 bg-transparent hover:bg-white/5 text-[12px] text-neutral-200"
               onClick={() => onSelectionStart(Math.min(maxSelectionStart, currentTime))}
+              disabled={controlsDisabled}
             >
               {selectionBars}마디 선택
             </Button>
@@ -278,6 +491,7 @@ export function MainTimelineSection({
                     selectionBars
                 )
               }
+              disabled={controlsDisabled}
             >
               <ChevronRight className="size-4" />
             </Button>
@@ -288,6 +502,7 @@ export function MainTimelineSection({
             size="sm"
             onClick={() => setZoomIndex((prev) => Math.max(0, prev - 1))}
             className="bg-transparent border-neutral-700 hover:bg-white/5"
+            disabled={controlsDisabled}
           >
             <ZoomOut className="size-4" />
           </Button>
@@ -296,6 +511,7 @@ export function MainTimelineSection({
             size="sm"
             onClick={() => setZoomIndex((prev) => Math.min(zoomLevels.length - 1, prev + 1))}
             className="bg-transparent border-neutral-700 hover:bg-white/5"
+            disabled={controlsDisabled}
           >
             <ZoomIn className="size-4" />
           </Button>
@@ -314,7 +530,7 @@ export function MainTimelineSection({
             {audioUrl
               ? '오디오 배치 가능'
               : audioAvailable
-                ? audioSourceLabel ?? '오디오 있음 (영상 추출)'
+                ? audioSourceLabel ?? '추출된 오디오 (파형 없음)'
                 : '오디오 없음'}
           </span>
         </div>
@@ -355,7 +571,7 @@ export function MainTimelineSection({
                 style={{ height: ROW_HEIGHT }}
               >
                 <div className="text-neutral-300 text-[10px] leading-none">SELECTION</div>
-                <div className="text-[10px] text-neutral-500 leading-none">8 bars</div>
+                <div className="text-[10px] text-neutral-500 leading-none">{selectionBars} bars</div>
               </div>
             </div>
           </div>
@@ -378,6 +594,38 @@ export function MainTimelineSection({
               className="relative h-full"
               style={{ width: isReady ? timelineWidth : '100%' }}
             >
+              <div className="absolute inset-0 pointer-events-none">
+                {barMarkers.map((t) => {
+                  const left = (t / duration) * timelineWidth;
+                  return (
+                    <div
+                      key={`bar-${t}`}
+                      className="absolute top-0 bottom-0 w-px bg-neutral-600/70"
+                      style={{ left }}
+                    />
+                  );
+                })}
+              </div>
+              <canvas
+                ref={videoWaveCanvasRef}
+                className="absolute left-0 pointer-events-none"
+                style={{
+                  top: RULER_HEIGHT,
+                  height: ROW_HEIGHT,
+                  width: isReady ? timelineWidth : '100%',
+                  opacity: videoWaveform ? 1 : 0,
+                }}
+              />
+              <canvas
+                ref={audioWaveCanvasRef}
+                className="absolute left-0 pointer-events-none"
+                style={{
+                  top: RULER_HEIGHT + ROW_HEIGHT + ROW_GAP,
+                  height: ROW_HEIGHT,
+                  width: isReady ? timelineWidth : '100%',
+                  opacity: audioWaveform ? 1 : 0,
+                }}
+              />
               <div
                 className="absolute top-0 left-0 right-0 bg-neutral-950/90 border-b border-neutral-800"
                 style={{ height: RULER_HEIGHT }}
@@ -455,11 +703,27 @@ export function MainTimelineSection({
                   onPointerMove={handleClipPointerMove}
                   onPointerUp={handleClipPointerUp}
                 >
+                  <button
+                    type="button"
+                    aria-label="Trim start"
+                    className="h-6 w-2 rounded bg-emerald-300/70 hover:bg-emerald-200 cursor-ew-resize"
+                    onPointerDown={handleClipResizeDown('start')}
+                    onPointerMove={handleClipResizeMove}
+                    onPointerUp={handleClipResizeUp}
+                  />
                   <div className="h-3 w-3 rounded-full bg-emerald-400" />
                   <span className="truncate">Audio Clip</span>
                   <span className="ml-auto text-[10px] text-emerald-200/70">
                     {formatTime(audioClipDuration)}
                   </span>
+                  <button
+                    type="button"
+                    aria-label="Trim end"
+                    className="h-6 w-2 rounded bg-emerald-300/70 hover:bg-emerald-200 cursor-ew-resize"
+                    onPointerDown={handleClipResizeDown('end')}
+                    onPointerMove={handleClipResizeMove}
+                    onPointerUp={handleClipResizeUp}
+                  />
                 </div>
               ) : audioUrl ? (
                 <div
@@ -485,7 +749,7 @@ export function MainTimelineSection({
                 </div>
               ) : audioAvailable ? (
                 <div
-                  className="absolute rounded-md border border-emerald-400/40 bg-emerald-500/10 px-2 flex items-center gap-2 text-xs text-emerald-200/80"
+                  className="absolute rounded-md border border-emerald-400/30 border-dashed bg-emerald-500/5 px-2 flex items-center gap-2 text-xs text-emerald-200/70"
                   style={{
                     height: AUDIO_BAR_HEIGHT,
                     top:
@@ -497,8 +761,8 @@ export function MainTimelineSection({
                     width: timelineWidth,
                   }}
                 >
-                  <div className="h-2 w-2 rounded-full bg-emerald-300" />
-                  영상 추출 오디오
+                  <div className="h-2 w-2 rounded-full bg-emerald-300/70" />
+                  {audioSourceLabel ?? '추출된 오디오 (파형 없음)'}
                 </div>
               ) : (
                 <div

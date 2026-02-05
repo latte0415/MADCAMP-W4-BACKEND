@@ -6,6 +6,7 @@ import { MainTimelineSection } from './MainTimelineSection';
 import { AudioDetailAnalysisSection } from './AudioDetailAnalysisSection';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { Skeleton } from './ui/skeleton';
 import { Upload, Music, Loader2, Volume2, VolumeX } from 'lucide-react';
 
 interface ProjectDetailProps {
@@ -39,9 +40,12 @@ export function ProjectDetail({
   const [currentTime, setCurrentTime] = useState(0);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [audioClipStart, setAudioClipStart] = useState(0);
+  const [audioClipOffset, setAudioClipOffset] = useState(0);
   const [selectionStart, setSelectionStart] = useState(0);
   const [hasAudioClip, setHasAudioClip] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioClipDuration, setAudioClipDuration] = useState(0);
   const [progressOpen, setProgressOpen] = useState(true);
   const [selectionBars, setSelectionBars] = useState(8);
   const [isMuted, setIsMuted] = useState(true);
@@ -49,16 +53,14 @@ export function ProjectDetail({
   const pendingTimeRef = useRef(0);
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const BAR_SECONDS = 4;
   const effectiveDuration = Math.max(project.duration || 0, videoDuration || 0);
   const selectionDuration = Math.min(effectiveDuration || 0, BAR_SECONDS * selectionBars);
-  const audioClipDuration = Math.min(
-    effectiveDuration || 0,
-    Math.max(8, (effectiveDuration || 0) * 0.6),
-  );
+  const maxClipDuration = Math.max(0, Math.min(effectiveDuration || 0, audioDuration || effectiveDuration || 0));
 
   const handlePlayPause = () => {
     setIsPlaying((prev) => !prev);
@@ -99,9 +101,12 @@ export function ProjectDetail({
 
   useEffect(() => {
     setAudioClipStart(0);
+    setAudioClipOffset(0);
     setSelectionStart(0);
     setHasAudioClip(false);
     setVideoDuration(0);
+    setAudioDuration(0);
+    setAudioClipDuration(0);
     setSelectionBars(8);
   }, [project.id]);
 
@@ -109,7 +114,65 @@ export function ProjectDetail({
     if (!project.audioUrl || hasAudioClip) return;
     setHasAudioClip(true);
     setAudioClipStart(0);
+    setAudioClipOffset(0);
   }, [project.audioUrl, hasAudioClip]);
+
+  useEffect(() => {
+    if (!audioDuration) return;
+    const maxOffset = Math.max(0, audioDuration - Math.max(2, audioClipDuration));
+    if (audioClipOffset > maxOffset) {
+      setAudioClipOffset(maxOffset);
+    }
+  }, [audioDuration, audioClipDuration, audioClipOffset]);
+
+  useEffect(() => {
+    if (!maxClipDuration) return;
+    if (audioClipDuration === 0) {
+      setAudioClipDuration(maxClipDuration);
+      return;
+    }
+    const clampedDuration = Math.max(2, Math.min(audioClipDuration, maxClipDuration));
+    if (clampedDuration !== audioClipDuration) {
+      setAudioClipDuration(clampedDuration);
+      return;
+    }
+    const maxAllowed = Math.max(2, Math.min(maxClipDuration, effectiveDuration - audioClipStart));
+    if (clampedDuration > maxAllowed) {
+      setAudioClipDuration(maxAllowed);
+    }
+  }, [audioClipDuration, audioClipStart, effectiveDuration, maxClipDuration]);
+
+  useEffect(() => {
+    if (project.audioUrl) {
+      setIsMuted(true);
+    } else {
+      setIsMuted(false);
+    }
+  }, [project.audioUrl]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!project.audioUrl) {
+      audio.pause();
+      return;
+    }
+    const clipEnd = audioClipStart + audioClipDuration;
+    const inClip = currentTime >= audioClipStart && currentTime <= clipEnd;
+    if (!inClip || !hasAudioClip) {
+      audio.pause();
+      return;
+    }
+    const targetTime = Math.max(0, currentTime - audioClipStart + audioClipOffset);
+    if (Number.isFinite(targetTime) && Math.abs(audio.currentTime - targetTime) > 0.2) {
+      audio.currentTime = targetTime;
+    }
+    if (isPlaying) {
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+  }, [currentTime, isPlaying, project.audioUrl, audioClipStart, audioClipDuration, hasAudioClip]);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('ko-KR', {
@@ -130,12 +193,17 @@ export function ProjectDetail({
 
   const lastEditedAt = project.completedAt ?? project.createdAt;
   const isAnalyzing = project.status === 'queued' || project.status === 'running';
+  const isLoadingProject =
+    loading ||
+    (project.status === 'queued' &&
+      !project.videoUrl &&
+      !project.audioUrl &&
+      project.motionKeypoints.length === 0 &&
+      project.musicKeypoints.length === 0);
+  const actionsDisabled = isLoadingProject;
   const hasNoMusicResult =
     project.status === 'done' && project.musicKeypoints.length === 0 && !project.audioUrl;
   const hasError = project.status === 'failed';
-  const hasDerivedAudio =
-    !project.audioUrl &&
-    (project.musicKeypoints.length > 0 || (project.bassNotes?.length ?? 0) > 0);
   const statusLabel: Record<Project['status'], string> = {
     queued: '대기 중',
     running: '분석 중',
@@ -150,46 +218,62 @@ export function ProjectDetail({
     failed: 'border-red-500/40 bg-red-500/10 text-red-200',
     draft: 'border-neutral-500/40 bg-neutral-500/10 text-neutral-200',
   };
-  const statusMessage =
-    project.statusMessage ??
-    (hasError
-      ? project.errorMessage ?? '분석에 실패했습니다. 다시 시도해 주세요.'
-      : isAnalyzing
-        ? '분석이 진행 중입니다.'
-        : '프로젝트 정보를 불러오는 중입니다.');
+  const getDefaultStatusMessage = () => {
+    if (hasError) return project.errorMessage ?? '분석에 실패했습니다. 다시 시도해 주세요.';
+    if (isLoadingProject) return '프로젝트 정보를 불러오는 중입니다.';
+    if (project.status === 'done') return '분석이 완료되었습니다.';
+    if (isAnalyzing) return '분석이 진행 중입니다.';
+    if (project.status === 'draft') return '초안 상태입니다.';
+    return '프로젝트 상태를 확인하는 중입니다.';
+  };
+  const statusMessage = project.statusMessage ?? getDefaultStatusMessage();
   const statusMessageLower = statusMessage.toLowerCase();
-  const isMusicMessage = statusMessageLower.includes('music') || statusMessageLower.includes('audio');
+  const isMusicMessage =
+    statusMessageLower.includes('music') ||
+    statusMessageLower.includes('audio') ||
+    statusMessageLower.includes('오디오') ||
+    statusMessageLower.includes('음악');
   const audioRequested =
     Boolean(project.audioUrl) ||
     (project.musicKeypoints?.length ?? 0) > 0 ||
     project.audioProgress !== undefined ||
     statusMessageLower.includes('music') ||
-    statusMessageLower.includes('audio');
+    statusMessageLower.includes('audio') ||
+    statusMessageLower.includes('오디오') ||
+    statusMessageLower.includes('음악');
   const motionRequested =
     Boolean(project.videoUrl) ||
     project.motionKeypoints.length > 0 ||
     project.motionProgress !== undefined ||
     statusMessageLower.includes('motion') ||
-    statusMessageLower.includes('magic');
+    statusMessageLower.includes('magic') ||
+    statusMessageLower.includes('모션') ||
+    statusMessageLower.includes('매직') ||
+    statusMessageLower.includes('비디오') ||
+    statusMessageLower.includes('영상');
 
   const deriveStageInfo = (message: string, status: Project['status']) => {
     const msg = message.toLowerCase();
     let analysis = '분석';
-    if (msg.includes('music') || msg.includes('audio')) analysis = '음악 분석';
-    else if (msg.includes('motion')) analysis = '모션 분석';
-    else if (msg.includes('magic')) analysis = '매직 분석';
-    else if (msg.includes('video')) analysis = '모션 분석';
-    else if (project.mode === 'magic') analysis = '매직 분석';
+    if (msg.includes('music') || msg.includes('audio') || msg.includes('오디오') || msg.includes('음악')) {
+      analysis = '음악 분석';
+    } else if (msg.includes('motion') || msg.includes('모션')) {
+      analysis = '모션 분석';
+    } else if (msg.includes('magic') || msg.includes('매직')) {
+      analysis = '매직 분석';
+    } else if (msg.includes('video') || msg.includes('비디오') || msg.includes('영상')) {
+      analysis = '모션 분석';
+    } else if (project.mode === 'magic') analysis = '매직 분석';
     else if (project.mode === 'dance') analysis = '모션 분석';
 
     let stage = '대기';
-    if (msg.includes('download')) stage = '다운로드';
-    else if (msg.includes('extract')) stage = '오디오 추출';
-    else if (msg.includes('stem')) stage = '스템 분리';
-    else if (msg.includes('analyz') || msg.includes('running')) stage = '분석';
-    else if (msg.includes('score')) stage = '스코어링';
-    else if (msg.includes('upload')) stage = '업로드';
-    else if (msg.includes('final')) stage = '마무리';
+    if (msg.includes('download') || msg.includes('다운로드')) stage = '다운로드';
+    else if (msg.includes('extract') || msg.includes('추출')) stage = '오디오 추출';
+    else if (msg.includes('stem') || msg.includes('스템')) stage = '스템 분리';
+    else if (msg.includes('analyz') || msg.includes('running') || msg.includes('분석')) stage = '분석';
+    else if (msg.includes('score') || msg.includes('스코어')) stage = '스코어링';
+    else if (msg.includes('upload') || msg.includes('업로드')) stage = '업로드';
+    else if (msg.includes('final') || msg.includes('마무리')) stage = '마무리';
     else if (status === 'running') stage = '분석';
     else if (status === 'queued') stage = '대기';
 
@@ -199,33 +283,52 @@ export function ProjectDetail({
   const deriveMotionStage = (message?: string) => {
     if (!message) return null;
     const msg = message.toLowerCase();
-    if (msg.includes('music') || msg.includes('audio')) return null;
-    if (!msg.includes('motion') && !msg.includes('magic') && !msg.includes('video')) return null;
-    if (msg.includes('downloading video')) return '비디오 다운로드';
-    if (msg.includes('preprocessing')) return '전처리';
-    if (msg.includes('analyzing')) return '모션 분석';
-    if (msg.includes('uploading results')) return '결과 업로드';
-    if (msg.includes('finalizing')) return '마무리';
+    if (msg.includes('music') || msg.includes('audio') || msg.includes('오디오') || msg.includes('음악')) {
+      return null;
+    }
+    if (
+      !msg.includes('motion') &&
+      !msg.includes('magic') &&
+      !msg.includes('video') &&
+      !msg.includes('모션') &&
+      !msg.includes('매직') &&
+      !msg.includes('비디오') &&
+      !msg.includes('영상')
+    ) {
+      return null;
+    }
+    if (msg.includes('downloading video') || msg.includes('비디오 다운로드')) return '비디오 다운로드';
+    if (msg.includes('preprocessing') || msg.includes('전처리')) return '전처리';
+    if (msg.includes('analyzing') || msg.includes('모션 분석')) return '모션 분석';
+    if (msg.includes('uploading results') || msg.includes('결과 업로드')) return '결과 업로드';
+    if (msg.includes('finalizing') || msg.includes('마무리')) return '마무리';
     return null;
   };
 
   const deriveAudioStage = (message?: string) => {
     if (!message) return null;
     const msg = message.toLowerCase();
-    if (!msg.includes('music') && !msg.includes('audio')) return null;
-    if (msg.includes('queued')) return '대기';
-    if (msg.includes('downloading audio')) return '오디오 다운로드';
-    if (msg.includes('downloading video')) return '비디오 다운로드';
-    if (msg.includes('extracting audio')) return '오디오 추출';
-    if (msg.includes('preparing pipeline')) return '파이프라인 준비';
-    if (msg.includes('separating stems')) return '스템 분리';
-    if (msg.includes('splitting drum bands')) return '드럼 밴드 분리';
-    if (msg.includes('detecting onsets')) return '온셋 검출';
-    if (msg.includes('selecting keypoints')) return '키포인트 선택';
-    if (msg.includes('merging textures')) return '텍스처 병합';
-    if (msg.includes('analyzing bass')) return '베이스 분석';
-    if (msg.includes('building json')) return '결과 JSON 생성';
-    if (msg.includes('uploading results')) return '결과 업로드';
+    if (
+      !msg.includes('music') &&
+      !msg.includes('audio') &&
+      !msg.includes('오디오') &&
+      !msg.includes('음악')
+    ) {
+      return null;
+    }
+    if (msg.includes('queued') || msg.includes('대기')) return '대기';
+    if (msg.includes('downloading audio') || msg.includes('오디오 다운로드')) return '오디오 다운로드';
+    if (msg.includes('downloading video') || msg.includes('비디오 다운로드')) return '비디오 다운로드';
+    if (msg.includes('extracting audio') || msg.includes('오디오 추출')) return '오디오 추출';
+    if (msg.includes('preparing pipeline') || msg.includes('파이프라인 준비')) return '파이프라인 준비';
+    if (msg.includes('separating stems') || msg.includes('스템 분리')) return '스템 분리';
+    if (msg.includes('splitting drum bands') || msg.includes('드럼 밴드 분리')) return '드럼 밴드 분리';
+    if (msg.includes('detecting onsets') || msg.includes('온셋')) return '온셋 검출';
+    if (msg.includes('selecting keypoints') || msg.includes('키포인트')) return '키포인트 선택';
+    if (msg.includes('merging textures') || msg.includes('텍스처')) return '텍스처 병합';
+    if (msg.includes('analyzing bass') || msg.includes('베이스')) return '베이스 분석';
+    if (msg.includes('building json') || msg.includes('json')) return '결과 JSON 생성';
+    if (msg.includes('uploading results') || msg.includes('결과 업로드')) return '결과 업로드';
     return null;
   };
   const inferProgressFallback = (stage: string, status: Project['status']) => {
@@ -275,6 +378,18 @@ export function ProjectDetail({
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
+      {project.audioUrl && (
+        <audio
+          ref={audioRef}
+          src={project.audioUrl}
+          preload="auto"
+          className="hidden"
+          onLoadedMetadata={(e) => {
+            const duration = e.currentTarget.duration;
+            if (Number.isFinite(duration)) setAudioDuration(duration);
+          }}
+        />
+      )}
       <Header
         onBack={onBack}
         showBack
@@ -287,7 +402,7 @@ export function ProjectDetail({
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-6xl mx-auto px-6 py-10">
-          {(loading || isAnalyzing || hasError) && (
+          {(isLoadingProject || isAnalyzing || hasError) && (
             <div
               className={`mb-6 rounded border px-4 py-3 text-sm ${
                 hasError
@@ -310,171 +425,248 @@ export function ProjectDetail({
           )}
           {/* 정보 섹션 */}
           <section className="mb-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
-                  D+M LAB · PROJECT
-                </div>
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.25em] border border-white/10 text-neutral-300 leading-none">
-                    {project.mode}
-                  </span>
-                  <h1 className="text-3xl font-semibold text-white leading-none">{project.title}</h1>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {onDelete && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-transparent border-red-500/40 text-red-200 hover:bg-red-500/10"
-                    onClick={onDelete}
-                  >
-                    삭제
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {[
-                { label: 'DURATION', value: formatDuration(project.duration) },
-                { label: 'CREATED', value: formatDate(project.createdAt) },
-                { label: 'LAST EDITED', value: formatDate(lastEditedAt) },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded border border-neutral-800 bg-neutral-950/80 px-4 py-3"
-                >
-                  <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
-                    {item.label}
+            {isLoadingProject ? (
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-40 bg-neutral-800" />
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-6 w-16 rounded-full bg-neutral-800" />
+                      <Skeleton className="h-8 w-64 bg-neutral-800" />
+                    </div>
                   </div>
-                  <div className="text-sm text-white">{item.value}</div>
+                  <Skeleton className="h-8 w-16 bg-neutral-800" />
                 </div>
-              ))}
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[0, 1, 2].map((idx) => (
+                    <div
+                      key={`meta-skel-${idx}`}
+                      className="rounded border border-neutral-800 bg-neutral-950/80 px-4 py-3"
+                    >
+                      <Skeleton className="h-3 w-20 bg-neutral-800" />
+                      <Skeleton className="mt-2 h-4 w-24 bg-neutral-800" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+                      D+M LAB · PROJECT
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.25em] border border-white/10 text-neutral-300 leading-none">
+                        {project.mode}
+                      </span>
+                      <h1 className="text-3xl font-semibold text-white leading-none">
+                        {project.title}
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {onDelete && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-transparent border-red-500/40 text-red-200 hover:bg-red-500/10"
+                        onClick={onDelete}
+                        disabled={actionsDisabled}
+                      >
+                        삭제
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { label: 'DURATION', value: formatDuration(project.duration) },
+                    { label: 'CREATED', value: formatDate(project.createdAt) },
+                    { label: 'LAST EDITED', value: formatDate(lastEditedAt) },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded border border-neutral-800 bg-neutral-950/80 px-4 py-3"
+                    >
+                      <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                        {item.label}
+                      </div>
+                      <div className="text-sm text-white">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
 
           {/* 진행률 섹션 */}
           <section className="mb-8">
             <div className="rounded border border-neutral-800 bg-neutral-950/80 px-5 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="text-sm text-white">진행률</div>
-                  {!audioRequested && (
-                    <span className="rounded-full border border-neutral-700 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-neutral-400">
-                      오디오 없음
-                    </span>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
-                  onClick={() => setProgressOpen((prev) => !prev)}
-                >
-                  {progressOpen ? '접기' : '펼치기'}
-                </Button>
-              </div>
-              {progressOpen && (
-                <>
-                  <div className="flex flex-col gap-3">
-                  {progressItems.map((item) => {
-                    const isMotionRow = item.key === 'analysis-motion';
-                    const isAudioRow = item.key === 'analysis-audio';
-                    const motionDetail = isMotionRow ? deriveMotionStage(statusMessage) : null;
-                    const audioDetail = isAudioRow ? deriveAudioStage(statusMessage) : null;
-                    const percent =
-                      item.value === undefined
-                        ? item.key.startsWith('upload')
-                          ? 0
-                          : isAudioRow && !audioRequested
-                            ? 0
-                            : isMotionRow && isMusicMessage && !motionDetail
-                              ? 0
-                              : inferProgressFallback(stageLabel, project.status)
-                        : toPercent(item.value);
-                    const state =
-                      hasError && item.label.includes('분석')
-                        ? isAudioRow && !audioRequested
-                          ? '대기'
-                          : isMotionRow && isMusicMessage && !motionDetail
-                            ? '대기'
-                            : '실패'
-                        : percent >= 100
-                          ? '완료'
-                          : item.value === undefined
-                            ? '대기'
-                            : '진행 중';
-                      const barClass =
-                        state === '실패'
-                          ? 'bg-red-500/70'
-                          : state === '완료'
-                            ? 'bg-emerald-400/80'
-                            : state === '진행 중'
-                              ? 'bg-amber-400/80'
-                              : 'bg-neutral-500/60';
-                      return (
-                        <div
-                          key={item.key}
-                          className="rounded border border-neutral-800 bg-black/20 px-4 py-3"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
-                            <span className="font-medium text-neutral-200">{item.label}</span>
-                            <span className="tabular-nums text-neutral-400">
-                              {percent}% · {state}
-                            </span>
-                          </div>
-                          <div className="mt-2">
-                            <Progress
-                              value={percent}
-                              className="bg-white/10"
-                              indicatorClassName={barClass}
-                            />
-                          </div>
-                          {item.key === 'analysis-motion' &&
-                            project.uploadVideoProgress !== undefined &&
-                            project.uploadVideoProgress < 1 && (
-                              <div className="mt-2 text-[11px] text-neutral-500">
-                                업로드: {toPercent(project.uploadVideoProgress)}%
-                              </div>
-                            )}
-                          {item.key === 'analysis-audio' &&
-                            project.uploadAudioProgress !== undefined &&
-                            project.uploadAudioProgress < 1 && (
-                              <div className="mt-2 text-[11px] text-neutral-500">
-                                업로드: {toPercent(project.uploadAudioProgress)}%
-                              </div>
-                            )}
-                          {item.detail && (
-                            <div className="mt-2 text-[11px] text-neutral-500">
-                              단계: {item.detail}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+              {isLoadingProject ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-20 bg-neutral-800" />
+                    <Skeleton className="h-7 w-16 bg-neutral-800" />
                   </div>
-                  <div className="mt-3 text-xs text-neutral-400">{statusMessage}</div>
-                  <div className="mt-2 flex flex-wrap gap-4 text-xs text-neutral-500">
-                    <span>분석: {analysisLabel}</span>
-                    <span>단계: {stageLabel}</span>
-                  </div>
-                  {hasError && (
-                    <div className="mt-3 rounded border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
-                      <div className="font-semibold">에러 발생</div>
-                      <div className="mt-1">
-                        {project.errorMessage ?? '분석 중 오류가 발생했습니다. 다시 시도해 주세요.'}
+                  {[0, 1].map((idx) => (
+                    <div
+                      key={`progress-skel-${idx}`}
+                      className="space-y-2 rounded border border-neutral-800 bg-black/20 px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-3 w-20 bg-neutral-800" />
+                        <Skeleton className="h-3 w-12 bg-neutral-800" />
                       </div>
-                      {project.statusLog && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer text-red-200/80">에러 상세 보기</summary>
-                          <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-black/40 p-2 text-[10px] text-red-100">
-                            {project.statusLog}
-                          </pre>
-                        </details>
+                      <Skeleton className="h-2 w-full bg-neutral-800" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm text-white">진행률</div>
+                      {!audioRequested && (
+                        <span className="rounded-full border border-neutral-700 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+                          오디오 없음
+                        </span>
                       )}
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
+                      onClick={() => setProgressOpen((prev) => !prev)}
+                      disabled={actionsDisabled}
+                    >
+                      {progressOpen ? '접기' : '펼치기'}
+                    </Button>
+                  </div>
+                  {progressOpen && (
+                    <>
+                      <div className="flex flex-col gap-3">
+                      {progressItems.map((item) => {
+                        const isMotionRow = item.key === 'analysis-motion';
+                        const isAudioRow = item.key === 'analysis-audio';
+                        const isUploadRow = item.key.startsWith('upload');
+                        const motionDetail = isMotionRow ? deriveMotionStage(statusMessage) : null;
+                        const audioDetail = isAudioRow ? deriveAudioStage(statusMessage) : null;
+                        const percent =
+                          item.value === undefined
+                            ? isAudioRow && !audioRequested
+                              ? 0
+                              : isMotionRow && isMusicMessage && !motionDetail
+                                ? 0
+                                : inferProgressFallback(stageLabel, project.status)
+                            : toPercent(item.value);
+                        const state =
+                          hasError && item.label.includes('분석')
+                            ? isAudioRow && !audioRequested
+                              ? '대기'
+                              : isMotionRow && isMusicMessage && !motionDetail
+                                ? '대기'
+                                : '실패'
+                            : percent >= 100
+                              ? '완료'
+                              : item.value === undefined
+                                ? '준비 중'
+                                : '진행 중';
+                          const barClass =
+                            state === '실패'
+                              ? 'bg-red-500/70'
+                              : state === '완료'
+                                ? 'bg-emerald-400/80'
+                                : state === '진행 중'
+                                  ? 'bg-amber-400/80'
+                                  : 'bg-neutral-500/60';
+                          return (
+                            <div
+                              key={item.key}
+                              className="rounded border border-neutral-800 bg-black/20 px-4 py-3"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
+                                <span className="font-medium text-neutral-200">{item.label}</span>
+                                <span className="tabular-nums text-neutral-400">
+                                  {percent}% · {state}
+                                </span>
+                              </div>
+                              <div className="mt-2">
+                                <Progress
+                                  value={percent}
+                                  className="bg-white/10"
+                                  indicatorClassName={barClass}
+                                />
+                              </div>
+                              {item.key === 'analysis-motion' &&
+                                project.uploadVideoProgress !== undefined &&
+                                project.uploadVideoProgress < 1 && (
+                                  <div className="mt-2">
+                                    <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                                      <span>비디오 업로드</span>
+                                      <span>{toPercent(project.uploadVideoProgress)}%</span>
+                                    </div>
+                                    <div className="mt-1">
+                                      <Progress
+                                        value={toPercent(project.uploadVideoProgress)}
+                                        className="h-2 bg-white/10"
+                                        indicatorClassName="bg-sky-400/80"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              {item.key === 'analysis-audio' &&
+                                project.uploadAudioProgress !== undefined &&
+                                project.uploadAudioProgress < 1 && (
+                                  <div className="mt-2">
+                                    <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                                      <span>음악 업로드</span>
+                                      <span>{toPercent(project.uploadAudioProgress)}%</span>
+                                    </div>
+                                    <div className="mt-1">
+                                      <Progress
+                                        value={toPercent(project.uploadAudioProgress)}
+                                        className="h-2 bg-white/10"
+                                        indicatorClassName="bg-emerald-400/80"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              {isUploadRow && item.value === undefined && (
+                                <div className="mt-2 text-[11px] text-neutral-500">대기 중</div>
+                              )}
+                              {item.detail && (
+                                <div className="mt-2 text-[11px] text-neutral-500">
+                                  단계: {item.detail}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-3 text-xs text-neutral-400">{statusMessage}</div>
+                      <div className="mt-2 flex flex-wrap gap-4 text-xs text-neutral-500">
+                        <span>분석: {analysisLabel}</span>
+                        <span>단계: {stageLabel}</span>
+                      </div>
+                      {hasError && (
+                        <div className="mt-3 rounded border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+                          <div className="font-semibold">에러 발생</div>
+                          <div className="mt-1">
+                            {project.errorMessage ?? '분석 중 오류가 발생했습니다. 다시 시도해 주세요.'}
+                          </div>
+                          {project.statusLog && (
+                            <details className="mt-2">
+                              <summary className="cursor-pointer text-red-200/80">에러 상세 보기</summary>
+                              <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-black/40 p-2 text-[10px] text-red-100">
+                                {project.statusLog}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -484,90 +676,106 @@ export function ProjectDetail({
           {/* 비디오 섹션 */}
           <section className="mb-8">
             <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 className="text-lg font-semibold text-white">비디오</h2>
-                <div className="flex items-center gap-3">
-                  {onReplaceVideo && project.videoUrl && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
-                        onClick={() => videoInputRef.current?.click()}
-                      >
-                        <Upload className="size-4 mr-2" />
-                        비디오 교체
-                      </Button>
-                      <input
-                        ref={videoInputRef}
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onReplaceVideo(file);
-                          e.currentTarget.value = '';
-                        }}
-                      />
-                    </>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleToggleMute}
-                    className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
-                  >
-                    {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-                  </Button>
-                  <span className="text-[10px] text-neutral-500 uppercase tracking-[0.35em]">
-                    Visual Timeline
-                  </span>
-                </div>
-              </div>
-              {!project.videoUrl ? (
-                <div className="rounded border border-neutral-800 bg-neutral-950/80 p-8 text-center">
-                  <p className="text-neutral-400 mb-4">영상이 없습니다.</p>
-                  <Button
-                    variant="outline"
-                    className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
-                    onClick={onOpenUploadDialog}
-                  >
-                    <Upload className="size-4 mr-2" />
-                    영상 업로드
-                  </Button>
-                  <p className="text-xs text-neutral-500 mt-2">
-                    새 프로젝트에서 영상을 업로드할 수 있습니다.
-                  </p>
+              {isLoadingProject ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-5 w-20 bg-neutral-800" />
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-7 w-20 bg-neutral-800" />
+                      <Skeleton className="h-7 w-10 bg-neutral-800" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-56 w-full bg-neutral-800" />
                 </div>
               ) : (
                 <>
-                  <div className="relative mb-4">
-                    <VideoPlayer
-                      ref={videoPlayerRef}
-                      videoUrl={project.videoUrl}
-                      isPlaying={isPlaying}
-                      onPlayPause={handlePlayPause}
-                      onTimeUpdate={handleTimeUpdate}
-                      currentTime={currentTime}
-                      onDuration={setVideoDuration}
-                      muted={isMuted}
-                    />
-                    {hoverTime !== null && project.videoUrl && (
-                      <div className="absolute bottom-4 left-4 z-10 w-40 overflow-hidden rounded border border-white/20 bg-black/80 shadow-lg">
-                        <video
-                          ref={previewVideoRef}
-                          src={project.videoUrl}
-                          muted
-                          playsInline
-                          preload="auto"
-                          className="w-full aspect-video object-contain pointer-events-none"
-                        />
-                        <div className="px-2 py-1 text-xs text-zinc-300 text-center">
-                          {Math.floor(hoverTime)}s
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 className="text-lg font-semibold text-white">비디오</h2>
+                    <div className="flex items-center gap-3">
+                      {onReplaceVideo && project.videoUrl && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
+                            onClick={() => videoInputRef.current?.click()}
+                            disabled={actionsDisabled}
+                          >
+                            <Upload className="size-4 mr-2" />
+                            비디오 교체
+                          </Button>
+                          <input
+                            ref={videoInputRef}
+                            type="file"
+                            accept="video/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) onReplaceVideo(file);
+                              e.currentTarget.value = '';
+                            }}
+                          />
+                        </>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToggleMute}
+                        className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
+                        disabled={actionsDisabled}
+                      >
+                        {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+                      </Button>
+                      <span className="text-[10px] text-neutral-500 uppercase tracking-[0.35em]">
+                        Visual Timeline
+                      </span>
+                    </div>
                   </div>
+                  {!project.videoUrl ? (
+                    <div className="rounded border border-neutral-800 bg-neutral-950/80 p-8 text-center">
+                      <p className="text-neutral-400 mb-4">영상이 없습니다.</p>
+                      <Button
+                        variant="outline"
+                        className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
+                        onClick={onOpenUploadDialog}
+                        disabled={actionsDisabled}
+                      >
+                        <Upload className="size-4 mr-2" />
+                        영상 업로드
+                      </Button>
+                      <p className="text-xs text-neutral-500 mt-2">
+                        새 프로젝트에서 영상을 업로드할 수 있습니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative mb-4">
+                      <VideoPlayer
+                        ref={videoPlayerRef}
+                        videoUrl={project.videoUrl}
+                        isPlaying={isPlaying}
+                        onPlayPause={handlePlayPause}
+                        onTimeUpdate={handleTimeUpdate}
+                        currentTime={currentTime}
+                        onDuration={setVideoDuration}
+                        muted={isMuted}
+                      />
+                      {hoverTime !== null && project.videoUrl && (
+                        <div className="absolute bottom-4 left-4 z-10 w-40 overflow-hidden rounded border border-white/20 bg-black/80 shadow-lg">
+                          <video
+                            ref={previewVideoRef}
+                            src={project.videoUrl}
+                            muted
+                            playsInline
+                            preload="auto"
+                            className="w-full aspect-video object-contain pointer-events-none"
+                          />
+                          <div className="px-2 py-1 text-xs text-zinc-300 text-center">
+                            {Math.floor(hoverTime)}s
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -585,6 +793,7 @@ export function ProjectDetail({
                       size="sm"
                       className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
                       onClick={() => audioInputRef.current?.click()}
+                      disabled={actionsDisabled}
                     >
                       <Music className="size-4 mr-2" />
                       {project.audioUrl ? '오디오 교체' : '음악 업로드'}
@@ -606,7 +815,7 @@ export function ProjectDetail({
                         size="sm"
                         className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
                         onClick={onExtractAudioFromVideo}
-                        disabled={isAnalyzing}
+                        disabled={isAnalyzing || actionsDisabled}
                       >
                         <Music className="size-4 mr-2" />
                         영상에서 음악 추출
@@ -620,6 +829,7 @@ export function ProjectDetail({
                       size="sm"
                       className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
                       onClick={onOpenUploadDialog}
+                      disabled={actionsDisabled}
                     >
                       <Music className="size-4 mr-2" />
                       음악 업로드
@@ -642,6 +852,11 @@ export function ProjectDetail({
                 )}
               </div>
             </div>
+            {project.audioUrl && (
+              <div className="mb-4 rounded border border-neutral-800 bg-neutral-950/80 px-4 py-3 text-xs text-neutral-500">
+                오디오 클립 길이는 타임라인에서 좌우 트림 핸들로 조절합니다.
+              </div>
+            )}
             <MainTimelineSection
               duration={effectiveDuration}
               currentTime={currentTime}
@@ -649,16 +864,21 @@ export function ProjectDetail({
               onPlayPause={handlePlayPause}
               onSeek={handleSeek}
               videoKeypoints={project.motionKeypoints}
+              videoUrl={project.videoUrl}
               audioUrl={project.audioUrl}
-              audioAvailable={Boolean(project.audioUrl) || hasDerivedAudio}
-              audioSourceLabel={hasDerivedAudio ? '오디오 있음 (영상 추출)' : undefined}
+              audioDuration={audioDuration}
+              audioAvailable={Boolean(project.audioUrl)}
               hasAudioClip={hasAudioClip}
               onPlaceAudioClip={() => {
                 setHasAudioClip(true);
-                setAudioClipStart(Math.min(project.duration, currentTime));
+                const maxStart = Math.max(0, effectiveDuration - audioClipDuration);
+                setAudioClipStart(Math.min(maxStart, currentTime));
               }}
               audioClipStart={audioClipStart}
+              audioClipOffset={audioClipOffset}
               audioClipDuration={audioClipDuration}
+              onAudioClipDurationChange={setAudioClipDuration}
+              onAudioClipOffsetChange={setAudioClipOffset}
               onAudioClipChange={setAudioClipStart}
               selectionStart={selectionStart}
               selectionDuration={selectionDuration}
@@ -671,25 +891,37 @@ export function ProjectDetail({
               }}
               onSelectionStart={setSelectionStart}
               onHoverTime={setHoverTime}
+              loading={isLoadingProject}
+              controlsDisabled={actionsDisabled}
             />
           </section>
 
           {/* 오디오 상세 분석 섹션 */}
           <section className="mb-8">
-            {project.musicKeypoints.length > 0 || (project.bassNotes?.length ?? 0) > 0 ? (
+            {isLoadingProject ? (
+              <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5 space-y-3">
+                <Skeleton className="h-4 w-40 bg-neutral-800" />
+                <Skeleton className="h-3 w-56 bg-neutral-800" />
+                <Skeleton className="h-28 w-full bg-neutral-800" />
+              </div>
+            ) : project.musicKeypoints.length > 0 || (project.bassNotes?.length ?? 0) > 0 ? (
               <AudioDetailAnalysisSection
-              audioUrl={project.audioUrl}
-              duration={effectiveDuration}
-              currentTime={currentTime}
-              selectionStart={selectionStart}
-              selectionDuration={selectionDuration}
-              musicKeypoints={project.musicKeypoints}
-              bassNotes={project.bassNotes}
-              onSeek={handleSeek}
+                audioUrl={project.audioUrl}
+                duration={effectiveDuration}
+                currentTime={currentTime}
+                selectionStart={selectionStart}
+                selectionDuration={selectionDuration}
+                musicKeypoints={project.musicKeypoints}
+                bassNotes={project.bassNotes}
+                musicDetail={project.musicDetail}
+                stemUrls={project.stemUrls}
+                onSeek={handleSeek}
               />
             ) : (
               <div className="rounded border border-neutral-800 bg-neutral-950/80 p-4 text-sm text-neutral-500">
-                선택한 구간에 대한 분석 데이터가 아직 없습니다.
+                {project.audioUrl
+                  ? '선택한 구간에 대한 분석 데이터가 아직 없습니다.'
+                  : '오디오가 없어 분석 데이터가 없습니다.'}
               </div>
             )}
           </section>

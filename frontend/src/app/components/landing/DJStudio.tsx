@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Project, ProjectMode } from '../../types';
 import { GenerativeAlbumArt } from './GenerativeAlbumArt';
 import { RecordingOverlay } from './RecordingOverlay';
+import { Progress } from '../ui/progress';
 
 export interface NewProjectData {
   title: string;
@@ -15,6 +16,10 @@ export interface NewProjectData {
 interface DJStudioProps {
   projects: Project[];
   onOpenProject: (project: Project) => void;
+  onEnterProject?: (
+    project: Project,
+    onProgress?: (value: number, label?: string) => void
+  ) => Promise<void> | void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
   userName?: string;
@@ -25,6 +30,7 @@ interface DJStudioProps {
 export function DJStudio({
   projects,
   onOpenProject,
+  onEnterProject,
   onNewProject,
   onCreateProject,
   userName = '게스트',
@@ -39,9 +45,15 @@ export function DJStudio({
   const [lpVisible, setLpVisible] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingLpVisible, setRecordingLpVisible] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
+  const [enterProgress, setEnterProgress] = useState(0);
+  const [enterLabel, setEnterLabel] = useState('프로젝트 불러오는 중');
 
   const currentProject = projects[selectedIndex];
   const isPlaying = loadedProject !== null;
+  const targetProject = loadedProject ?? currentProject;
+
+  const resolveProgress = () => enterProgress;
 
   const handleStartRecording = () => {
     if (isTransitioning || isPlaying || isRecording) return;
@@ -78,7 +90,7 @@ export function DJStudio({
   };
 
   const handleLoadToTurntable = () => {
-    if (currentProject && currentProject.status === 'done' && !isTransitioning) {
+    if (currentProject && currentProject.status === 'done' && !isTransitioning && !isEntering) {
       setIsTransitioning(true);
       setLoadedProject(currentProject);
       setShowLpOnAlbum(false);
@@ -96,18 +108,29 @@ export function DJStudio({
   };
 
   const handleEnterProject = () => {
-    if (loadedProject) {
-      onOpenProject(loadedProject);
+    if (isEntering || isTransitioning || isRecording) return;
+    const project = loadedProject ?? currentProject;
+    if (!project) return;
+    if (onEnterProject) {
+      setIsEntering(true);
+      setEnterProgress(0);
+      setEnterLabel('프로젝트 불러오는 중');
+      Promise.resolve(
+        onEnterProject(project, (value, label) => {
+          setEnterProgress(Math.max(0, Math.min(100, Math.round(value))));
+          if (label) setEnterLabel(label);
+        })
+      )
+        .catch(() => {})
+        .finally(() => setIsEntering(false));
       return;
     }
-    if (currentProject) {
-      onOpenProject(currentProject);
-    }
+    onOpenProject(project);
   };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTransitioning) return;
+      if (isTransitioning || isEntering) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         if (isRecording) {
@@ -117,7 +140,7 @@ export function DJStudio({
         }
         return;
       }
-      if (isRecording) return; // Don't handle other keys during recording
+      if (isRecording || isEntering) return; // Don't handle other keys during recording/entering
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (!isPlaying) setSelectedIndex((prev) => Math.max(0, prev - 1));
@@ -139,10 +162,10 @@ export function DJStudio({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, projects.length, currentProject, loadedProject, isPlaying, isTransitioning, isRecording]);
+  }, [selectedIndex, projects.length, currentProject, loadedProject, isPlaying, isTransitioning, isRecording, isEntering, onEnterProject, onOpenProject]);
 
   const handleWheel = (e: React.WheelEvent) => {
-    if (isPlaying || isTransitioning || isRecording) return;
+    if (isPlaying || isTransitioning || isRecording || isEntering) return;
     const delta = e.deltaY > 0 ? 1 : -1;
     setSelectedIndex((prev) => Math.max(0, Math.min(projects.length - 1, prev + delta)));
   };
@@ -339,11 +362,13 @@ export function DJStudio({
                 <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
                   <button
                     onClick={() => onOpenProject(currentProject)}
+                    disabled={isEntering}
                     className="text-xs px-4 py-2 transition-colors"
                     style={{
                       border: '1px solid #333',
-                      color: '#ddd',
+                      color: isEntering ? '#555' : '#ddd',
                       background: 'transparent',
+                      opacity: isEntering ? 0.6 : 1,
                     }}
                   >
                     open
@@ -359,7 +384,11 @@ export function DJStudio({
                       play →
                     </button>
                   )}
-                  {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
+                  {(isTransitioning || isEntering) && (
+                    <span className="text-xs text-neutral-400">
+                      loading...
+                    </span>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -415,9 +444,9 @@ export function DJStudio({
         </motion.div>
 
         {/* Controls */}
-        <AnimatePresence>
-          {loadedProject && (
-            <motion.div
+      <AnimatePresence>
+        {loadedProject && (
+          <motion.div
               className="absolute bottom-20 right-10 flex items-center gap-6 z-50"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -427,10 +456,23 @@ export function DJStudio({
               <button onClick={handleBack} className="text-xs text-neutral-400 hover:text-white transition-colors">← back</button>
               <button
                 onClick={handleEnterProject}
+                disabled={isEntering}
                 className="text-sm px-5 py-2 transition-colors"
-                style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
+                style={{
+                  border: '1px solid #d97706',
+                  color: isEntering ? '#666' : '#d97706',
+                  background: isEntering ? 'rgba(217, 119, 6, 0.1)' : 'transparent',
+                  opacity: isEntering ? 0.7 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (isEntering) return;
+                  e.currentTarget.style.background = '#d97706';
+                  e.currentTarget.style.color = '#080808';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = isEntering ? 'rgba(217, 119, 6, 0.1)' : 'transparent';
+                  e.currentTarget.style.color = isEntering ? '#666' : '#d97706';
+                }}
               >
                 enter project →
               </button>
@@ -438,6 +480,26 @@ export function DJStudio({
           )}
         </AnimatePresence>
       </div>
+
+      {isEntering && targetProject && (
+        <div
+          className="absolute z-40"
+          style={{ right: 120, top: 'calc(50% + 120px)', width: 260 }}
+        >
+          <div className="mb-2 text-[11px] text-amber-200/80">
+            {enterLabel}
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-amber-200/80 mb-1">
+            <span>로딩 중</span>
+            <span>{resolveProgress()}%</span>
+          </div>
+          <Progress
+            value={resolveProgress()}
+            className="h-2 bg-white/10"
+            indicatorClassName="bg-amber-400/80"
+          />
+        </div>
+      )}
 
       {/* Floating LP - animates between album and turntable */}
       {lpVisible && !isRecording && (currentProject || loadedProject) && (

@@ -752,9 +752,12 @@ export default function App() {
     refreshLibrary().catch(() => {});
   }, []);
 
+  const apiBase = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+  const loginUrl = apiBase ? `${apiBase}/auth/google/login` : '/auth/google/login';
+
   const authProps = {
     userName,
-    onLogin: () => (window.location.href = '/auth/google/login'),
+    onLogin: () => (window.location.href = loginUrl),
     onLogout: async () => {
       await logout();
       setUserName('게스트');

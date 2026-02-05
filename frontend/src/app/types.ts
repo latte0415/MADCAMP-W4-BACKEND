@@ -12,6 +12,7 @@ export interface MotionKeypoint {
   type: 'hit' | 'hold' | 'appear' | 'vanish';
   duration?: number; // for hold type
   intensity: number;
+  frame?: number; // frame number for linking to PIXIE mesh
 }
 
 export interface BassNote {
@@ -97,6 +98,11 @@ export interface MusicAnalysisDetail {
   other?: OtherAnalysisDetail;
 }
 
+export interface PixieMeshInfo {
+  s3_prefix: string;
+  file_count: number;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -112,6 +118,7 @@ export interface Project {
   bassNotes?: BassNote[];
   musicDetail?: MusicAnalysisDetail;
   stemUrls?: StemUrls;
+  pixieMeshes?: Record<string, PixieMeshInfo>;
   status: ProjectStatus;
   errorMessage?: string;
   progress?: number;

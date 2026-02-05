@@ -47,6 +47,7 @@ type ProjectDetailResponse = {
       drum_high?: string | null;
     } | null;
   };
+  pixie_meshes?: Record<string, { s3_prefix: string; file_count: number }> | null;
 };
 
 type PresignResponse = { upload_url: string; s3_key: string };
@@ -273,6 +274,36 @@ export async function fetchJson(url?: string | null) {
   return res.json();
 }
 
+export async function getMeshUrl(
+  requestId: number | string,
+  kind: string,
+  frame: number
+): Promise<string | null> {
+  try {
+    const res = await apiFetch<{ url: string }>(
+      `${DEFAULT_API_BASE}/api/analysis/${requestId}/mesh/${kind}/${frame}`
+    );
+    return res.url;
+  } catch {
+    return null;
+  }
+}
+
+export async function listMeshFrames(requestId: number | string): Promise<{
+  kind: string;
+  s3_prefix: string;
+  file_count: number;
+}[]> {
+  try {
+    const res = await apiFetch<{ meshes: { kind: string; s3_prefix: string; file_count: number }[] }>(
+      `${DEFAULT_API_BASE}/api/analysis/${requestId}/meshes`
+    );
+    return res.meshes;
+  } catch {
+    return [];
+  }
+}
+
 export function parseMusicKeypoints(data: any): MusicKeypoint[] {
   if (!data) return [];
   const out: MusicKeypoint[] = [];
@@ -409,11 +440,13 @@ export function parseMotionKeypoints(data: any): MotionKeypoint[] {
   const events = Array.isArray(data.events) ? data.events : [];
   for (const evt of events) {
     const type = evt.type ?? evt.kind;
+    const frame = evt.frame ?? evt.start_frame;
     if (type === 'hit') {
       out.push({
         time: Number(evt.t ?? evt.time ?? 0),
         type: 'hit',
         intensity: getIntensity(evt),
+        frame: frame != null ? Number(frame) : undefined,
       });
     } else if (type === 'hold') {
       const start = Number(evt.t_start ?? evt.start ?? evt.t ?? 0);
@@ -423,12 +456,14 @@ export function parseMotionKeypoints(data: any): MotionKeypoint[] {
         type: 'hold',
         duration: Math.max(0, end - start),
         intensity: getIntensity(evt),
+        frame: frame != null ? Number(frame) : undefined,
       });
     } else if (type === 'appear' || type === 'vanish') {
       out.push({
         time: Number(evt.t ?? evt.time ?? 0),
         type,
         intensity: getIntensity(evt),
+        frame: frame != null ? Number(frame) : undefined,
       });
     }
   }
@@ -507,6 +542,7 @@ export function mapProjectDetail(
     bassNotes,
     musicDetail,
     stemUrls,
+    pixieMeshes: detail.pixie_meshes ?? undefined,
     status,
     errorMessage: detail.error_message ?? undefined,
     motionProgress: isDone && detail.video?.url ? 1 : undefined,

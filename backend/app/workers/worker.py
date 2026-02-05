@@ -56,6 +56,7 @@ def _resolve_motion_pipeline() -> str:
     candidates = [
         MOTION_PIPELINE,
         str(PROJECT_ROOT / "motion" / "pipelines" / "motion_pipeline.py"),
+        str(Path.cwd() / "motion" / "pipelines" / "motion_pipeline.py"),
     ]
     for path in candidates:
         if os.path.isfile(path):
@@ -630,3 +631,218 @@ class MusicAnalysisWorker(BaseAnalysisWorker):
         params.pop("music_only", None)
         req.params_json = params or None
         db.commit()
+
+
+# ============================================================================
+# PIXIE Analysis Worker - runs in background after motion analysis completes
+# ============================================================================
+
+PIXIE_ROOT = os.path.join(PROJECT_ROOT, MOTION_ROOT, "gpu", "pixie", "PIXIE")
+PIXIE_DEMO = os.path.join(PIXIE_ROOT, "demos", "demo_fit_body.py")
+EXTRACT_KEYFRAMES = os.path.join(PROJECT_ROOT, MOTION_ROOT, "pipelines", "extract_keyframes.py")
+
+
+def _extract_keyframes(video_path: str, motion_json_path: str, out_dir: str) -> dict[str, list[int]]:
+    """Extract keyframes from video based on motion events."""
+    import json
+    import cv2
+
+    with open(motion_json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    events = data.get("events", [])
+
+    hit_frames = [e["frame"] for e in events if e.get("type") == "hit" and "frame" in e]
+    hold_frames = [e["start_frame"] for e in events if e.get("type") == "hold" and "start_frame" in e]
+
+    def extract_frames(frames: list[int], subdir: str, prefix: str) -> int:
+        out_path = os.path.join(out_dir, subdir)
+        os.makedirs(out_path, exist_ok=True)
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            logger.error("Cannot open video: %s", video_path)
+            return 0
+        count = 0
+        for fidx in frames:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(fidx))
+            ok, frame = cap.read()
+            if not ok:
+                continue
+            fname = os.path.join(out_path, f"{prefix}_{int(fidx):06d}.png")
+            cv2.imwrite(fname, frame)
+            count += 1
+        cap.release()
+        return count
+
+    hit_count = extract_frames(hit_frames, "hit", "hit")
+    hold_count = extract_frames(hold_frames, "hold", "hold")
+
+    logger.info("Extracted keyframes: hit=%d, hold=%d", hit_count, hold_count)
+    return {"hit": hit_frames, "hold": hold_frames}
+
+
+def _run_pixie_on_keyframes(keyframe_dir: str, output_dir: str, kind: str) -> int:
+    """Run PIXIE on extracted keyframes. Returns number of OBJ files generated."""
+    input_dir = os.path.join(keyframe_dir, kind)
+    out_dir = os.path.join(output_dir, kind)
+
+    if not os.path.isdir(input_dir) or not os.listdir(input_dir):
+        logger.info("No keyframes for kind=%s, skipping PIXIE", kind)
+        return 0
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    # Run PIXIE with CPU
+    cmd = [
+        sys.executable,
+        PIXIE_DEMO,
+        "-i", input_dir,
+        "-s", out_dir,
+        "--device", "cpu",
+        "--iscrop", "True",
+        "--saveObj", "True",
+        "--saveVis", "False",
+        "--saveParam", "True",
+        "--savePred", "True",
+        "--saveImages", "False",
+        "--useTex", "False",
+        "--lightTex", "False",
+        "--extractTex", "False",
+    ]
+
+    logger.info("Running PIXIE: %s", " ".join(cmd))
+    proc = subprocess.run(cmd, capture_output=True, text=True, cwd=PIXIE_ROOT)
+
+    if proc.returncode != 0:
+        logger.error("PIXIE failed for kind=%s: %s", kind, proc.stderr or proc.stdout)
+        return 0
+
+    # Count generated OBJ files
+    obj_count = len([f for f in os.listdir(out_dir) if f.endswith(".obj")])
+    logger.info("PIXIE generated %d OBJ files for kind=%s", obj_count, kind)
+    return obj_count
+
+
+def _upload_pixie_outputs(request_id: int, output_dir: str, kind: str) -> tuple[str, int]:
+    """Upload PIXIE OBJ files to S3. Returns (s3_prefix, file_count)."""
+    local_dir = os.path.join(output_dir, kind)
+    if not os.path.isdir(local_dir):
+        return "", 0
+
+    s3_prefix = f"results/{request_id}/pixie/{kind}"
+    count = 0
+
+    for fname in os.listdir(local_dir):
+        if not fname.endswith(".obj"):
+            continue
+        local_path = os.path.join(local_dir, fname)
+        s3_key = f"{s3_prefix}/{fname}"
+        upload_file(local_path, s3_key, content_type="application/octet-stream")
+        count += 1
+
+    logger.info("Uploaded %d OBJ files to %s", count, s3_prefix)
+    return s3_prefix, count
+
+
+class PixieAnalysisWorker(BaseAnalysisWorker):
+    """Background worker that runs PIXIE on completed motion analysis requests."""
+
+    def __init__(self, poll_interval: float = 10.0):
+        super().__init__(poll_interval)
+
+    def _fetch_request(self, db: Session) -> Optional[models.AnalysisRequest]:
+        # Find "done" requests with motion results but no PIXIE outputs
+        subq = db.query(models.PixieOutput.request_id).distinct()
+        return (
+            db.query(models.AnalysisRequest)
+            .join(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
+            .filter(models.AnalysisRequest.status == "done")
+            .filter(models.AnalysisRequest.mode == "dance")
+            .filter(models.AnalysisRequest.is_deleted == False)
+            .filter(models.AnalysisResult.motion_json_s3_key.isnot(None))
+            .filter(~models.AnalysisRequest.id.in_(subq))
+            .order_by(models.AnalysisRequest.finished_at.asc())
+            .with_for_update(skip_locked=True)
+            .first()
+        )
+
+    def _tick(self) -> None:
+        """Override to not change request status."""
+        db: Session = SessionLocal()
+        try:
+            req = self._fetch_request(db)
+            if not req:
+                return
+            if req.is_deleted:
+                return
+
+            logger.info("PIXIE worker processing request %s", req.id)
+            self._handle_request(db, req)
+            logger.info("PIXIE worker completed request %s", req.id)
+        except Exception:
+            logger.exception("PIXIE worker failed for request")
+        finally:
+            db.close()
+
+    def _handle_request(self, db: Session, req: models.AnalysisRequest) -> None:
+        # Check if PIXIE demo exists
+        if not os.path.isfile(PIXIE_DEMO):
+            logger.warning("PIXIE demo not found at %s, skipping", PIXIE_DEMO)
+            return
+
+        res = db.query(models.AnalysisResult).filter(
+            models.AnalysisResult.request_id == req.id
+        ).first()
+        if not res or not res.motion_json_s3_key:
+            logger.warning("No motion result for request %s", req.id)
+            return
+
+        video = db.query(models.MediaFile).filter(
+            models.MediaFile.id == req.video_id
+        ).first()
+        if not video:
+            logger.warning("No video for request %s", req.id)
+            return
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Download video
+            logger.info("PIXIE: downloading video for request %s", req.id)
+            local_video = os.path.join(tmpdir, "input.mp4")
+            with open(local_video, "wb") as f:
+                download_fileobj(video.s3_key, f)
+
+            # Download motion_result.json
+            logger.info("PIXIE: downloading motion result for request %s", req.id)
+            local_motion = os.path.join(tmpdir, "motion_result.json")
+            with open(local_motion, "wb") as f:
+                download_fileobj(res.motion_json_s3_key, f)
+
+            # Extract keyframes
+            logger.info("PIXIE: extracting keyframes for request %s", req.id)
+            keyframe_dir = os.path.join(tmpdir, "keyframes")
+            frame_info = _extract_keyframes(local_video, local_motion, keyframe_dir)
+
+            # Run PIXIE on each kind
+            pixie_out = os.path.join(tmpdir, "pixie_mesh")
+            for kind in ["hit", "hold"]:
+                if not frame_info.get(kind):
+                    continue
+
+                logger.info("PIXIE: running inference for kind=%s, request %s", kind, req.id)
+                obj_count = _run_pixie_on_keyframes(keyframe_dir, pixie_out, kind)
+
+                if obj_count > 0:
+                    # Upload to S3
+                    logger.info("PIXIE: uploading results for kind=%s, request %s", kind, req.id)
+                    s3_prefix, file_count = _upload_pixie_outputs(req.id, pixie_out, kind)
+
+                    # Create PixieOutput record
+                    if s3_prefix and file_count > 0:
+                        pixie_record = models.PixieOutput(
+                            request_id=req.id,
+                            kind=kind,
+                            s3_prefix=s3_prefix,
+                            file_count=file_count,
+                        )
+                        db.add(pixie_record)
+                        db.commit()
+                        logger.info("PIXIE: created PixieOutput record for kind=%s, request %s", kind, req.id)

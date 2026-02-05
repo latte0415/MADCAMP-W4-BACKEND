@@ -47,6 +47,7 @@ export function DJStudio({
   const [lpVisible, setLpVisible] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingLpVisible, setRecordingLpVisible] = useState(false);
+  const [isAlbumChanging, setIsAlbumChanging] = useState(false);
 
   // Loading state - starts when play is clicked
   const [isLoading, setIsLoading] = useState(false);
@@ -95,10 +96,14 @@ export function DJStudio({
     if (isTransitioning || isLoading) return;
     if (index !== selectedIndex) {
       setLpVisible(false);
+      setIsAlbumChanging(true);
       setSelectedIndex(index);
       setTimeout(() => {
         setLpVisible(true);
       }, 350);
+      setTimeout(() => {
+        setIsAlbumChanging(false);
+      }, 700);
     }
   };
 
@@ -575,7 +580,7 @@ export function DJStudio({
             opacity: 0,
           }}
           animate={{
-            left: showLpOnAlbum ? (lpVisible ? 620 : 420) : 'calc(100% - 335px)',
+            left: showLpOnAlbum ? (lpVisible ? 660 : 420) : 'calc(100% - 335px)',
             top: showLpOnAlbum ? 'calc(50% - 310px)' : 'calc(50% - 190px)',
             width: showLpOnAlbum ? 560 : 300,
             height: showLpOnAlbum ? 560 : 300,
@@ -584,7 +589,7 @@ export function DJStudio({
           transition={{
             type: 'spring',
             stiffness: 100,
-            delay: (lpVisible && showLpOnAlbum) ? 0.35 : 0,
+            delay: isAlbumChanging ? 0.35 : 0,
             damping: 18,
           }}
         >

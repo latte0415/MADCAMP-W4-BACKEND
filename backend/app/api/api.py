@@ -375,6 +375,63 @@ def get_analysis_music(
     return MusicResultResponse(url=presign_get_url(res.music_json_s3_key))
 
 
+@router.get("/analysis/{request_id}/mesh/{kind}/{frame}")
+def get_mesh_url(
+    request_id: int,
+    kind: str,
+    frame: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """PIXIE 3D mesh OBJ 파일의 presigned URL을 반환합니다."""
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user.id:
+        raise HTTPException(status_code=404, detail="not found")
+
+    pixie = db.query(models.PixieOutput).filter(
+        models.PixieOutput.request_id == request_id,
+        models.PixieOutput.kind == kind,
+    ).first()
+    if not pixie:
+        raise HTTPException(status_code=404, detail="pixie output not found")
+
+    # Construct S3 key for the mesh file
+    # Format: {s3_prefix}/{kind}_{frame:06d}.obj
+    s3_key = f"{pixie.s3_prefix}/{kind}_{frame:06d}.obj"
+    return {"url": presign_get_url(s3_key)}
+
+
+@router.get("/analysis/{request_id}/meshes")
+def list_mesh_frames(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """프로젝트의 사용 가능한 PIXIE mesh 정보를 반환합니다."""
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user.id:
+        raise HTTPException(status_code=404, detail="not found")
+
+    pixie_outputs = db.query(models.PixieOutput).filter(
+        models.PixieOutput.request_id == request_id
+    ).all()
+
+    return {
+        "meshes": [
+            {
+                "kind": p.kind,
+                "s3_prefix": p.s3_prefix,
+                "file_count": p.file_count,
+            }
+            for p in pixie_outputs
+        ]
+    }
+
+
 @router.patch("/analysis/{request_id}/audio")
 def update_analysis_audio(
     request_id: int,
@@ -487,7 +544,8 @@ def project_detail(request_id: int, db: Session = Depends(get_db)):
     audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first() if req.audio_id else None
     res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
     edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).first()
-    return presenters.build_project_detail(req, video, audio, res, edit)
+    pixie_outputs = db.query(models.PixieOutput).filter(models.PixieOutput.request_id == req.id).all()
+    return presenters.build_project_detail(req, video, audio, res, edit, pixie_outputs)
 
 
 @router.delete("/project/{request_id}")

@@ -27,6 +27,7 @@ interface UploadDialogProps {
     mode: ProjectMode;
     video?: File;
     audio?: File;
+    extractAudio?: boolean;
   }) => void;
 }
 
@@ -35,6 +36,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
   const [mode, setMode] = useState<ProjectMode>('dance');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [extractAudio, setExtractAudio] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +51,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
       mode,
       video: videoFile || undefined,
       audio: audioFile || undefined,
+      extractAudio: extractAudio || undefined,
     });
 
     // Reset form
@@ -56,6 +59,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
     setMode('dance');
     setVideoFile(null);
     setAudioFile(null);
+    setExtractAudio(false);
   };
 
   return (
@@ -160,6 +164,17 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
               <p className="text-xs text-zinc-500">
                 Selected: {audioFile.name}
               </p>
+            )}
+            {!audioFile && videoFile && (
+              <label className="flex items-center gap-2 text-xs text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={extractAudio}
+                  onChange={(e) => setExtractAudio(e.target.checked)}
+                  className="accent-blue-500"
+                />
+                Use audio extracted from video
+              </label>
             )}
           </div>
 

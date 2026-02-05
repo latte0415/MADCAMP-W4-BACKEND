@@ -27,7 +27,7 @@ class MediaCommitRequest(BaseModel):
 
 
 class AnalysisRequestCreate(BaseModel):
-    video_id: int
+    video_id: Optional[int] = None
     audio_id: Optional[int] = None
     mode: str
     params_json: Optional[dict] = None
@@ -67,7 +67,7 @@ class LibraryItem(BaseModel):
     status: str
     created_at: datetime
     finished_at: Optional[datetime]
-    video_s3_key: str
+    video_s3_key: Optional[str]
     video_duration_sec: Optional[float]
     audio_s3_key: Optional[str]
     motion_json_s3_key: Optional[str]
@@ -84,6 +84,8 @@ class AnalysisResultUpsert(BaseModel):
     music_json_s3_key: Optional[str] = None
     magic_json_s3_key: Optional[str] = None
     overlay_video_s3_key: Optional[str] = None
+    match_score: Optional[float] = None
+    match_details: Optional[dict] = None
 
 
 class MusicResultResponse(BaseModel):
@@ -94,6 +96,16 @@ class MusicResultResponse(BaseModel):
 class AnalysisAudioUpdate(BaseModel):
     """분석 요청의 오디오(음악) 교체용."""
     audio_id: int
+
+
+class AnalysisVideoUpdate(BaseModel):
+    """분석 요청의 비디오(영상) 교체용."""
+    video_id: int
+
+
+class AnalysisExtractAudioUpdate(BaseModel):
+    """영상에서 오디오 추출 사용 여부."""
+    enabled: bool
 
 
 class AnalysisMusicOnlyRequest(BaseModel):

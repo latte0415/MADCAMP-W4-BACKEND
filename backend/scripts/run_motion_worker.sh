@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python -m backend.app.workers.runner --type motion "$@"
+python -m backend.app.workers.runner --type dance "$@"

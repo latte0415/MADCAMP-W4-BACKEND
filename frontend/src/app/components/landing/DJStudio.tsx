@@ -251,7 +251,7 @@ export function DJStudio({
                   <div className="absolute top-8 right-8 text-[12px] font-mono" style={{ color: currentProject.thumbnailUrl ? 'rgba(255,255,255,0.5)' : '#999' }}>{String(selectedIndex + 1).padStart(2, '0')}</div>
                 </div>
 
-                {/* Play button */}
+                {/* Buttons */}
                 <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
                   <button
                     onClick={() => onOpenProject(currentProject)}
@@ -264,12 +264,10 @@ export function DJStudio({
                   >
                     open
                   </button>
-                  {currentProject.status === 'done' && !isPlaying && (
-                <div className="absolute -bottom-4 left-0" style={{ zIndex: 2 }}>
                   {currentProject.status === 'done' && !isPlaying && !isTransitioning && (
                     <button
                       onClick={handleLoadToTurntable}
-                      className="text-sm px-5 py-2.5 transition-colors"
+                      className="text-xs px-4 py-2 transition-colors"
                       style={{ border: '1px solid #d97706', color: '#d97706', background: 'transparent' }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
@@ -277,7 +275,7 @@ export function DJStudio({
                       play →
                     </button>
                   )}
-                  {isTransitioning && <span className="text-sm text-neutral-400">loading...</span>}
+                  {isTransitioning && <span className="text-xs text-neutral-400">loading...</span>}
                 </div>
               </motion.div>
             )}

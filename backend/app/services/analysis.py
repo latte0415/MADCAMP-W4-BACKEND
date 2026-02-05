@@ -11,6 +11,7 @@ from ..schemas import (
     AnalysisAudioUpdate,
 )
 from ..workers.jobs import set_job, get_job
+from ..services.s3 import delete_key, delete_keys
 
 
 def _get_media_or_404(db: Session, media_id: int, expected_type: Optional[str] = None) -> models.MediaFile:
@@ -41,14 +42,18 @@ def _require_owned_media(
 
 
 def create_analysis_request(db: Session, user_id: int, payload: AnalysisRequestCreate) -> models.AnalysisRequest:
-    _require_owned_media(
-        db,
-        user_id,
-        payload.video_id,
-        expected_type="video",
-        not_found_detail="video media not found",
-        forbidden_detail="video must belong to you",
-    )
+    if not payload.video_id and not payload.audio_id:
+        raise HTTPException(status_code=400, detail="video or audio is required")
+
+    if payload.video_id is not None:
+        _require_owned_media(
+            db,
+            user_id,
+            payload.video_id,
+            expected_type="video",
+            not_found_detail="video media not found",
+            forbidden_detail="video must belong to you",
+        )
 
     if payload.audio_id is not None:
         _require_owned_media(
@@ -61,7 +66,12 @@ def create_analysis_request(db: Session, user_id: int, payload: AnalysisRequestC
         )
 
     params = dict(payload.params_json or {})
-    if payload.audio_id is None:
+    status = "queued"
+    extract_audio = bool(params.get("extract_audio"))
+    if payload.video_id is None:
+        params["music_only"] = True
+        status = "queued_music"
+    elif payload.audio_id is None and not extract_audio:
         params["skip_music"] = True
 
     req = models.AnalysisRequest(
@@ -70,7 +80,7 @@ def create_analysis_request(db: Session, user_id: int, payload: AnalysisRequestC
         audio_id=payload.audio_id,
         mode=payload.mode,
         params_json=params or None,
-        status="queued",
+        status=status,
         title=payload.title,
         notes=payload.notes,
     )
@@ -136,8 +146,24 @@ def upsert_analysis_result(db: Session, request_id: int, payload: AnalysisResult
     res.music_json_s3_key = payload.music_json_s3_key
     res.magic_json_s3_key = payload.magic_json_s3_key
     res.overlay_video_s3_key = payload.overlay_video_s3_key
+    if payload.match_score is not None:
+        res.match_score = payload.match_score
+    if payload.match_details is not None:
+        res.match_details = payload.match_details
     req.status = "done"
     db.commit()
+
+
+def _delete_result_keys(res: Optional[models.AnalysisResult], keys: list[str]) -> None:
+    if not res:
+        return
+    to_delete = [key for key in keys if key]
+    if not to_delete:
+        return
+    try:
+        delete_keys(to_delete)
+    except Exception:
+        pass
 
 
 def update_analysis_audio(
@@ -169,16 +195,170 @@ def update_analysis_audio(
     return payload.audio_id
 
 
+def update_analysis_video(
+    db: Session,
+    user_id: int,
+    request_id: int,
+    video_id: int,
+) -> int:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+
+    _require_owned_media(
+        db,
+        user_id,
+        video_id,
+        expected_type="video",
+        not_found_detail="video media not found",
+        forbidden_detail="video must belong to you",
+    )
+    req.video_id = video_id
+    if not req.audio_id:
+        params = dict(req.params_json or {})
+        if not params.get("extract_audio"):
+            params["skip_music"] = True
+        params.pop("music_only", None)
+        req.params_json = params
+    db.commit()
+    return video_id
+
+
+def remove_analysis_audio(
+    db: Session,
+    user_id: int,
+    request_id: int,
+) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+    req.audio_id = None
+    params = dict(req.params_json or {})
+    params.pop("music_only", None)
+    if req.video_id and params.get("extract_audio"):
+        params.pop("skip_music", None)
+    else:
+        params["skip_music"] = True
+    req.params_json = params
+
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    if res:
+        _delete_result_keys(res, [res.music_json_s3_key])
+        res.music_json_s3_key = None
+        res.match_score = None
+        res.match_details = None
+    db.commit()
+
+
+def remove_analysis_video(
+    db: Session,
+    user_id: int,
+    request_id: int,
+) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+    req.video_id = None
+    params = dict(req.params_json or {})
+    params["music_only"] = True if req.audio_id else False
+    params.pop("skip_music", None)
+    req.params_json = params or None
+
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    if res:
+        _delete_result_keys(res, [res.motion_json_s3_key, res.magic_json_s3_key, res.overlay_video_s3_key])
+        res.motion_json_s3_key = None
+        res.magic_json_s3_key = None
+        res.overlay_video_s3_key = None
+        res.match_score = None
+        res.match_details = None
+    db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).delete()
+    db.commit()
+
+
+def set_extract_audio(
+    db: Session,
+    user_id: int,
+    request_id: int,
+    enabled: bool,
+) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+
+    params = dict(req.params_json or {})
+    if enabled:
+        params["extract_audio"] = True
+        params.pop("skip_music", None)
+    else:
+        params.pop("extract_audio", None)
+        if not req.audio_id:
+            params["skip_music"] = True
+    req.params_json = params or None
+    db.commit()
+
+
+def queue_motion_rerun(db: Session, user_id: int, request_id: int) -> None:
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user_id:
+        raise HTTPException(status_code=404, detail="not found")
+    if not req.video_id:
+        raise HTTPException(status_code=400, detail="no video attached")
+
+    _get_media_or_404(db, req.video_id, expected_type="video")
+
+    params = dict(req.params_json or {})
+    params.pop("music_only", None)
+    if req.audio_id:
+        params.pop("skip_music", None)
+    else:
+        params["skip_music"] = True
+    req.params_json = params or None
+    req.status = "queued"
+    req.error_message = None
+    req.finished_at = None
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    if res:
+        _delete_result_keys(res, [res.motion_json_s3_key, res.magic_json_s3_key, res.overlay_video_s3_key])
+        res.motion_json_s3_key = None
+        res.magic_json_s3_key = None
+        res.overlay_video_s3_key = None
+        res.match_score = None
+        res.match_details = None
+    db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).delete()
+    db.commit()
+    set_job(req.id, "queued", message="motion rerun queued", progress=0.0, db=db)
+
+
 def queue_music_rerun(db: Session, user_id: int, request_id: int) -> None:
     req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="not found")
     if req.user_id != user_id:
         raise HTTPException(status_code=404, detail="not found")
-    if not req.audio_id:
-        raise HTTPException(status_code=400, detail="no audio attached")
-
-    _get_media_or_404(db, req.audio_id, expected_type="audio")
+    if req.audio_id:
+        _get_media_or_404(db, req.audio_id, expected_type="audio")
+    elif req.video_id:
+        _get_media_or_404(db, req.video_id, expected_type="video")
+    else:
+        raise HTTPException(status_code=400, detail="no audio or video attached")
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+    if res:
+        _delete_result_keys(res, [res.music_json_s3_key])
+        res.music_json_s3_key = None
+        res.match_score = None
+        res.match_details = None
+    db.commit()
     queue_music_only(db, user_id, request_id, audio_id=None)
 
 
@@ -205,10 +385,12 @@ def queue_music_only(
         )
         req.audio_id = audio_id
 
-    if not req.audio_id:
-        raise HTTPException(status_code=400, detail="no audio attached")
-
-    _get_media_or_404(db, req.audio_id, expected_type="audio")
+    if req.audio_id:
+        _get_media_or_404(db, req.audio_id, expected_type="audio")
+    elif req.video_id:
+        _get_media_or_404(db, req.video_id, expected_type="video")
+    else:
+        raise HTTPException(status_code=400, detail="no audio or video attached")
 
     params = dict(req.params_json or {})
     params.pop("skip_music", None)

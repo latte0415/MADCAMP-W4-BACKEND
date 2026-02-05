@@ -17,6 +17,8 @@ from ..schemas import (
     AnalysisResultUpsert,
     AnalysisStatusUpdate,
     AnalysisAudioUpdate,
+    AnalysisVideoUpdate,
+    AnalysisExtractAudioUpdate,
     AnalysisMusicOnlyRequest,
     LibraryItem,
     LibraryResponse,
@@ -144,7 +146,7 @@ def library(
             models.AnalysisEdit,
             audio,
         )
-        .join(video, video.id == models.AnalysisRequest.video_id)
+        .outerjoin(video, video.id == models.AnalysisRequest.video_id)
         .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
         .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
         .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
@@ -191,7 +193,7 @@ def monitoring(
                 models.AnalysisEdit,
                 audio,
             )
-            .join(video, video.id == models.AnalysisRequest.video_id)
+            .outerjoin(video, video.id == models.AnalysisRequest.video_id)
             .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
             .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
             .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
@@ -244,6 +246,52 @@ def update_analysis_audio(
     return {"ok": True, "audio_id": audio_id}
 
 
+@router.patch("/analysis/{request_id}/video")
+def update_analysis_video(
+    request_id: int,
+    payload: AnalysisVideoUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에 연결된 비디오(영상)를 교체합니다."""
+    video_id = analysis_service.update_analysis_video(db, user.id, request_id, payload.video_id)
+    return {"ok": True, "video_id": video_id}
+
+
+@router.delete("/analysis/{request_id}/audio")
+def remove_analysis_audio(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에서 오디오를 제거합니다."""
+    analysis_service.remove_analysis_audio(db, user.id, request_id)
+    return {"ok": True}
+
+
+@router.delete("/analysis/{request_id}/video")
+def remove_analysis_video(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에서 비디오를 제거합니다."""
+    analysis_service.remove_analysis_video(db, user.id, request_id)
+    return {"ok": True}
+
+
+@router.patch("/analysis/{request_id}/extract-audio")
+def update_extract_audio(
+    request_id: int,
+    payload: AnalysisExtractAudioUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """영상에서 오디오 추출 사용 여부를 설정합니다."""
+    analysis_service.set_extract_audio(db, user.id, request_id, payload.enabled)
+    return {"ok": True, "enabled": payload.enabled}
+
+
 @router.post("/analysis/{request_id}/rerun-music")
 def rerun_music_analysis(
     request_id: int,
@@ -252,6 +300,17 @@ def rerun_music_analysis(
 ):
     """해당 분석 요청의 오디오로 음악 분석만 다시 실행합니다. 오디오가 연결되어 있어야 합니다."""
     analysis_service.queue_music_rerun(db, user.id, request_id)
+    return {"ok": True, "queued": True}
+
+
+@router.post("/analysis/{request_id}/rerun-motion")
+def rerun_motion_analysis(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """해당 분석 요청의 비디오로 동작 분석을 다시 실행합니다."""
+    analysis_service.queue_motion_rerun(db, user.id, request_id)
     return {"ok": True, "queued": True}
 
 

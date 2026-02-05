@@ -51,8 +51,9 @@ type ProjectDetailResponse = {
 
 type PresignResponse = { upload_url: string; s3_key: string };
 
-const DEFAULT_API_BASE = 'https://madcamp-w4-backend-production.up.railway.app:8080';
-const API_BASE = (import.meta.env.VITE_API_URL || DEFAULT_API_BASE).replace(/\/+$/, '');
+// Use empty string for same-origin requests (local dev/build), or set VITE_API_URL for cross-origin
+const DEFAULT_API_BASE = '';
+const API_BASE = (import.meta.env.VITE_API_URL ?? DEFAULT_API_BASE).replace(/\/+$/, '');
 
 function apiUrl(path: string) {
   if (!path.startsWith('/')) return path;
@@ -130,6 +131,12 @@ export async function deleteAnalysisRequest(requestId: number) {
 export async function rerunMusicAnalysis(requestId: number) {
   return apiFetch(`/api/analysis/${requestId}/rerun-music`, {
     method: 'POST',
+  });
+}
+
+export async function deleteProject(requestId: number) {
+  return apiFetch<{ ok: boolean; deleted_keys: number }>(`/api/project/${requestId}`, {
+    method: 'DELETE',
   });
 }
 

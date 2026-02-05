@@ -28,6 +28,7 @@ GOOGLE_CLIENT_SECRET = get_env("GOOGLE_CLIENT_SECRET")
 BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8000")
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
+COOKIE_SAMESITE = os.environ.get("COOKIE_SAMESITE", "lax")  # "lax", "strict", or "none"
 WORKER_ENABLED = os.environ.get("WORKER_ENABLED", "true").lower() == "true"
 WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "1"))
 MUSIC_WORKER_CONCURRENCY = int(os.environ.get("MUSIC_WORKER_CONCURRENCY", "1"))

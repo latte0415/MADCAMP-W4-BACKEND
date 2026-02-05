@@ -29,6 +29,7 @@ import {
   rerunMotionAnalysis,
   deleteAnalysisRequest,
   streamAnalysisStatus,
+  deleteProject,
   getMe,
   logout,
 } from './api';
@@ -170,6 +171,11 @@ export default function App() {
     };
 
     if (!needsRevalidate()) {
+      // Show gradual progress even for cached projects
+      onProgress?.(30, '캐시에서 불러오는 중');
+      await new Promise(r => setTimeout(r, 150));
+      onProgress?.(70, '데이터 준비 중');
+      await new Promise(r => setTimeout(r, 150));
       onProgress?.(100, '준비 완료');
       return true;
     }
@@ -248,15 +254,13 @@ export default function App() {
   const handleEnterProject = async (
     project: Project,
     onProgress?: (value: number, label?: string) => void
-  ) => {
+  ): Promise<boolean> => {
     if (isTempId(project.id)) {
-      handleSelectProject(project);
-      return;
+      return true; // Let DJStudio handle navigation
     }
     lastLoadedRef.current = project.id;
     const ok = await openProjectById(project.id, onProgress);
-    if (!ok) return;
-    navigate(`/project/${project.id}`);
+    return ok; // Return success, don't navigate - let DJStudio do it after showing progress
   };
 
   const handleBack = () => {
@@ -400,20 +404,21 @@ export default function App() {
     if (project.audioUrl?.startsWith('blob:')) URL.revokeObjectURL(project.audioUrl);
   };
 
-  const handleDeleteProject = async () => {
-    if (!selectedProject) return;
-    const projectId = selectedProject.id;
+  const handleDeleteProject = async (project?: Project) => {
+    const targetProject = project ?? selectedProject;
+    if (!targetProject) return;
+    const projectId = targetProject.id;
     const confirmDelete = window.confirm(
       '이 프로젝트를 삭제할까요?\n삭제하면 복구할 수 없습니다.'
     );
     if (!confirmDelete) return;
 
-    cleanupProjectUrls(selectedProject);
+    cleanupProjectUrls(targetProject);
     setProjects(prev => prev.filter(p => p.id !== projectId));
-    setSelectedProject(null);
-    navigate('/');
-    detailCacheRef.current.delete(projectId);
-    cacheOrderRef.current = cacheOrderRef.current.filter(id => id !== projectId);
+    if (selectedProject?.id === projectId) {
+      setSelectedProject(null);
+      navigate('/');
+    }
 
     if (isTempId(projectId)) {
       deletedTempIdsRef.current.add(projectId);
@@ -421,7 +426,7 @@ export default function App() {
     }
 
     try {
-      await deleteAnalysisRequest(Number(projectId));
+      await deleteProject(Number(projectId));
       await refreshLibrary();
     } catch (err) {
       console.error(err);
@@ -817,6 +822,7 @@ export default function App() {
               onSelectProject={handleSelectProject}
               onEnterProject={handleEnterProject}
               onCreateProject={handleCreateProject}
+              onDeleteProject={handleDeleteProject}
               {...authProps}
             />
           }

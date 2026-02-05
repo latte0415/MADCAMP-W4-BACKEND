@@ -11,6 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .core.config import (
     SESSION_SECRET,
     COOKIE_SECURE,
+    COOKIE_SAMESITE,
     WORKER_ENABLED,
     WORKER_CONCURRENCY,
     PROJECT_ROOT,
@@ -43,7 +44,7 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
-    same_site="lax",
+    same_site=COOKIE_SAMESITE,
     https_only=COOKIE_SECURE,
 )
 

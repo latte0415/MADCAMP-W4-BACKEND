@@ -34,6 +34,7 @@ from ..schemas import (
 from ..services import analysis as analysis_service
 from ..services import media as media_service
 from ..services import presenters
+from ..services.s3 import delete_keys, presign_get_url
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -487,3 +488,85 @@ def project_detail(request_id: int, db: Session = Depends(get_db)):
     res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
     edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == req.id).first()
     return presenters.build_project_detail(req, video, audio, res, edit)
+
+
+@router.delete("/project/{request_id}")
+def delete_project(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """프로젝트와 관련된 모든 S3 파일을 삭제합니다."""
+    req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="not found")
+    if req.user_id != user.id:
+        raise HTTPException(status_code=403, detail="forbidden")
+
+    # Collect all S3 keys to delete
+    s3_keys: list[str] = []
+
+    # Get media files
+    video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first() if req.video_id else None
+    audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first() if req.audio_id else None
+
+    if video and video.s3_key:
+        s3_keys.append(video.s3_key)
+    if audio and audio.s3_key:
+        s3_keys.append(audio.s3_key)
+
+    # Get analysis result S3 keys
+    res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == request_id).first()
+    if res:
+        if res.motion_json_s3_key:
+            s3_keys.append(res.motion_json_s3_key)
+        if res.music_json_s3_key:
+            s3_keys.append(res.music_json_s3_key)
+        if res.magic_json_s3_key:
+            s3_keys.append(res.magic_json_s3_key)
+        if res.overlay_video_s3_key:
+            s3_keys.append(res.overlay_video_s3_key)
+
+    # Get analysis edit S3 keys
+    edit = db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == request_id).first()
+    if edit:
+        if edit.motion_markers_s3_key:
+            s3_keys.append(edit.motion_markers_s3_key)
+        if edit.edited_overlay_s3_key:
+            s3_keys.append(edit.edited_overlay_s3_key)
+
+    # Delete related database records
+    db.query(models.AnalysisJob).filter(models.AnalysisJob.request_id == request_id).delete()
+    db.query(models.PixieOutput).filter(models.PixieOutput.request_id == request_id).delete()
+    db.query(models.AnalysisEdit).filter(models.AnalysisEdit.request_id == request_id).delete()
+    db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == request_id).delete()
+
+    # Delete media files (only if not used by other requests)
+    if video:
+        other_video_refs = db.query(models.AnalysisRequest).filter(
+            models.AnalysisRequest.video_id == video.id,
+            models.AnalysisRequest.id != request_id
+        ).count()
+        if other_video_refs == 0:
+            db.delete(video)
+
+    if audio:
+        other_audio_refs = db.query(models.AnalysisRequest).filter(
+            models.AnalysisRequest.audio_id == audio.id,
+            models.AnalysisRequest.id != request_id
+        ).count()
+        if other_audio_refs == 0:
+            db.delete(audio)
+
+    # Delete the analysis request
+    db.delete(req)
+    db.commit()
+
+    # Delete S3 files
+    if s3_keys:
+        try:
+            delete_keys(s3_keys)
+        except Exception:
+            pass  # Log but don't fail if S3 deletion fails
+
+    return {"ok": True, "deleted_keys": len(s3_keys)}

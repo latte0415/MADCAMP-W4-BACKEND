@@ -68,8 +68,7 @@ export function AudioDetailAnalysisSection({
   const [drumBand, setDrumBand] = useState<DrumBand>('low');
   const [zoom, setZoom] = useState(1);
   const [waveformData, setWaveformData] = useState<Float32Array | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const waveformRefs = useRef<(HTMLCanvasElement | null)[]>([]);
 
   const selectionEnd = selectionStart + selectionDuration;
   const viewDuration = Math.max(0.001, selectionDuration);
@@ -143,47 +142,54 @@ export function AudioDetailAnalysisSection({
   }, [effectiveAudioUrl, duration]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || duration <= 0 || selectionDuration <= 0) return;
+    if (duration <= 0 || selectionDuration <= 0) return;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = timelineWidth * dpr;
-    canvas.height = WAVEFORM_HEIGHT * dpr;
-    canvas.style.width = `${timelineWidth}px`;
-    canvas.style.height = `${WAVEFORM_HEIGHT}px`;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
+    const samplesPerSec = waveformData && waveformData.length > 0 ? waveformData.length / duration : 0;
+    const startIndex = waveformData
+      ? clamp(Math.floor(selectionStart * samplesPerSec), 0, waveformData.length)
+      : 0;
+    const endIndex = waveformData
+      ? clamp(Math.ceil(selectionEnd * samplesPerSec), 0, waveformData.length)
+      : 0;
+    const slice = waveformData ? waveformData.subarray(startIndex, endIndex) : null;
 
-    if (waveformData && waveformData.length > 0) {
-      const samplesPerSec = waveformData.length / duration;
-      const startIndex = clamp(Math.floor(selectionStart * samplesPerSec), 0, waveformData.length);
-      const endIndex = clamp(Math.ceil(selectionEnd * samplesPerSec), 0, waveformData.length);
-      const slice = waveformData.subarray(startIndex, endIndex);
-      const centerY = WAVEFORM_HEIGHT / 2;
-      const step = slice.length > 0 ? timelineWidth / slice.length : timelineWidth;
-      ctx.fillStyle = '#2f2f2f';
-      for (let i = 0; i < slice.length; i++) {
-        const x = i * step;
-        const v = slice[i] ?? 0;
-        const barHeight = Math.max(2, v * centerY);
-        ctx.fillRect(x, centerY - barHeight / 2, Math.max(1, step), barHeight);
+    waveformRefs.current.forEach((canvas) => {
+      if (!canvas) return;
+      canvas.width = timelineWidth * dpr;
+      canvas.height = WAVEFORM_HEIGHT * dpr;
+      canvas.style.width = `${timelineWidth}px`;
+      canvas.style.height = `${WAVEFORM_HEIGHT}px`;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
+
+      if (slice && slice.length > 0) {
+        const centerY = WAVEFORM_HEIGHT / 2;
+        const step = slice.length > 0 ? timelineWidth / slice.length : timelineWidth;
+        ctx.fillStyle = 'rgba(150, 150, 150, 0.28)';
+        for (let i = 0; i < slice.length; i++) {
+          const x = i * step;
+          const v = slice[i] ?? 0;
+          const barHeight = Math.max(2, v * centerY);
+          ctx.fillRect(x, centerY - barHeight / 2, Math.max(1, step), barHeight);
+        }
       }
-    }
 
-    for (let t = selectionStart; t <= selectionEnd + 0.0001; t += BAR_SECONDS) {
-      const x = ((t - selectionStart) / viewDuration) * timelineWidth;
-      ctx.strokeStyle = '#1f1f1f';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 4]);
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, WAVEFORM_HEIGHT);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
+      for (let t = selectionStart; t <= selectionEnd + 0.0001; t += BAR_SECONDS) {
+        const x = ((t - selectionStart) / viewDuration) * timelineWidth;
+        ctx.strokeStyle = 'rgba(120,120,120,0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, WAVEFORM_HEIGHT);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
   }, [duration, selectionStart, selectionEnd, selectionDuration, timelineWidth, viewDuration, waveformData]);
 
   const handleZoomIn = () => setZoom((prev) => clamp(prev * 1.35, MIN_ZOOM, MAX_ZOOM));
@@ -191,8 +197,7 @@ export function AudioDetailAnalysisSection({
 
   const handleSeekClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onSeek || duration <= 0) return;
-    const container = scrollRef.current;
-    if (!container) return;
+    const container = e.currentTarget;
     const rect = container.getBoundingClientRect();
     const scrollLeft = container.scrollLeft;
     const x = e.clientX - rect.left + scrollLeft;
@@ -594,6 +599,33 @@ export function AudioDetailAnalysisSection({
     );
   };
 
+  const stemItems = [
+    {
+      id: 'drums' as const,
+      label: '드럼 키포인트',
+      color: STEM_COLORS.drums,
+      count: (drumKeypointsByBand[drumBand] ?? drumEvents).length,
+    },
+    {
+      id: 'bass' as const,
+      label: '베이스',
+      color: STEM_COLORS.bass,
+      count: resolvedBassNotes.length,
+    },
+    {
+      id: 'vocal' as const,
+      label: '보컬',
+      color: STEM_COLORS.vocal,
+      count: vocalCurve.length || vocalEvents.length,
+    },
+    {
+      id: 'other' as const,
+      label: '기타',
+      color: STEM_COLORS.other,
+      count: (otherDetail?.keypoints?.length ?? 0) || otherCurve.length || otherEvents.length,
+    },
+  ];
+
   return (
     <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -627,12 +659,7 @@ export function AudioDetailAnalysisSection({
       </div>
 
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        {([
-          { id: 'drums', label: '드럼 키포인트' },
-          { id: 'bass', label: '베이스' },
-          { id: 'vocal', label: '보컬' },
-          { id: 'other', label: '기타' },
-        ] as const).map((tab) => (
+        {stemItems.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -672,25 +699,29 @@ export function AudioDetailAnalysisSection({
       </div>
 
       <div className="space-y-3">
-        {([
-          { id: 'drums', label: '드럼 키포인트' },
-          { id: 'bass', label: '베이스' },
-          { id: 'vocal', label: '보컬' },
-          { id: 'other', label: '기타' },
-        ] as const)
+        {stemItems
           .filter((tab) => visibleStems.includes(tab.id))
-          .map((tab) => (
-            <div key={`stem-${tab.id}`} className="rounded border border-neutral-800 bg-neutral-950/80 p-3">
-              <div className="mb-2 text-xs text-neutral-400 uppercase tracking-[0.2em]">
-                {tab.label}
+          .map((tab, index) => (
+            <div key={`stem-${tab.id}`} className="grid grid-cols-[160px_1fr] gap-3 items-start">
+              <div className="rounded border border-neutral-800 bg-neutral-950/80 p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-400">
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: tab.color }} />
+                  {tab.label}
+                </div>
+                <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-neutral-600">
+                  {tab.count}개
+                </div>
               </div>
               <div
-                ref={tab.id === 'drums' ? scrollRef : undefined}
-                onClick={tab.id === 'drums' ? handleSeekClick : undefined}
-                className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950"
+                onClick={handleSeekClick}
+                className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
               >
                 {effectiveAudioUrl ? (
                   <>
+                    <canvas
+                      ref={(el) => (waveformRefs.current[index] = el)}
+                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT, display: 'block' }}
+                    />
                     <div
                       className="absolute left-0 top-0 pointer-events-none"
                       style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}

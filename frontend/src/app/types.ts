@@ -34,4 +34,5 @@ export interface Project {
   motionKeypoints: MotionKeypoint[];
   bassNotes?: BassNote[];
   status: ProjectStatus;
+  errorMessage?: string;
 }

@@ -66,13 +66,13 @@ export function AudioWaveformTimeline({
 
     ctx.scale(dpr, dpr);
 
-    ctx.fillStyle = '#18181b';
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, timelineWidth, height);
 
     if (waveformData && waveformData.length > 0) {
       const centerY = height / 2;
       const step = timelineWidth / waveformData.length;
-      ctx.fillStyle = '#3f3f46';
+      ctx.fillStyle = '#2f2f2f';
       for (let i = 0; i < waveformData.length; i++) {
         const x = i * step;
         const v = waveformData[i];
@@ -83,7 +83,7 @@ export function AudioWaveformTimeline({
 
     for (let t = 0; t <= duration; t += BAR_INTERVAL_SEC) {
       const x = (t / duration) * timelineWidth;
-      ctx.strokeStyle = '#52525b';
+      ctx.strokeStyle = '#2f2f2f';
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 2]);
       ctx.beginPath();
@@ -91,13 +91,13 @@ export function AudioWaveformTimeline({
       ctx.lineTo(x, height);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = '#71717a';
+      ctx.fillStyle = '#606060';
       ctx.font = '10px -apple-system, system-ui, sans-serif';
       ctx.fillText(`${Math.floor(t)}s`, x + 2, 12);
     }
 
     const playheadX = (currentTime / duration) * timelineWidth;
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = '#fafafa';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
@@ -116,18 +116,20 @@ export function AudioWaveformTimeline({
 
   if (!audioUrl) {
     return (
-      <div className="rounded-lg border border-white/10 bg-zinc-900/50 p-4 text-center text-sm text-zinc-500">
-        음악을 업로드하면 파형이 표시됩니다.
-      </div>
-    );
-  }
+    <div className="rounded border border-neutral-800 bg-neutral-950/80 p-4 text-center text-sm text-neutral-500">
+      음악을 업로드하면 파형이 표시됩니다.
+    </div>
+  );
+}
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-zinc-900/50 p-4">
-      <div className="text-xs text-zinc-400">음악 파형 (마디 구분: {BAR_INTERVAL_SEC}초 간격)</div>
+    <div className="flex flex-col gap-2 rounded border border-neutral-800 bg-neutral-950/80 p-4">
+      <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+        음악 파형 (마디 구분: {BAR_INTERVAL_SEC}초 간격)
+      </div>
       <div
         ref={containerRef}
-        className="relative h-20 overflow-x-auto overflow-y-hidden rounded border border-white/5 bg-zinc-950"
+        className="relative h-20 overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950"
       >
         <canvas
           ref={canvasRef}

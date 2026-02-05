@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session, aliased
 
 from ..core.deps import get_db, get_current_user
+from ..core.config import MONITORING_PUBLIC
 from ..db import models
 from ..schemas import (
     MediaCreateResponse,
@@ -16,9 +17,13 @@ from ..schemas import (
     AnalysisResultUpsert,
     AnalysisStatusUpdate,
     AnalysisAudioUpdate,
+    AnalysisVideoUpdate,
+    AnalysisExtractAudioUpdate,
+    AnalysisMusicOnlyRequest,
     LibraryItem,
     LibraryResponse,
     MusicResultResponse,
+    MonitoringResponse,
 )
 from ..services import analysis as analysis_service
 from ..services import media as media_service
@@ -141,7 +146,7 @@ def library(
             models.AnalysisEdit,
             audio,
         )
-        .join(video, video.id == models.AnalysisRequest.video_id)
+        .outerjoin(video, video.id == models.AnalysisRequest.video_id)
         .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
         .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
         .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
@@ -166,6 +171,44 @@ def library(
         items.append(presenters.build_library_item(req, video_row, res, edit, audio_row))
 
     return items
+
+
+@router.get("/monitoring", response_model=MonitoringResponse)
+def monitoring(
+    limit: int = 25,
+    db: Session = Depends(get_db),
+):
+    if not MONITORING_PUBLIC:
+        raise HTTPException(status_code=401, detail="monitoring disabled")
+
+    video = aliased(models.MediaFile)
+    audio = aliased(models.MediaFile)
+
+    def _fetch(status_value: str):
+        q = (
+            db.query(
+                models.AnalysisRequest,
+                video,
+                models.AnalysisResult,
+                models.AnalysisEdit,
+                audio,
+            )
+            .outerjoin(video, video.id == models.AnalysisRequest.video_id)
+            .outerjoin(models.AnalysisResult, models.AnalysisResult.request_id == models.AnalysisRequest.id)
+            .outerjoin(models.AnalysisEdit, models.AnalysisEdit.request_id == models.AnalysisRequest.id)
+            .outerjoin(audio, audio.id == models.AnalysisRequest.audio_id)
+            .filter(models.AnalysisRequest.status == status_value)
+            .filter(models.AnalysisRequest.is_deleted == False)
+            .order_by(models.AnalysisRequest.created_at.desc())
+            .limit(limit)
+        )
+        return [presenters.build_library_item(req, video_row, res, edit, audio_row) for req, video_row, res, edit, audio_row in q.all()]
+
+    return MonitoringResponse(
+        queued=_fetch("queued"),
+        queued_music=_fetch("queued_music"),
+        running=_fetch("running"),
+    )
 
 
 @router.get("/media/{media_id}/download")
@@ -203,6 +246,52 @@ def update_analysis_audio(
     return {"ok": True, "audio_id": audio_id}
 
 
+@router.patch("/analysis/{request_id}/video")
+def update_analysis_video(
+    request_id: int,
+    payload: AnalysisVideoUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에 연결된 비디오(영상)를 교체합니다."""
+    video_id = analysis_service.update_analysis_video(db, user.id, request_id, payload.video_id)
+    return {"ok": True, "video_id": video_id}
+
+
+@router.delete("/analysis/{request_id}/audio")
+def remove_analysis_audio(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에서 오디오를 제거합니다."""
+    analysis_service.remove_analysis_audio(db, user.id, request_id)
+    return {"ok": True}
+
+
+@router.delete("/analysis/{request_id}/video")
+def remove_analysis_video(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 요청에서 비디오를 제거합니다."""
+    analysis_service.remove_analysis_video(db, user.id, request_id)
+    return {"ok": True}
+
+
+@router.patch("/analysis/{request_id}/extract-audio")
+def update_extract_audio(
+    request_id: int,
+    payload: AnalysisExtractAudioUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """영상에서 오디오 추출 사용 여부를 설정합니다."""
+    analysis_service.set_extract_audio(db, user.id, request_id, payload.enabled)
+    return {"ok": True, "enabled": payload.enabled}
+
+
 @router.post("/analysis/{request_id}/rerun-music")
 def rerun_music_analysis(
     request_id: int,
@@ -211,6 +300,29 @@ def rerun_music_analysis(
 ):
     """해당 분석 요청의 오디오로 음악 분석만 다시 실행합니다. 오디오가 연결되어 있어야 합니다."""
     analysis_service.queue_music_rerun(db, user.id, request_id)
+    return {"ok": True, "queued": True}
+
+
+@router.post("/analysis/{request_id}/rerun-motion")
+def rerun_motion_analysis(
+    request_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """해당 분석 요청의 비디오로 동작 분석을 다시 실행합니다."""
+    analysis_service.queue_motion_rerun(db, user.id, request_id)
+    return {"ok": True, "queued": True}
+
+
+@router.post("/analysis/{request_id}/music-only")
+def run_music_only(
+    request_id: int,
+    payload: AnalysisMusicOnlyRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """오디오만 사용해 음악 분석을 실행합니다. audio_id를 주면 교체 후 실행합니다."""
+    analysis_service.queue_music_only(db, user.id, request_id, audio_id=payload.audio_id)
     return {"ok": True, "queued": True}
 
 

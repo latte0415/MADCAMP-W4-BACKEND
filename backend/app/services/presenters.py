@@ -13,7 +13,7 @@ def _url_for_key(key: Optional[str]) -> Optional[str]:
 
 def build_library_item(
     req: models.AnalysisRequest,
-    video_row: models.MediaFile,
+    video_row: Optional[models.MediaFile],
     res: Optional[models.AnalysisResult],
     edit: Optional[models.AnalysisEdit],
     audio_row: Optional[models.MediaFile],
@@ -25,8 +25,8 @@ def build_library_item(
         status=req.status,
         created_at=req.created_at,
         finished_at=req.finished_at,
-        video_s3_key=video_row.s3_key,
-        video_duration_sec=video_row.duration_sec,
+        video_s3_key=video_row.s3_key if video_row else None,
+        video_duration_sec=video_row.duration_sec if video_row else None,
         audio_s3_key=audio_row.s3_key if audio_row else None,
         motion_json_s3_key=res.motion_json_s3_key if res else None,
         music_json_s3_key=res.music_json_s3_key if res else None,
@@ -47,6 +47,9 @@ def build_project_detail(
         "title": req.title,
         "mode": req.mode,
         "status": req.status,
+        "error_message": req.error_message,
+        "match_score": float(res.match_score) if res and res.match_score is not None else None,
+        "match_details": res.match_details if res else None,
         "created_at": req.created_at,
         "finished_at": req.finished_at,
         "video": {
@@ -67,4 +70,3 @@ def build_project_detail(
             "edited_motion_markers": _url_for_key(edit.motion_markers_s3_key) if edit else None,
         },
     }
-

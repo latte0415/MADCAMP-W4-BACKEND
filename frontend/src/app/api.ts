@@ -15,6 +15,7 @@ type ProjectDetailResponse = {
   title: string | null;
   mode: ProjectMode;
   status: string;
+  error_message?: string | null;
   created_at: string;
   finished_at?: string | null;
   video?: { url?: string | null; duration_sec?: number | null };
@@ -78,20 +79,35 @@ export async function commitMedia(payload: {
   });
 }
 
+export async function updateAnalysisAudio(requestId: number, audioId: number) {
+  return apiFetch(`/api/analysis/${requestId}/audio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ audio_id: audioId }),
+  });
+}
+
+export async function rerunMusicAnalysis(requestId: number) {
+  return apiFetch(`/api/analysis/${requestId}/rerun-music`, {
+    method: 'POST',
+  });
+}
+
 export async function createAnalysis(payload: {
-  video_id: number;
+  video_id?: number | null;
   audio_id?: number | null;
   mode: ProjectMode;
   title?: string | null;
+  params_json?: Record<string, any> | null;
 }) {
   return apiFetch<{ id: number }>('/api/analysis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      video_id: payload.video_id,
+      video_id: payload.video_id ?? null,
       audio_id: payload.audio_id ?? null,
       mode: payload.mode,
-      params_json: null,
+      params_json: payload.params_json ?? null,
       title: payload.title ?? null,
       notes: null,
     }),
@@ -259,5 +275,6 @@ export function mapProjectDetail(
     motionKeypoints,
     bassNotes,
     status,
+    errorMessage: detail.error_message ?? undefined,
   };
 }

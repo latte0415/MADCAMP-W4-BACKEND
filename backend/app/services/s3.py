@@ -53,3 +53,16 @@ def presign_put_url(key: str, content_type: Optional[str] = None, expires_in: in
         Params=params,
         ExpiresIn=expires_in,
     )
+
+
+def delete_key(key: str) -> None:
+    _s3.delete_object(Bucket=S3_BUCKET, Key=key)
+
+
+def delete_keys(keys: list[str]) -> None:
+    if not keys:
+        return
+    _s3.delete_objects(
+        Bucket=S3_BUCKET,
+        Delete={"Objects": [{"Key": key} for key in keys], "Quiet": True},
+    )

@@ -8,6 +8,8 @@ const DEFAULT_MIN_PX_PER_SEC = 50;
 const ZOOM_FACTOR = 1.5;
 const MIN_ZOOM = 10;
 const MAX_ZOOM = 500;
+const ACTIVATE_BEFORE_SEC = 0.03;
+const ACTIVATE_AFTER_SEC = 0.15;
 
 const BAND_COLORS: Record<string, string> = {
   low: "#e74c3c",
@@ -134,6 +136,10 @@ export function Tab13DrumKeypointsView({ audioUrl, data }: Tab13DrumKeypointsVie
   const xScale = useCallback(
     (t: number) => (overlaySize.width > 0 && visibleDur > 0 ? ((t - visibleStart) / visibleDur) * overlaySize.width : 0),
     [overlaySize.width, visibleStart, visibleDur]
+  );
+  const isActiveAtTime = useCallback(
+    (t: number) => currentTime >= t - ACTIVATE_BEFORE_SEC && currentTime <= t + ACTIVATE_AFTER_SEC,
+    [currentTime]
   );
 
   const bands = ["low", "mid", "high"] as const;
@@ -287,14 +293,17 @@ export function Tab13DrumKeypointsView({ audioUrl, data }: Tab13DrumKeypointsVie
                       const t = (kp as KeypointByBandItem).time;
                       const score = scores[i];
                       const r = scoreToR(score);
+                      const isActive = isActiveAtTime(t);
                       return (
                         <circle
                           key={`kp-${t}-${i}`}
                           cx={xScale(t)}
                           cy={overlaySize.height / 2}
-                          r={r}
+                          r={isActive ? r + 2 : r}
                           fill={bandColor}
-                          opacity={0.9}
+                          opacity={isActive ? 1 : 0.6}
+                          stroke={isActive ? "#fff" : "none"}
+                          strokeWidth={isActive ? 2 : 0}
                         />
                       );
                     });

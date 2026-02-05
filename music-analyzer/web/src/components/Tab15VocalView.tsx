@@ -13,6 +13,8 @@ const ZOOM_FACTOR = 1.5;
 const MIN_ZOOM = 10;
 const MAX_ZOOM = 500;
 const PADDING_VERTICAL = 12;
+const ACTIVATE_BEFORE_SEC = 0.03;
+const ACTIVATE_AFTER_SEC = 0.15;
 
 /** Vocal 피치 범위 (Hz). y축 log scale */
 const VOCAL_PITCH_HZ_MIN = 80;
@@ -294,6 +296,10 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
       stripWidth > 0 && visibleDur > 0 ? ((t - visibleStart) / visibleDur) * stripWidth : 0,
     [stripWidth, visibleStart, visibleDur]
   );
+  const isActiveAtTime = useCallback(
+    (t: number) => currentTime >= t - ACTIVATE_BEFORE_SEC && currentTime <= t + ACTIVATE_AFTER_SEC,
+    [currentTime]
+  );
 
   const pitchToY = useCallback(
     (midi: number) => {
@@ -488,6 +494,7 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                           : null;
                         const cy = nearest != null ? pitchToY(nearest.pitch) : PITCH_STRIP_HEIGHT / 2;
                         const cx = xScale(turn.t);
+                        const isActive = isActiveAtTime(turn.t);
                         const up =
                           turn.direction === "down_to_up" ||
                           (turn.direction !== "up_to_down" && !turn.direction);
@@ -501,7 +508,8 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                             points={pts}
                             fill="#f39c12"
                             stroke="#fff"
-                            strokeWidth={1}
+                            strokeWidth={isActive ? 2 : 1}
+                            opacity={isActive ? 1 : 0.6}
                             title="전환: 멜로디가 꺾이는 지점 (여기서 동작을 바꿔라)"
                           />
                         );
@@ -518,6 +526,7 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                         const x0 = xScale(ph.start) + 2;
                         const x1 = xScale(ph.end) - 2;
                         const cx = Math.max(x0, Math.min(x1, xScale(g.t)));
+                        const isActive = isActiveAtTime(g.t);
                         const fill =
                           g.type === "accent" ? "#e74c3c" : g.type === "onset" ? "#3498db" : "#f39c12";
                         const title =
@@ -540,7 +549,8 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                               points={pts}
                               fill={fill}
                               stroke="#fff"
-                              strokeWidth={1}
+                              strokeWidth={isActive ? 2 : 1}
+                              opacity={isActive ? 1 : 0.6}
                               title={title}
                             />
                           );
@@ -550,10 +560,11 @@ export function Tab15VocalView({ audioUrl, data }: Tab15VocalViewProps) {
                             key={`gesture-${i}-${g.t}`}
                             cx={cx}
                             cy={cy}
-                            r={g.type === "onset" ? 4 : 5}
+                            r={(g.type === "onset" ? 4 : 5) + (isActive ? 2 : 0)}
                             fill={fill}
                             stroke="#fff"
-                            strokeWidth={1}
+                            strokeWidth={isActive ? 2 : 1}
+                            opacity={isActive ? 1 : 0.6}
                             title={title}
                           />
                         );

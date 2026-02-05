@@ -31,6 +31,8 @@ const WAVEFORM_HEIGHT = 120;
 const BASE_PX_PER_SEC = 120;
 const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 4;
+const ACTIVATE_BEFORE_SEC = 0.03;
+const ACTIVATE_AFTER_SEC = 0.15;
 
 const STEM_COLORS: Record<DetailTab | DrumBand, string> = {
   drums: '#f59e0b',
@@ -127,6 +129,28 @@ export function AudioDetailAnalysisSection({
     }),
     [audioUrl, stemUrls]
   );
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const inRange = resolvedBassNotes.filter(
+      (note) => note.time >= selectionStart && note.time <= selectionEnd
+    );
+    const times = resolvedBassNotes.map((n) => n.time).filter((t) => Number.isFinite(t));
+    const minTime = times.length ? Math.min(...times) : null;
+    const maxTime = times.length ? Math.max(...times) : null;
+    // Debug-only visibility checks for bass overlays.
+    console.debug('[AudioDetailAnalysisSection] bass debug', {
+      totalBassNotes: resolvedBassNotes.length,
+      bassNotesInSelection: inRange.length,
+      selectionStart,
+      selectionEnd,
+      minBassTime: minTime,
+      maxBassTime: maxTime,
+      hasBassDetail: Boolean(bassDetail),
+      hasMusicDetail: Boolean(musicDetail),
+      sampleNote: resolvedBassNotes[0] ?? null,
+    });
+  }, [resolvedBassNotes, selectionStart, selectionEnd, bassDetail, musicDetail]);
 
   useEffect(() => {
     if (duration <= 0) {
@@ -254,6 +278,13 @@ export function AudioDetailAnalysisSection({
   const selectionBars = Math.max(1, Math.round(selectionDuration / BAR_SECONDS));
   const clampedTime = clamp(currentTime, selectionStart, selectionEnd);
   const xScale = (t: number) => ((t - selectionStart) / viewDuration) * timelineWidth;
+  const isActiveAtTime = (t: number, span?: number) => {
+    if (!Number.isFinite(t)) return false;
+    if (span != null && span > 0) {
+      return clampedTime >= t && clampedTime <= t + span;
+    }
+    return clampedTime >= t - ACTIVATE_BEFORE_SEC && clampedTime <= t + ACTIVATE_AFTER_SEC;
+  };
 
   useEffect(() => {
     currentTimeRef.current = currentTime;
@@ -294,21 +325,44 @@ export function AudioDetailAnalysisSection({
     const events = drumKeypointsByBand[band]?.length
       ? drumKeypointsByBand[band]!
       : drumEventsByBand[band];
+    const textureBlocks = musicDetail?.textureBlocksByBand?.[band] ?? [];
     return (
       <svg width={timelineWidth} height={height} style={{ display: 'block' }}>
+        {textureBlocks
+          .filter((blk) => blk.end >= selectionStart && blk.start <= selectionEnd)
+          .map((blk, index) => {
+            const x = xScale(Math.max(blk.start, selectionStart));
+            const w = Math.max(2, xScale(Math.min(blk.end, selectionEnd)) - x);
+            const intensity = clamp(Number(blk.intensity ?? blk.density ?? 0.4), 0, 1);
+            return (
+              <rect
+                key={`drum-tex-${band}-${index}`}
+                x={x}
+                y={2}
+                width={w}
+                height={height - 4}
+                fill={STEM_COLORS[band]}
+                opacity={0.12 + intensity * 0.28}
+                rx={2}
+              />
+            );
+          })}
         {events
           .filter((kp: any) => kp.time >= selectionStart && kp.time <= selectionEnd)
           .map((kp: any, index: number) => {
             const score = clamp(Number(kp.score ?? kp.intensity ?? 0.6), 0, 1);
             const r = 2 + score * 6;
+            const isActive = isActiveAtTime(kp.time);
             return (
               <circle
                 key={`drum-${band}-${kp.time}-${index}`}
                 cx={xScale(kp.time)}
                 cy={height / 2}
-                r={r}
+                r={isActive ? r + 2 : r}
                 fill={STEM_COLORS[band]}
-                opacity={0.35 + score * 0.6}
+                opacity={isActive ? 1 : 0.35 + score * 0.6}
+                stroke={isActive ? '#fff' : 'none'}
+                strokeWidth={isActive ? 2 : 0}
               />
             );
           })}
@@ -343,6 +397,7 @@ export function AudioDetailAnalysisSection({
             .map((note, index) => {
               const x = xScale(note.time);
               const w = Math.max(4, ((note.duration ?? 0) / viewDuration) * timelineWidth);
+              const isActive = isActiveAtTime(note.time, note.duration);
               return (
                 <rect
                   key={`bass-${index}`}
@@ -351,7 +406,9 @@ export function AudioDetailAnalysisSection({
                   width={w}
                   height={WAVEFORM_HEIGHT * 0.25}
                   fill={STEM_COLORS.bass}
-                  opacity={0.6}
+                  opacity={isActive ? 0.9 : 0.6}
+                  stroke={isActive ? '#fff' : 'none'}
+                  strokeWidth={isActive ? 1.5 : 0}
                   rx={2}
                 />
               );
@@ -516,16 +573,26 @@ export function AudioDetailAnalysisSection({
           })}
           {vocalTurns
             .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
-            .map((t, index) => (
-              <circle
-                key={`vocal-turn-${index}`}
-                cx={xScale(t.t)}
-                cy={WAVEFORM_HEIGHT * 0.25}
-                r={4}
-                fill="#facc15"
-                opacity={0.9}
-              />
-            ))}
+            .map((t, index) => {
+              const isActive = isActiveAtTime(t.t);
+              const size = isActive ? 7 : 5;
+              const cx = xScale(t.t);
+              const cy = WAVEFORM_HEIGHT * 0.25;
+              const up = t.direction === 'down_to_up' || (t.direction !== 'up_to_down' && !t.direction);
+              const pts = up
+                ? `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`
+                : `${cx},${cy + size} ${cx - size},${cy - size} ${cx + size},${cy - size}`;
+              return (
+                <polygon
+                  key={`vocal-turn-${index}`}
+                  points={pts}
+                  fill="#facc15"
+                  opacity={isActive ? 1 : 0.7}
+                  stroke={isActive ? '#fff' : 'none'}
+                  strokeWidth={isActive ? 1.5 : 0}
+                />
+              );
+            })}
           {vocalOnsets
             .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
             .map((t, index) => (
@@ -533,9 +600,11 @@ export function AudioDetailAnalysisSection({
                 key={`vocal-onset-${index}`}
                 cx={xScale(t.t)}
                 cy={WAVEFORM_HEIGHT * 0.75}
-                r={3}
+                r={isActiveAtTime(t.t) ? 5 : 3}
                 fill="#f472b6"
-                opacity={0.9}
+                opacity={isActiveAtTime(t.t) ? 1 : 0.75}
+                stroke={isActiveAtTime(t.t) ? '#fff' : 'none'}
+                strokeWidth={isActiveAtTime(t.t) ? 1.5 : 0}
               />
             ))}
         </svg>
@@ -568,6 +637,20 @@ export function AudioDetailAnalysisSection({
         const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
         const v = clamp(density, 0, 1);
         return pad + (1 - v) * innerH;
+      };
+      const nearestCurvePoint = (t: number) => {
+        if (curve.length === 0) return null;
+        let nearest = curve[0]!;
+        let best = Math.abs(nearest.t - t);
+        for (let i = 1; i < curve.length; i++) {
+          const pt = curve[i]!;
+          const d = Math.abs(pt.t - t);
+          if (d < best) {
+            best = d;
+            nearest = pt;
+          }
+        }
+        return nearest;
       };
       if (regions.length === 0 && keypoints.length === 0 && curve.length < 2) {
         return (
@@ -627,16 +710,26 @@ export function AudioDetailAnalysisSection({
                 />
               );
             })}
-          {keypoints.map((kp, index) => (
-            <circle
-              key={`other-kp-${index}`}
-              cx={xScale(kp.t)}
-              cy={hasPitch ? WAVEFORM_HEIGHT * 0.35 : WAVEFORM_HEIGHT * 0.6}
-              r={4}
-              fill={STEM_COLORS.other}
-              opacity={0.9}
-            />
-          ))}
+          {keypoints.map((kp, index) => {
+            const nearest = nearestCurvePoint(kp.t);
+            const intensity = clamp(Number(kp.score ?? 0.6), 0, 1);
+            const isActive = isActiveAtTime(kp.t);
+            const baseY = hasPitch && nearest?.pitch != null
+              ? pitchToY(nearest.pitch)
+              : densityToY(nearest?.density ?? nearest?.amp ?? 0.6);
+            return (
+              <circle
+                key={`other-kp-${index}`}
+                cx={xScale(kp.t)}
+                cy={baseY}
+                r={3 + intensity * 4 + (isActive ? 2 : 0)}
+                fill={STEM_COLORS.other}
+                opacity={isActive ? 1 : 0.7}
+                stroke={isActive ? '#fff' : 'none'}
+                strokeWidth={isActive ? 1.5 : 0}
+              />
+            );
+          })}
         </svg>
       );
     }
@@ -660,14 +753,17 @@ export function AudioDetailAnalysisSection({
           .map((kp: any, index: number) => {
             const score = clamp(Number(kp.score ?? kp.intensity ?? 0.6), 0, 1);
             const r = scoreToRadius(score);
+            const isActive = isActiveAtTime(kp.time);
             return (
               <circle
                 key={`kp-${kp.time}-${index}`}
                 cx={xScale(kp.time)}
                 cy={WAVEFORM_HEIGHT / 2}
-                r={r}
+                r={isActive ? r + 2 : r}
                 fill={color}
-                opacity={0.9}
+                opacity={isActive ? 1 : 0.9}
+                stroke={isActive ? '#fff' : 'none'}
+                strokeWidth={isActive ? 2 : 0}
               />
             );
           })}

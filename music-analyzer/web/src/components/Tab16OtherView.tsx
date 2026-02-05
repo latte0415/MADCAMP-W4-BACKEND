@@ -13,6 +13,8 @@ const ZOOM_FACTOR = 1.5;
 const MIN_ZOOM = 10;
 const MAX_ZOOM = 500;
 const PADDING_VERTICAL = 8;
+const ACTIVATE_BEFORE_SEC = 0.03;
+const ACTIVATE_AFTER_SEC = 0.15;
 
 interface Tab16OtherViewProps {
   audioUrl: string | null;
@@ -117,6 +119,10 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
     (t: number) =>
       stripWidth > 0 && visibleDur > 0 ? ((t - visibleStart) / visibleDur) * stripWidth : 0,
     [stripWidth, visibleStart, visibleDur]
+  );
+  const isActiveAtTime = useCallback(
+    (t: number) => currentTime >= t - ACTIVATE_BEFORE_SEC && currentTime <= t + ACTIVATE_AFTER_SEC,
+    [currentTime]
   );
 
   const densityToY = useCallback(
@@ -326,6 +332,7 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                         const cy = hasPitchCurve && pitch != null
                           ? pitchToY(pitch, visiblePitchMin, visiblePitchMax)
                           : densityToY(density);
+                        const isActive = isActiveAtTime(kp.t);
                         if (kp.type === "density_peak") {
                           const size = 5;
                           const pts = `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`;
@@ -335,7 +342,8 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                               points={pts}
                               fill="#e67e22"
                               stroke="#fff"
-                              strokeWidth={1}
+                              strokeWidth={isActive ? 2 : 1}
+                              opacity={isActive ? 1 : 0.6}
                               title="density peak: 리듬이 가장 쌓인 시점"
                             />
                           );
@@ -349,7 +357,8 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                               points={pts}
                               fill="#16a085"
                               stroke="#fff"
-                              strokeWidth={1}
+                              strokeWidth={isActive ? 2 : 1}
+                              opacity={isActive ? 1 : 0.6}
                               title="phrase_start: 멜로디 시작"
                             />
                           );
@@ -363,7 +372,8 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                               points={pts}
                               fill="#8e44ad"
                               stroke="#fff"
-                              strokeWidth={1}
+                              strokeWidth={isActive ? 2 : 1}
+                              opacity={isActive ? 1 : 0.6}
                               title="pitch_turn: 멜로디 전환점"
                             />
                           );
@@ -374,10 +384,11 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                               key={`kp-${i}-${kp.t}`}
                               cx={cx}
                               cy={cy}
-                              r={4}
+                              r={4 + (isActive ? 2 : 0)}
                               fill="#e74c3c"
                               stroke="#fff"
-                              strokeWidth={1}
+                              strokeWidth={isActive ? 2 : 1}
+                              opacity={isActive ? 1 : 0.6}
                               title="accent: 에너지 강조"
                             />
                           );
@@ -387,10 +398,11 @@ export function Tab16OtherView({ audioUrl, data }: Tab16OtherViewProps) {
                             key={`kp-${i}-${kp.t}`}
                             cx={cx}
                             cy={cy}
-                            r={3}
+                            r={3 + (isActive ? 2 : 0)}
                             fill="#3498db"
                             stroke="#fff"
-                            strokeWidth={1}
+                            strokeWidth={isActive ? 2 : 1}
+                            opacity={isActive ? 1 : 0.6}
                             title="onset: 타격/어택 시점"
                           />
                         );

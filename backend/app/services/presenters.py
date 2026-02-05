@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Any
 
-from ..schemas import LibraryItem
+from ..schemas import LibraryItem, MonitoringItem
 from ..services.s3 import presign_get_url
 from ..db import models
 
@@ -32,6 +32,39 @@ def build_library_item(
         music_json_s3_key=res.music_json_s3_key if res else None,
         magic_json_s3_key=res.magic_json_s3_key if res else None,
         edited_motion_markers_s3_key=edit.motion_markers_s3_key if edit else None,
+    )
+
+
+def build_monitoring_item(
+    req: models.AnalysisRequest,
+    video_row: Optional[models.MediaFile],
+    res: Optional[models.AnalysisResult],
+    edit: Optional[models.AnalysisEdit],
+    audio_row: Optional[models.MediaFile],
+    job: Optional[models.AnalysisJob],
+) -> MonitoringItem:
+    return MonitoringItem(
+        id=req.id,
+        title=req.title,
+        mode=req.mode,
+        status=req.status,
+        created_at=req.created_at,
+        started_at=req.started_at,
+        finished_at=req.finished_at,
+        error_message=job.error_message if job and job.error_message else req.error_message,
+        video_s3_key=video_row.s3_key if video_row else None,
+        video_duration_sec=video_row.duration_sec if video_row else None,
+        audio_s3_key=audio_row.s3_key if audio_row else None,
+        motion_json_s3_key=res.motion_json_s3_key if res else None,
+        music_json_s3_key=res.music_json_s3_key if res else None,
+        magic_json_s3_key=res.magic_json_s3_key if res else None,
+        edited_motion_markers_s3_key=edit.motion_markers_s3_key if edit else None,
+        match_score=float(res.match_score) if res and res.match_score is not None else None,
+        job_status=job.status if job else None,
+        job_message=job.message if job else None,
+        job_progress=float(job.progress) if job and job.progress is not None else None,
+        job_log=job.log if job else None,
+        job_updated_at=job.updated_at if job else None,
     )
 
 

@@ -113,7 +113,42 @@ class AnalysisMusicOnlyRequest(BaseModel):
     audio_id: Optional[int] = None
 
 
+class MonitoringItem(BaseModel):
+    id: int
+    title: Optional[str]
+    mode: str
+    status: str
+    created_at: datetime
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    error_message: Optional[str] = None
+    video_s3_key: Optional[str]
+    video_duration_sec: Optional[float]
+    audio_s3_key: Optional[str]
+    motion_json_s3_key: Optional[str]
+    music_json_s3_key: Optional[str]
+    magic_json_s3_key: Optional[str]
+    edited_motion_markers_s3_key: Optional[str]
+    match_score: Optional[float] = None
+    job_status: Optional[str] = None
+    job_message: Optional[str] = None
+    job_progress: Optional[float] = None
+    job_log: Optional[str] = None
+    job_updated_at: Optional[datetime] = None
+
+
 class MonitoringResponse(BaseModel):
-    queued: List[LibraryItem]
-    queued_music: List[LibraryItem]
-    running: List[LibraryItem]
+    queued: List[MonitoringItem]
+    queued_music: List[MonitoringItem]
+    running: List[MonitoringItem]
+    failed: List[MonitoringItem]
+
+
+class MonitoringHealthResponse(BaseModel):
+    total_running: int
+    total_queued: int
+    total_queued_music: int
+    total_failed_24h: int
+    total_done_24h: int
+    active_running: int
+    stale_running: int

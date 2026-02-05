@@ -79,6 +79,7 @@ def get_job(request_id: int, db: Optional[Session] = None) -> Optional[Dict[str,
                 "message": record.message,
                 "progress": float(record.progress) if record.progress is not None else None,
                 "log": record.log,
+                "updated_at": record.updated_at,
             }
     with _lock:
         return _jobs.get(request_id)

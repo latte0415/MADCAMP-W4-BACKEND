@@ -103,7 +103,7 @@ export function DJStudio({
   };
 
   const handleLoadToTurntable = () => {
-    if (currentProject && currentProject.status === 'done' && !isTransitioning && !isLoading) {
+    if (currentProject && !isTransitioning && !isLoading) {
       // Start transition animation
       setIsTransitioning(true);
       setLoadedProject(currentProject);
@@ -184,7 +184,7 @@ export function DJStudio({
         e.preventDefault();
         if (canEnter) {
           handleEnterProject();
-        } else if (!isPlaying && currentProject && currentProject.status === 'done') {
+        } else if (!isPlaying && currentProject) {
           handleLoadToTurntable();
         }
       }
@@ -284,10 +284,8 @@ export function DJStudio({
                         }}
                         onDoubleClick={() => {
                           if (!isSelected) return;
-                          if (project.status === 'done') {
-                            handleLoadToTurntable();
-                          }
-                        }}
+                        handleLoadToTurntable();
+                      }}
                       >
                         <div
                           className="absolute inset-0 flex items-center"
@@ -436,7 +434,7 @@ export function DJStudio({
                 {/* Buttons - only show when not playing */}
                 {!isPlaying && (
                   <div className="absolute -bottom-2 left-0 flex items-center gap-3" style={{ zIndex: 2 }}>
-                    {currentProject.status === 'done' && !isTransitioning && (
+                    {!isTransitioning && (
                       <button
                         onClick={handleLoadToTurntable}
                         className="text-sm px-5 py-2.5 transition-colors"
@@ -444,7 +442,7 @@ export function DJStudio({
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#d97706'; e.currentTarget.style.color = '#080808'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#d97706'; }}
                       >
-                        play →
+                        {currentProject.status === 'done' ? 'play →' : 'open →'}
                       </button>
                     )}
                     {currentProject.status !== 'done' && (

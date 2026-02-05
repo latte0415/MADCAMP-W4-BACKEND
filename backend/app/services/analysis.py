@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
@@ -12,6 +12,7 @@ from ..schemas import (
     AnalysisAudioUpdate,
 )
 from ..workers.jobs import set_job, get_job
+from ..core.config import STALE_RUNNING_MINUTES
 from ..services.s3 import delete_key, delete_keys
 
 
@@ -99,6 +100,42 @@ def get_analysis_status(db: Session, request_id: int) -> Dict[str, Any]:
     if req.is_deleted:
         raise HTTPException(status_code=404, detail="not found")
     job = get_job(request_id, db=db) or {}
+
+    def _mark_stale_running() -> None:
+        if STALE_RUNNING_MINUTES <= 0:
+            return
+        job_status = job.get("status") or req.status
+        if job_status != "running":
+            return
+        updated_at = job.get("updated_at") or req.started_at
+        if updated_at is None:
+            return
+        if updated_at.tzinfo is not None:
+            updated_at_local = updated_at.replace(tzinfo=None)
+        else:
+            updated_at_local = updated_at
+        cutoff = datetime.utcnow() - timedelta(minutes=STALE_RUNNING_MINUTES)
+        if updated_at_local >= cutoff:
+            return
+        error_message = "analysis stalled; please retry"
+        req.status = "failed"
+        req.error_message = error_message
+        req.finished_at = datetime.utcnow()
+        db.commit()
+        set_job(
+            req.id,
+            "failed",
+            error_message,
+            message="stalled",
+            progress=1.0,
+            db=db,
+        )
+        job["status"] = "failed"
+        job["error"] = error_message
+        job["message"] = "stalled"
+        job["progress"] = 1.0
+
+    _mark_stale_running()
     return {
         "id": req.id,
         "status": job.get("status", req.status),

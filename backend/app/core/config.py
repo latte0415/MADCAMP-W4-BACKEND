@@ -32,6 +32,7 @@ COOKIE_SAMESITE = os.environ.get("COOKIE_SAMESITE", "lax")  # "lax", "strict", o
 WORKER_ENABLED = os.environ.get("WORKER_ENABLED", "true").lower() == "true"
 WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "1"))
 MUSIC_WORKER_CONCURRENCY = int(os.environ.get("MUSIC_WORKER_CONCURRENCY", "1"))
+STALE_RUNNING_MINUTES = int(os.environ.get("STALE_RUNNING_MINUTES", "60"))
 MONITORING_PUBLIC = os.environ.get("MONITORING_PUBLIC", "false").lower() == "true"
 def _resolve_project_root() -> Path:
     env_root = os.environ.get("PROJECT_ROOT")

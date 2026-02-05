@@ -10,6 +10,20 @@ from scipy.signal import savgol_filter, find_peaks
 
 import mediapipe as mp
 
+
+def _resolve_mp_pose():
+    try:
+        return mp.solutions.pose
+    except AttributeError:
+        # Some mediapipe builds expose solutions under mediapipe.python.solutions
+        try:
+            from mediapipe.python.solutions import pose as mp_pose  # type: ignore
+        except Exception as exc:
+            raise RuntimeError(
+                "mediapipe is missing the pose solution. Ensure the correct package/version is installed."
+            ) from exc
+        return mp_pose
+
 # -------------------------
 # Config
 # -------------------------
@@ -80,7 +94,7 @@ def extract_pose_xy(video_path: str) -> Tuple[np.ndarray, float]:
     if not fps or fps <= 0:
         fps = 30.0  # fallback
 
-    mp_pose = mp.solutions.pose
+    mp_pose = _resolve_mp_pose()
     pose = mp_pose.Pose(
         static_image_mode=False,
         model_complexity=1,

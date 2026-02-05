@@ -5,7 +5,6 @@ import type {
   StemUrls,
   MusicAnalysisDetail,
   DrumKeypointByBandItem,
-  TextureBlockItem,
   VocalCurvePoint,
   OtherCurvePoint,
 } from '../types';
@@ -65,7 +64,7 @@ export function AudioDetailAnalysisSection({
   onSeek,
 }: AudioDetailAnalysisSectionProps) {
   const [visibleStems, setVisibleStems] = useState<DetailTab[]>(['drums', 'bass', 'vocal', 'other']);
-  const [drumBand, setDrumBand] = useState<DrumBand>('low');
+  const [visibleDrumBands, setVisibleDrumBands] = useState<DrumBand[]>(['low', 'mid', 'high']);
   const [zoom, setZoom] = useState(1);
   const [waveformData, setWaveformData] = useState<Float32Array | null>(null);
   const waveformRefs = useRef<(HTMLCanvasElement | null)[]>([]);
@@ -83,9 +82,13 @@ export function AudioDetailAnalysisSection({
     return markers;
   }, [selectionDuration, selectionStart, selectionEnd]);
 
-  const drumEvents = useMemo(
-    () => musicKeypoints.filter((kp) => kp.frequency === drumBand),
-    [musicKeypoints, drumBand]
+  const drumEventsByBand = useMemo(
+    () => ({
+      low: musicKeypoints.filter((kp) => kp.frequency === 'low'),
+      mid: musicKeypoints.filter((kp) => kp.frequency === 'mid'),
+      high: musicKeypoints.filter((kp) => kp.frequency === 'high'),
+    }),
+    [musicKeypoints]
   );
   const vocalEvents = useMemo(
     () => musicKeypoints.filter((kp) => kp.frequency === 'high'),
@@ -93,7 +96,6 @@ export function AudioDetailAnalysisSection({
   );
   const otherEvents = useMemo(() => musicKeypoints.filter((kp) => kp.frequency === 'mid'), [musicKeypoints]);
   const drumKeypointsByBand = musicDetail?.keypointsByBand ?? {};
-  const textureBlocksByBand = musicDetail?.textureBlocksByBand ?? {};
   const bassDetail = musicDetail?.bass;
   const vocalDetail = musicDetail?.vocal;
   const otherDetail = musicDetail?.other;
@@ -111,8 +113,8 @@ export function AudioDetailAnalysisSection({
   );
   const effectiveAudioUrl = useMemo(() => {
     if (!stemUrls) return audioUrl ?? null;
-    return stemUrls.drums ?? stemUrls.drumBands?.[drumBand] ?? audioUrl ?? null;
-  }, [audioUrl, drumBand, stemUrls]);
+    return stemUrls.drums ?? audioUrl ?? null;
+  }, [audioUrl, stemUrls]);
 
   useEffect(() => {
     if (!effectiveAudioUrl || duration <= 0) {
@@ -155,19 +157,21 @@ export function AudioDetailAnalysisSection({
 
     waveformRefs.current.forEach((canvas) => {
       if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const height = rect.height || WAVEFORM_HEIGHT;
       canvas.width = timelineWidth * dpr;
-      canvas.height = WAVEFORM_HEIGHT * dpr;
+      canvas.height = height * dpr;
       canvas.style.width = `${timelineWidth}px`;
-      canvas.style.height = `${WAVEFORM_HEIGHT}px`;
+      canvas.style.height = `${height}px`;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
+      ctx.clearRect(0, 0, timelineWidth, height);
       ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, timelineWidth, WAVEFORM_HEIGHT);
+      ctx.fillRect(0, 0, timelineWidth, height);
 
       if (slice && slice.length > 0) {
-        const centerY = WAVEFORM_HEIGHT / 2;
+        const centerY = height / 2;
         const step = slice.length > 0 ? timelineWidth / slice.length : timelineWidth;
         ctx.fillStyle = 'rgba(150, 150, 150, 0.28)';
         for (let i = 0; i < slice.length; i++) {
@@ -185,7 +189,7 @@ export function AudioDetailAnalysisSection({
         ctx.setLineDash([2, 4]);
         ctx.beginPath();
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, WAVEFORM_HEIGHT);
+        ctx.lineTo(x, height);
         ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -211,6 +215,33 @@ export function AudioDetailAnalysisSection({
   const clampedTime = clamp(currentTime, selectionStart, selectionEnd);
   const xScale = (t: number) => ((t - selectionStart) / viewDuration) * timelineWidth;
   const playheadX = xScale(clampedTime);
+
+  const renderDrumBandOverlay = (band: DrumBand, height: number) => {
+    const events = drumKeypointsByBand[band]?.length
+      ? drumKeypointsByBand[band]!
+      : drumEventsByBand[band];
+    return (
+      <svg width={timelineWidth} height={height} style={{ display: 'block' }}>
+        {events
+          .filter((kp: any) => kp.time >= selectionStart && kp.time <= selectionEnd)
+          .map((kp: any, index: number) => {
+            const score = clamp(Number(kp.score ?? kp.intensity ?? 0.6), 0, 1);
+            const r = 2 + score * 6;
+            return (
+              <circle
+                key={`drum-${band}-${kp.time}-${index}`}
+                cx={xScale(kp.time)}
+                cy={height / 2}
+                r={r}
+                fill={STEM_COLORS[band]}
+                opacity={0.35 + score * 0.6}
+              />
+            );
+          })}
+        <line x1={playheadX} x2={playheadX} y1={0} y2={height} stroke="#fafafa" strokeWidth={2} />
+      </svg>
+    );
+  };
 
   const renderOverlayFor = (tab: DetailTab) => {
     if (tab === 'bass') {
@@ -542,12 +573,10 @@ export function AudioDetailAnalysisSection({
       );
     }
 
-    const events = tab === 'drums' ? drumEvents : vocalEvents;
-    const color = tab === 'drums' ? STEM_COLORS[drumBand] : STEM_COLORS.vocal;
-    const drumBandKeypoints = drumKeypointsByBand[drumBand] ?? [];
-    const textureBlocks = (textureBlocksByBand[drumBand] ?? []) as TextureBlockItem[];
-    const selectedEvents: Array<MusicKeypoint | DrumKeypointByBandItem> =
-      tab === 'drums' && drumBandKeypoints.length > 0 ? drumBandKeypoints : events;
+    const events = vocalEvents;
+    const color = STEM_COLORS.vocal;
+    const drumBandKeypoints: DrumKeypointByBandItem[] = [];
+    const selectedEvents: Array<MusicKeypoint | DrumKeypointByBandItem> = events;
     const scores = selectedEvents.map((kp: any) => {
       const v = kp.score ?? kp.intensity ?? 0.5;
       return clamp(Number(v), 0, 1);
@@ -558,26 +587,6 @@ export function AudioDetailAnalysisSection({
     const scoreToRadius = (s: number) => 2 + ((s - minS) / range) * 12;
     return (
       <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-        {tab === 'drums' &&
-          textureBlocks
-            .filter((blk) => blk.end >= selectionStart && blk.start <= selectionEnd)
-            .map((blk, index) => {
-              const x = xScale(blk.start);
-              const w = Math.max(2, xScale(blk.end) - x);
-              const opacity = 0.18 + clamp(blk.intensity ?? blk.density ?? 0.3, 0, 1) * 0.25;
-              return (
-                <rect
-                  key={`tex-${index}`}
-                  x={x}
-                  y={2}
-                  width={w}
-                  height={WAVEFORM_HEIGHT - 4}
-                  fill={STEM_COLORS[drumBand]}
-                  opacity={opacity}
-                  rx={2}
-                />
-              );
-            })}
         {selectedEvents
           .filter((kp: any) => kp.time >= selectionStart && kp.time <= selectionEnd)
           .map((kp: any, index: number) => {
@@ -604,7 +613,10 @@ export function AudioDetailAnalysisSection({
       id: 'drums' as const,
       label: '드럼 키포인트',
       color: STEM_COLORS.drums,
-      count: (drumKeypointsByBand[drumBand] ?? drumEvents).length,
+      count:
+        (drumKeypointsByBand.low?.length ?? drumEventsByBand.low.length) +
+        (drumKeypointsByBand.mid?.length ?? drumEventsByBand.mid.length) +
+        (drumKeypointsByBand.high?.length ?? drumEventsByBand.high.length),
     },
     {
       id: 'bass' as const,
@@ -685,9 +697,13 @@ export function AudioDetailAnalysisSection({
           {(['low', 'mid', 'high'] as DrumBand[]).map((band) => (
             <button
               key={band}
-              onClick={() => setDrumBand(band)}
+              onClick={() =>
+                setVisibleDrumBands((prev) =>
+                  prev.includes(band) ? prev.filter((b) => b !== band) : [...prev, band]
+                )
+              }
               className={`px-2 py-1 rounded border text-[10px] ${
-                drumBand === band
+                visibleDrumBands.includes(band)
                   ? 'border-amber-400/70 bg-amber-500/20 text-amber-200'
                   : 'border-neutral-700 text-neutral-500 hover:border-neutral-500'
               }`}
@@ -712,38 +728,115 @@ export function AudioDetailAnalysisSection({
                   {tab.count}개
                 </div>
               </div>
-              <div
-                onClick={handleSeekClick}
-                className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
-              >
-                {effectiveAudioUrl ? (
+              <div className="space-y-2">
+                {tab.id === 'drums' &&
+                  (['low', 'mid', 'high'] as DrumBand[])
+                    .filter((band) => visibleDrumBands.includes(band))
+                    .map((band, bandIndex) => {
+                      const refIndex = index * 10 + bandIndex;
+                      return (
+                        <div
+                          key={`drum-${band}`}
+                          onClick={handleSeekClick}
+                          className="relative h-[64px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
+                        >
+                          {effectiveAudioUrl ? (
+                            <>
+                              <canvas
+                                ref={(el) => (waveformRefs.current[refIndex] = el)}
+                                style={{ width: timelineWidth, height: 64, display: 'block' }}
+                              />
+                              <div
+                                className="absolute left-0 top-0 pointer-events-none"
+                                style={{ width: timelineWidth, height: 64 }}
+                              >
+                                {barMarkers.map((t) => {
+                                  const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                                  return (
+                                    <div
+                                      key={`bar-${tab.id}-${band}-${t}`}
+                                      className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                                      style={{ left }}
+                                    />
+                                  );
+                                })}
+                              </div>
+                              <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: 64 }}>
+                                {renderDrumBandOverlay(band, 64)}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-xs text-neutral-500">
+                              오디오가 필요합니다.
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                {tab.id === 'bass' && (
                   <>
-                    <canvas
-                      ref={(el) => (waveformRefs.current[index] = el)}
-                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT, display: 'block' }}
-                    />
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">Waveform</div>
                     <div
-                      className="absolute left-0 top-0 pointer-events-none"
-                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+                      onClick={handleSeekClick}
+                      className="relative h-[90px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
                     >
-                      {barMarkers.map((t) => {
-                        const left = ((t - selectionStart) / viewDuration) * timelineWidth;
-                        return (
-                          <div
-                            key={`bar-${tab.id}-${t}`}
-                            className="absolute top-0 bottom-0 w-px bg-neutral-600/75"
-                            style={{ left }}
+                      {effectiveAudioUrl ? (
+                        <>
+                          <canvas
+                            ref={(el) => (waveformRefs.current[index * 10] = el)}
+                            style={{ width: timelineWidth, height: 90, display: 'block' }}
                           />
-                        );
-                      })}
+                          <div
+                            className="absolute left-0 top-0 pointer-events-none"
+                            style={{ width: timelineWidth, height: 90 }}
+                          >
+                            {barMarkers.map((t) => {
+                              const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                              return (
+                                <div
+                                  key={`bar-${tab.id}-${t}`}
+                                  className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                                  style={{ left }}
+                                />
+                              );
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-neutral-500">
+                          오디오가 필요합니다.
+                        </div>
+                      )}
                     </div>
-                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
-                      {renderOverlayFor(tab.id)}
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">Pitch / Groove</div>
+                    <div
+                      onClick={handleSeekClick}
+                      className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
+                    >
+                      <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
+                        {renderOverlayFor('bass')}
+                      </div>
                     </div>
                   </>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-neutral-500">
-                    오디오가 필요합니다.
+                )}
+                {tab.id === 'vocal' && (
+                  <div
+                    onClick={handleSeekClick}
+                    className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
+                  >
+                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
+                      {renderOverlayFor('vocal')}
+                    </div>
+                  </div>
+                )}
+                {tab.id === 'other' && (
+                  <div
+                    onClick={handleSeekClick}
+                    className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
+                  >
+                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
+                      {renderOverlayFor('other')}
+                    </div>
                   </div>
                 )}
               </div>

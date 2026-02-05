@@ -1,0 +1,5 @@
+[phases.install]
+cmds = [
+  "python -m pip install --upgrade pip setuptools wheel Cython",
+  "python -m pip install --no-build-isolation -r requirements.txt",
+]

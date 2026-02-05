@@ -12,6 +12,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+type DrumBand = 'all' | 'low' | 'mid' | 'high';
+
 interface MainTimelineSectionProps {
   duration: number;
   currentTime: number;
@@ -40,6 +42,10 @@ interface MainTimelineSectionProps {
   onHoverTime?: (time: number | null) => void;
   loading?: boolean;
   controlsDisabled?: boolean;
+  // Drum band selection
+  drumBand?: DrumBand;
+  onDrumBandChange?: (band: DrumBand) => void;
+  drumBandUrls?: { low?: string; mid?: string; high?: string };
 }
 
 const KEYPOINT_COLORS: Record<MotionKeypoint['type'], string> = {
@@ -94,6 +100,9 @@ export function MainTimelineSection({
   onHoverTime,
   loading = false,
   controlsDisabled = false,
+  drumBand = 'all',
+  onDrumBandChange,
+  drumBandUrls,
 }: MainTimelineSectionProps) {
   const zoomLevels = [1, 1.5, 3, 6, 12];
   const [zoomIndex, setZoomIndex] = useState(0);
@@ -563,8 +572,26 @@ export function MainTimelineSection({
                 className="rounded border border-neutral-800 bg-neutral-900/60 px-2 flex flex-col justify-center leading-none"
                 style={{ height: ROW_HEIGHT }}
               >
-                <div className="text-neutral-300 text-[10px] leading-none">AUDIO 1</div>
-                <div className="text-[10px] text-neutral-500 leading-none">clip</div>
+                <div className="text-neutral-300 text-[10px] leading-none mb-1">AUDIO CLIP</div>
+                {drumBandUrls && (drumBandUrls.low || drumBandUrls.mid || drumBandUrls.high) ? (
+                  <div className="flex gap-0.5">
+                    {(['all', 'low', 'mid', 'high'] as const).map((band) => (
+                      <button
+                        key={band}
+                        onClick={() => onDrumBandChange?.(band)}
+                        className={`px-1.5 py-0.5 text-[8px] uppercase rounded transition-colors ${
+                          drumBand === band
+                            ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
+                            : 'bg-neutral-800/50 text-neutral-500 border border-transparent hover:text-neutral-300'
+                        }`}
+                      >
+                        {band === 'all' ? 'ALL' : band.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-neutral-500 leading-none">clip</div>
+                )}
               </div>
               <div
                 className="rounded border border-neutral-800 bg-neutral-900/60 px-2 flex flex-col justify-center leading-none"

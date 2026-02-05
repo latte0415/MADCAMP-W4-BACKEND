@@ -346,9 +346,9 @@ export function DJStudio({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{
                   opacity: 1,
-                  scale: isPlaying ? 0.70 : 1,
-                  x: isPlaying ? -120 : 0,
-                  y: isPlaying ? 50 : 0,
+                  scale: isPlaying ? 0.82 : 1,
+                  x: isPlaying ? -80 : 0,
+                  y: isPlaying ? 30 : 0,
                 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
@@ -575,7 +575,7 @@ export function DJStudio({
             opacity: 0,
           }}
           animate={{
-            left: showLpOnAlbum ? (lpVisible ? 620 : 420) : 'calc(100% - 340px)',
+            left: showLpOnAlbum ? (lpVisible ? 620 : 420) : 'calc(100% - 335px)',
             top: showLpOnAlbum ? 'calc(50% - 310px)' : 'calc(50% - 190px)',
             width: showLpOnAlbum ? 560 : 300,
             height: showLpOnAlbum ? 560 : 300,
@@ -584,7 +584,7 @@ export function DJStudio({
           transition={{
             type: 'spring',
             stiffness: 100,
-            delay: lpVisible ? 0.35 : 0,
+            delay: (lpVisible && showLpOnAlbum) ? 0.35 : 0,
             damping: 18,
           }}
         >
@@ -662,7 +662,7 @@ export function DJStudio({
               opacity: 0,
             }}
             animate={{
-              left: 'calc(100% - 340px)',
+              left: 'calc(100% - 335px)',
               top: 'calc(50% - 190px)',
               width: 300,
               height: 300,

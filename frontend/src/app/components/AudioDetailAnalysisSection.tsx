@@ -66,8 +66,15 @@ export function AudioDetailAnalysisSection({
   const [visibleStems, setVisibleStems] = useState<DetailTab[]>(['drums', 'bass', 'vocal', 'other']);
   const [visibleDrumBands, setVisibleDrumBands] = useState<DrumBand[]>(['low', 'mid', 'high']);
   const [zoom, setZoom] = useState(1);
-  const [waveformData, setWaveformData] = useState<Float32Array | null>(null);
+  const [waveformByStem, setWaveformByStem] = useState<
+    Partial<Record<DetailTab, Float32Array | null>>
+  >({});
   const waveformRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+  const waveformStemKeys = useRef<(DetailTab | null)[]>([]);
+  const playheadRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const currentTimeRef = useRef(currentTime);
+  const smoothTimeRef = useRef(currentTime);
+  const lastFrameRef = useRef<number | null>(null);
 
   const selectionEnd = selectionStart + selectionDuration;
   const viewDuration = Math.max(0.001, selectionDuration);
@@ -111,52 +118,77 @@ export function AudioDetailAnalysisSection({
   const otherCurve = (otherDetail?.other_curve ?? []).filter(
     (p): p is OtherCurvePoint => Number.isFinite(Number(p?.t))
   );
-  const effectiveAudioUrl = useMemo(() => {
-    if (!stemUrls) return audioUrl ?? null;
-    return stemUrls.drums ?? audioUrl ?? null;
-  }, [audioUrl, stemUrls]);
+  const stemAudioUrls = useMemo(
+    () => ({
+      drums: stemUrls?.drums ?? audioUrl ?? null,
+      bass: stemUrls?.bass ?? audioUrl ?? null,
+      vocal: stemUrls?.vocal ?? audioUrl ?? null,
+      other: stemUrls?.other ?? audioUrl ?? null,
+    }),
+    [audioUrl, stemUrls]
+  );
 
   useEffect(() => {
-    if (!effectiveAudioUrl || duration <= 0) {
-      setWaveformData(null);
+    if (duration <= 0) {
+      setWaveformByStem({});
       return;
     }
     let cancelled = false;
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    fetch(effectiveAudioUrl)
-      .then((res) => res.arrayBuffer())
-      .then((buf) => ctx.decodeAudioData(buf))
-      .then((buffer) => {
-        if (cancelled) return;
+    const loadWaveform = async (url: string | null) => {
+      if (!url) return null;
+      try {
+        const res = await fetch(url);
+        const buf = await res.arrayBuffer();
+        const buffer = await ctx.decodeAudioData(buf);
         const ch = buffer.getChannelData(0);
         const step = Math.max(1, Math.floor(ch.length / (buffer.duration * 60)));
         const samples: number[] = [];
         for (let i = 0; i < ch.length; i += step) {
           samples.push(Math.abs(ch[i]));
         }
-        setWaveformData(new Float32Array(samples));
-      })
-      .catch(() => setWaveformData(null));
+        return new Float32Array(samples);
+      } catch {
+        return null;
+      }
+    };
+    const loadAll = async () => {
+      const next: Partial<Record<DetailTab, Float32Array | null>> = {};
+      const stems: DetailTab[] = ['drums', 'bass', 'vocal', 'other'];
+      for (const stem of stems) {
+        next[stem] = await loadWaveform(stemAudioUrls[stem]);
+        if (cancelled) return;
+      }
+      if (!cancelled) setWaveformByStem(next);
+    };
+    loadAll();
     return () => {
       cancelled = true;
       ctx.close();
     };
-  }, [effectiveAudioUrl, duration]);
+  }, [
+    duration,
+    stemAudioUrls.drums,
+    stemAudioUrls.bass,
+    stemAudioUrls.vocal,
+    stemAudioUrls.other,
+  ]);
 
   useEffect(() => {
     if (duration <= 0 || selectionDuration <= 0) return;
     const dpr = window.devicePixelRatio || 1;
-    const samplesPerSec = waveformData && waveformData.length > 0 ? waveformData.length / duration : 0;
-    const startIndex = waveformData
-      ? clamp(Math.floor(selectionStart * samplesPerSec), 0, waveformData.length)
-      : 0;
-    const endIndex = waveformData
-      ? clamp(Math.ceil(selectionEnd * samplesPerSec), 0, waveformData.length)
-      : 0;
-    const slice = waveformData ? waveformData.subarray(startIndex, endIndex) : null;
-
-    waveformRefs.current.forEach((canvas) => {
+    waveformRefs.current.forEach((canvas, index) => {
       if (!canvas) return;
+      const stemKey = waveformStemKeys.current[index];
+      const waveformData = stemKey ? waveformByStem[stemKey] ?? null : null;
+      const samplesPerSec = waveformData && waveformData.length > 0 ? waveformData.length / duration : 0;
+      const startIndex = waveformData
+        ? clamp(Math.floor(selectionStart * samplesPerSec), 0, waveformData.length)
+        : 0;
+      const endIndex = waveformData
+        ? clamp(Math.ceil(selectionEnd * samplesPerSec), 0, waveformData.length)
+        : 0;
+      const slice = waveformData ? waveformData.subarray(startIndex, endIndex) : null;
       const rect = canvas.getBoundingClientRect();
       const height = rect.height || WAVEFORM_HEIGHT;
       canvas.width = timelineWidth * dpr;
@@ -194,7 +226,15 @@ export function AudioDetailAnalysisSection({
         ctx.setLineDash([]);
       }
     });
-  }, [duration, selectionStart, selectionEnd, selectionDuration, timelineWidth, viewDuration, waveformData]);
+  }, [
+    duration,
+    selectionStart,
+    selectionEnd,
+    selectionDuration,
+    timelineWidth,
+    viewDuration,
+    waveformByStem,
+  ]);
 
   const handleZoomIn = () => setZoom((prev) => clamp(prev * 1.35, MIN_ZOOM, MAX_ZOOM));
   const handleZoomOut = () => setZoom((prev) => clamp(prev / 1.35, MIN_ZOOM, MAX_ZOOM));
@@ -214,7 +254,41 @@ export function AudioDetailAnalysisSection({
   const selectionBars = Math.max(1, Math.round(selectionDuration / BAR_SECONDS));
   const clampedTime = clamp(currentTime, selectionStart, selectionEnd);
   const xScale = (t: number) => ((t - selectionStart) / viewDuration) * timelineWidth;
-  const playheadX = xScale(clampedTime);
+
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    let rafId: number | null = null;
+    const tick = () => {
+      const now = performance.now();
+      const last = lastFrameRef.current ?? now;
+      const dt = Math.min(0.1, Math.max(0.001, (now - last) / 1000));
+      lastFrameRef.current = now;
+      const t = clamp(currentTimeRef.current, selectionStart, selectionEnd);
+      const prev = smoothTimeRef.current;
+      const alpha = 1 - Math.exp(-dt * 20);
+      const next = prev + (t - prev) * alpha;
+      smoothTimeRef.current = Number.isFinite(next) ? next : t;
+      const x = xScale(smoothTimeRef.current);
+      playheadRefs.current.forEach((el) => {
+        if (!el) return;
+        el.style.transform = `translate3d(${x}px, 0, 0)`;
+      });
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [selectionStart, selectionEnd, viewDuration, timelineWidth]);
+
+  useEffect(() => {
+    smoothTimeRef.current = clamp(currentTimeRef.current, selectionStart, selectionEnd);
+    lastFrameRef.current = null;
+  }, [selectionStart, selectionEnd]);
+  // playheadX no longer needed; playhead is rendered via DOM for smooth motion
 
   const renderDrumBandOverlay = (band: DrumBand, height: number) => {
     const events = drumKeypointsByBand[band]?.length
@@ -238,7 +312,6 @@ export function AudioDetailAnalysisSection({
               />
             );
           })}
-        <line x1={playheadX} x2={playheadX} y1={0} y2={height} stroke="#fafafa" strokeWidth={2} />
       </svg>
     );
   };
@@ -349,7 +422,6 @@ export function AudioDetailAnalysisSection({
               />
             );
           })}
-          <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
         </svg>
       );
     }
@@ -383,7 +455,6 @@ export function AudioDetailAnalysisSection({
                   opacity={0.9}
                 />
               ))}
-            <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
           </svg>
         );
       }
@@ -467,7 +538,6 @@ export function AudioDetailAnalysisSection({
                 opacity={0.9}
               />
             ))}
-          <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
         </svg>
       );
     }
@@ -514,7 +584,6 @@ export function AudioDetailAnalysisSection({
                   opacity={0.9}
                 />
               ))}
-            <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
           </svg>
         );
       }
@@ -568,7 +637,6 @@ export function AudioDetailAnalysisSection({
               opacity={0.9}
             />
           ))}
-          <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
         </svg>
       );
     }
@@ -603,7 +671,6 @@ export function AudioDetailAnalysisSection({
               />
             );
           })}
-        <line x1={playheadX} x2={playheadX} y1={0} y2={WAVEFORM_HEIGHT} stroke="#fafafa" strokeWidth={2} />
       </svg>
     );
   };
@@ -718,7 +785,7 @@ export function AudioDetailAnalysisSection({
         {stemItems
           .filter((tab) => visibleStems.includes(tab.id))
           .map((tab, index) => (
-            <div key={`stem-${tab.id}`} className="grid grid-cols-[160px_1fr] gap-3 items-start">
+            <div key={`stem-${tab.id}`} className="grid grid-cols-[160px_minmax(0,1fr)] gap-3 items-start">
               <div className="rounded border border-neutral-800 bg-neutral-950/80 p-3">
                 <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-400">
                   <span className="inline-block h-2 w-2 rounded-full" style={{ background: tab.color }} />
@@ -728,7 +795,7 @@ export function AudioDetailAnalysisSection({
                   {tab.count}개
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 {tab.id === 'drums' &&
                   (['low', 'mid', 'high'] as DrumBand[])
                     .filter((band) => visibleDrumBands.includes(band))
@@ -740,10 +807,13 @@ export function AudioDetailAnalysisSection({
                           onClick={handleSeekClick}
                           className="relative h-[64px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
                         >
-                          {effectiveAudioUrl ? (
+                          {stemAudioUrls.drums ? (
                             <>
                               <canvas
-                                ref={(el) => (waveformRefs.current[refIndex] = el)}
+                                ref={(el) => {
+                                  waveformRefs.current[refIndex] = el;
+                                  waveformStemKeys.current[refIndex] = 'drums';
+                                }}
                                 style={{ width: timelineWidth, height: 64, display: 'block' }}
                               />
                               <div
@@ -753,19 +823,23 @@ export function AudioDetailAnalysisSection({
                                 {barMarkers.map((t) => {
                                   const left = ((t - selectionStart) / viewDuration) * timelineWidth;
                                   return (
-                                    <div
-                                      key={`bar-${tab.id}-${band}-${t}`}
-                                      className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
-                                      style={{ left }}
-                                    />
-                                  );
-                                })}
-                              </div>
-                              <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: 64 }}>
-                                {renderDrumBandOverlay(band, 64)}
-                              </div>
-                            </>
-                          ) : (
+                        <div
+                          key={`bar-${tab.id}-${band}-${t}`}
+                          className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                          style={{ left }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: 64 }}>
+                    {renderDrumBandOverlay(band, 64)}
+                    <div
+                      ref={(el) => (playheadRefs.current[refIndex] = el)}
+                      className="absolute left-0 top-0 bottom-0 w-px bg-white/80 pointer-events-none will-change-transform"
+                    />
+                  </div>
+                </>
+              ) : (
                             <div className="flex h-full items-center justify-center text-xs text-neutral-500">
                               오디오가 필요합니다.
                             </div>
@@ -780,29 +854,38 @@ export function AudioDetailAnalysisSection({
                       onClick={handleSeekClick}
                       className="relative h-[90px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
                     >
-                      {effectiveAudioUrl ? (
+                      {stemAudioUrls.bass ? (
                         <>
                           <canvas
-                            ref={(el) => (waveformRefs.current[index * 10] = el)}
+                            ref={(el) => {
+                              waveformRefs.current[index * 10] = el;
+                              waveformStemKeys.current[index * 10] = 'bass';
+                            }}
                             style={{ width: timelineWidth, height: 90, display: 'block' }}
                           />
+                    <div
+                      className="absolute left-0 top-0 pointer-events-none"
+                      style={{ width: timelineWidth, height: 90 }}
+                    >
+                      {barMarkers.map((t) => {
+                        const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                        return (
                           <div
-                            className="absolute left-0 top-0 pointer-events-none"
-                            style={{ width: timelineWidth, height: 90 }}
-                          >
-                            {barMarkers.map((t) => {
-                              const left = ((t - selectionStart) / viewDuration) * timelineWidth;
-                              return (
-                                <div
-                                  key={`bar-${tab.id}-${t}`}
-                                  className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
-                                  style={{ left }}
-                                />
-                              );
-                            })}
-                          </div>
-                        </>
-                      ) : (
+                            key={`bar-${tab.id}-${t}`}
+                            className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                            style={{ left }}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: 90 }}>
+                      <div
+                        ref={(el) => (playheadRefs.current[index * 10] = el)}
+                        className="absolute left-0 top-0 bottom-0 w-px bg-white/80 pointer-events-none will-change-transform"
+                      />
+                    </div>
+                  </>
+                ) : (
                         <div className="flex h-full items-center justify-center text-xs text-neutral-500">
                           오디오가 필요합니다.
                         </div>
@@ -813,10 +896,14 @@ export function AudioDetailAnalysisSection({
                       onClick={handleSeekClick}
                       className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
                     >
-                      <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
-                        {renderOverlayFor('bass')}
-                      </div>
-                    </div>
+                  <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
+                    {renderOverlayFor('bass')}
+                    <div
+                      ref={(el) => (playheadRefs.current[index * 10 + 1] = el)}
+                      className="absolute left-0 top-0 bottom-0 w-px bg-white/80 pointer-events-none will-change-transform"
+                    />
+                  </div>
+                </div>
                   </>
                 )}
                 {tab.id === 'vocal' && (
@@ -824,23 +911,97 @@ export function AudioDetailAnalysisSection({
                     onClick={handleSeekClick}
                     className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
                   >
-                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
-                      {renderOverlayFor('vocal')}
+                  {stemAudioUrls.vocal ? (
+                    <>
+                      <canvas
+                        ref={(el) => {
+                          waveformRefs.current[index * 10] = el;
+                          waveformStemKeys.current[index * 10] = 'vocal';
+                        }}
+                        style={{ width: timelineWidth, height: WAVEFORM_HEIGHT, display: 'block' }}
+                      />
+                      <div
+                        className="absolute left-0 top-0 pointer-events-none"
+                        style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+                      >
+                        {barMarkers.map((t) => {
+                          const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                          return (
+                            <div
+                              key={`bar-${tab.id}-${t}`}
+                              className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                              style={{ left }}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div
+                        className="absolute left-0 top-0"
+                        style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+                      >
+                        {renderOverlayFor('vocal')}
+                        <div
+                          ref={(el) => (playheadRefs.current[index * 10] = el)}
+                          className="absolute left-0 top-0 bottom-0 w-px bg-white/80 pointer-events-none will-change-transform"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-neutral-500">
+                      오디오가 필요합니다.
                     </div>
-                  </div>
-                )}
-                {tab.id === 'other' && (
-                  <div
-                    onClick={handleSeekClick}
-                    className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
-                  >
-                    <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
+                  )}
+                </div>
+              )}
+            {tab.id === 'other' && (
+              <div
+                onClick={handleSeekClick}
+                className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer"
+              >
+                {stemAudioUrls.other ? (
+                  <>
+                    <canvas
+                      ref={(el) => {
+                        waveformRefs.current[index * 10] = el;
+                        waveformStemKeys.current[index * 10] = 'other';
+                      }}
+                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT, display: 'block' }}
+                    />
+                    <div
+                      className="absolute left-0 top-0 pointer-events-none"
+                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+                    >
+                      {barMarkers.map((t) => {
+                        const left = ((t - selectionStart) / viewDuration) * timelineWidth;
+                        return (
+                          <div
+                            key={`bar-${tab.id}-${t}`}
+                            className="absolute top-0 bottom-0 w-px bg-neutral-600/50"
+                            style={{ left }}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div
+                      className="absolute left-0 top-0"
+                      style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}
+                    >
                       {renderOverlayFor('other')}
+                      <div
+                        ref={(el) => (playheadRefs.current[index * 10] = el)}
+                        className="absolute left-0 top-0 bottom-0 w-px bg-white/80 pointer-events-none will-change-transform"
+                      />
                     </div>
+                  </>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-xs text-neutral-500">
+                    오디오가 필요합니다.
                   </div>
                 )}
               </div>
-            </div>
+            )}
+          </div>
+        </div>
           ))}
       </div>
     </div>

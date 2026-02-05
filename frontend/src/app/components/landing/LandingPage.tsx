@@ -1,12 +1,13 @@
 import { useRef, useEffect, useState } from 'react';
 import { Project } from '../../types';
 import { HeroSection } from './HeroSection';
-import { DJStudio } from './DJStudio';
+import { DJStudio, NewProjectData } from './DJStudio';
 
 interface LandingPageProps {
   projects: Project[];
   onSelectProject: (project: Project) => void;
   onNewProject?: () => void;
+  onCreateProject?: (data: NewProjectData) => void;
   userName?: string;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -16,6 +17,7 @@ export function LandingPage({
   projects,
   onSelectProject,
   onNewProject,
+  onCreateProject,
   userName,
   onLogin,
   onLogout,
@@ -83,6 +85,7 @@ export function LandingPage({
           projects={projects}
           onOpenProject={onSelectProject}
           onNewProject={onNewProject}
+          onCreateProject={onCreateProject}
           userName={userName}
           onLogin={onLogin}
           onLogout={onLogout}

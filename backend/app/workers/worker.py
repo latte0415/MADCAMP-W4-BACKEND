@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -20,12 +21,25 @@ from ..services.match_score import compute_match_score
 from ..core.config import PROJECT_ROOT, DEMUCS_MODEL
 from .jobs import set_job
 
-MOTION_ROOT = os.environ.get("MOTION_ROOT", str(PROJECT_ROOT / "motion"))
-MOTION_PIPELINE = os.path.join(MOTION_ROOT, "pipelines", "motion_pipeline.py")
+MOTION_ROOT = os.environ.get("MOTION_ROOT", "motion")
+MOTION_PIPELINE = os.path.join(PROJECT_ROOT, MOTION_ROOT, "pipelines", "motion_pipeline.py")
 
 MAGIC_WORKER_CMD = os.environ.get("MAGIC_WORKER_CMD")
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_motion_pipeline() -> str:
+    candidates = [
+        MOTION_PIPELINE,
+        str(PROJECT_ROOT / "motion" / "pipelines" / "motion_pipeline.py"),
+    ]
+    for path in candidates:
+        if os.path.isfile(path):
+            return path
+    logger.error("motion_pipeline.py not found. Checked: %s", candidates)
+    logger.error("PROJECT_ROOT=%s MOTION_ROOT=%s", PROJECT_ROOT, MOTION_ROOT)
+    raise RuntimeError(f"motion_pipeline.py not found. Checked: {candidates}")
 
 
 class BaseAnalysisWorker:
@@ -141,6 +155,15 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
             raise RuntimeError("video not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
+            music_thread = None
+            if self._should_run_music(req):
+                music_thread = threading.Thread(
+                    target=self._run_music_for_request,
+                    args=(req.id,),
+                    daemon=True,
+                )
+                music_thread.start()
+
             self._abort_if_deleted(db, req)
             set_job(req.id, "running", message="motion: downloading video", progress=0.12, db=db)
             local_video = os.path.join(tmpdir, "input.mp4")
@@ -151,7 +174,8 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
             self._abort_if_deleted(db, req)
             set_job(req.id, "running", message="motion: preprocessing", progress=0.22, db=db)
             set_job(req.id, "running", message="motion: analyzing", progress=0.45, db=db)
-            cmd = ["python", MOTION_PIPELINE, "--video", local_video, "--out", out_json]
+            motion_pipeline = _resolve_motion_pipeline()
+            cmd = [sys.executable, motion_pipeline, "--video", local_video, "--out", out_json]
             proc = subprocess.run(cmd, capture_output=True, text=True)
             if proc.returncode != 0:
                 log = (proc.stderr or proc.stdout or "motion pipeline failed")[:4000]
@@ -170,13 +194,13 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
             res.motion_json_s3_key = result_key
             db.commit()
 
-            if not (req.params_json or {}).get("skip_music") and (
-                req.audio_id or (req.params_json or {}).get("extract_audio")
-            ):
-                self._queue_music(db, req)
+            if music_thread:
+                set_job(req.id, "running", message="motion done (waiting music)", progress=0.85, db=db)
+                music_thread.join()
             else:
                 set_job(req.id, "running", message="motion: finalizing", progress=0.85, db=db)
-                self._compute_match_if_ready(db, req)
+
+            self._compute_match_if_ready(db, req)
 
     def _run_magic(self, db: Session, req: models.AnalysisRequest) -> None:
         if not MAGIC_WORKER_CMD:
@@ -188,6 +212,15 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
             raise RuntimeError("video not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
+            music_thread = None
+            if self._should_run_music(req):
+                music_thread = threading.Thread(
+                    target=self._run_music_for_request,
+                    args=(req.id,),
+                    daemon=True,
+                )
+                music_thread.start()
+
             self._abort_if_deleted(db, req)
             set_job(req.id, "running", message="magic: downloading video", progress=0.12, db=db)
             local_video = os.path.join(tmpdir, "input.mp4")
@@ -222,11 +255,13 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
             res.magic_json_s3_key = result_key
             db.commit()
 
-            if not (req.params_json or {}).get("skip_music") and (req.audio_id or (req.params_json or {}).get("extract_audio")):
-                self._queue_music(db, req)
+            if music_thread:
+                set_job(req.id, "running", message="magic done (waiting music)", progress=0.85, db=db)
+                music_thread.join()
             else:
                 set_job(req.id, "running", message="magic: finalizing", progress=0.85, db=db)
-                self._compute_match_if_ready(db, req)
+
+            self._compute_match_if_ready(db, req)
 
     def _compute_match_if_ready(self, db: Session, req: models.AnalysisRequest) -> None:
         res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
@@ -259,6 +294,85 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
                 set_job(req.id, "running", message="analysis: scoring done", progress=0.95, db=db)
             except Exception:
                 logger.exception("match score computation failed")
+
+    def _should_run_music(self, req: models.AnalysisRequest) -> bool:
+        params = req.params_json or {}
+        if params.get("skip_music"):
+            return False
+        return bool(req.audio_id or params.get("extract_audio"))
+
+    def _run_music_for_request(self, request_id: int) -> None:
+        db = SessionLocal()
+        try:
+            req = db.query(models.AnalysisRequest).filter(models.AnalysisRequest.id == request_id).first()
+            if not req:
+                return
+            res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
+            if res and res.music_json_s3_key:
+                return
+
+            with tempfile.TemporaryDirectory() as tmpdir:
+                local_audio = None
+
+                if req.audio_id:
+                    audio = db.query(models.MediaFile).filter(models.MediaFile.id == req.audio_id).first()
+                    if not audio:
+                        return
+                    ext = "bin"
+                    if audio.s3_key and "." in audio.s3_key:
+                        ext = audio.s3_key.rsplit(".", 1)[-1]
+                    elif audio.content_type:
+                        if "wav" in audio.content_type:
+                            ext = "wav"
+                        elif "mpeg" in audio.content_type or "mp3" in audio.content_type:
+                            ext = "mp3"
+                        elif "mp4" in audio.content_type or "m4a" in audio.content_type:
+                            ext = "m4a"
+                    local_audio = os.path.join(tmpdir, f"input_audio.{ext}")
+                    with open(local_audio, "wb") as f:
+                        download_fileobj(audio.s3_key, f)
+                elif (req.params_json or {}).get("extract_audio") and req.video_id:
+                    video = db.query(models.MediaFile).filter(models.MediaFile.id == req.video_id).first()
+                    if not video:
+                        return
+                    local_video = os.path.join(tmpdir, "input_video.mp4")
+                    with open(local_video, "wb") as f:
+                        download_fileobj(video.s3_key, f)
+                    local_audio = os.path.join(tmpdir, "extracted_audio.wav")
+                    cmd = [
+                        "ffmpeg",
+                        "-y",
+                        "-i",
+                        local_video,
+                        "-vn",
+                        "-ac",
+                        "1",
+                        "-ar",
+                        "44100",
+                        local_audio,
+                    ]
+                    proc = subprocess.run(cmd, capture_output=True, text=True)
+                    if proc.returncode != 0:
+                        return
+                else:
+                    return
+
+                stem_out_dir = os.path.join(tmpdir, "stems")
+                out_json = os.path.join(tmpdir, "streams_sections_cnn.json")
+                run_music_analysis(local_audio, stem_out_dir, out_json, model_name=DEMUCS_MODEL)
+
+                result_key = f"results/{req.id}/streams_sections_cnn.json"
+                upload_file(out_json, result_key, content_type="application/json")
+
+                if not res:
+                    res = models.AnalysisResult(request_id=req.id)
+                    db.add(res)
+                res.music_json_s3_key = result_key
+                db.commit()
+        except Exception:
+            logger.exception("parallel music analysis failed")
+        finally:
+            db.close()
 
 
 class DanceAnalysisWorker(MotionAnalysisWorker):

@@ -91,11 +91,14 @@ def extract_pose_xy(video_path: str) -> Tuple[np.ndarray, float]:
 
     frames_xy: List[np.ndarray] = []
     num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    stride = 2 if fps > 30 else 1
 
-    for _ in tqdm(range(num_frames), desc="Extract pose"):
+    for frame_idx in tqdm(range(num_frames), desc="Extract pose"):
         ok, frame = cap.read()
         if not ok:
             break
+        if stride > 1 and (frame_idx % stride != 0):
+            continue
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         res = pose.process(rgb)
 
@@ -114,7 +117,7 @@ def extract_pose_xy(video_path: str) -> Tuple[np.ndarray, float]:
     pose.close()
 
     poses = np.stack(frames_xy, axis=0)  # (T,33,2)
-    return poses, float(fps)
+    return poses, float(fps / stride)
 
 
 def interpolate_nans(poses: np.ndarray) -> np.ndarray:

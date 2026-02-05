@@ -12,6 +12,7 @@ import {
   VocalAnalysisDetail,
   OtherAnalysisDetail,
 } from './types';
+import type { StreamsSectionsData } from './types/streamsSections';
 
 type LibraryItem = {
   id: number;
@@ -433,6 +434,38 @@ export function parseMusicDetail(data: any): MusicAnalysisDetail | undefined {
   };
 }
 
+export function parseStreamsSectionsData(data: any): StreamsSectionsData | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const hasSignals =
+    typeof data.duration_sec === 'number' ||
+    Array.isArray(data.streams) ||
+    Array.isArray(data.sections) ||
+    Array.isArray(data.keypoints) ||
+    data.keypoints_by_band ||
+    data.texture_blocks_by_band ||
+    data.bass ||
+    data.vocal ||
+    data.other;
+  if (!hasSignals) return undefined;
+
+  const normalized: StreamsSectionsData = {
+    source: typeof data.source === 'string' ? data.source : '',
+    sr: Number.isFinite(Number(data.sr)) ? Number(data.sr) : 0,
+    duration_sec: Number.isFinite(Number(data.duration_sec)) ? Number(data.duration_sec) : 0,
+    streams: Array.isArray(data.streams) ? data.streams : [],
+    sections: Array.isArray(data.sections) ? data.sections : [],
+    keypoints: Array.isArray(data.keypoints) ? data.keypoints : [],
+    events: Array.isArray(data.events) ? data.events : undefined,
+    keypoints_by_band: data.keypoints_by_band ?? undefined,
+    texture_blocks_by_band: data.texture_blocks_by_band ?? undefined,
+    bass: data.bass ?? undefined,
+    vocal: data.vocal ?? undefined,
+    other: data.other ?? undefined,
+  };
+
+  return normalized;
+}
+
 export function parseMotionKeypoints(data: any): MotionKeypoint[] {
   if (!data) return [];
   const out: MotionKeypoint[] = [];
@@ -495,7 +528,8 @@ export function mapProjectDetail(
   musicKeypoints: MusicKeypoint[],
   motionKeypoints: MotionKeypoint[],
   bassNotes: BassNote[] = [],
-  musicDetail?: MusicAnalysisDetail
+  musicDetail?: MusicAnalysisDetail,
+  streamsSectionsData?: StreamsSectionsData
 ): Project {
   const status = (detail.status as ProjectStatus) || 'draft';
   const maxMusic = musicKeypoints.reduce((m, k) => Math.max(m, k.time), 0);
@@ -541,6 +575,7 @@ export function mapProjectDetail(
     motionKeypoints,
     bassNotes,
     musicDetail,
+    streamsSectionsData,
     stemUrls,
     pixieMeshes: detail.pixie_meshes ?? undefined,
     status,

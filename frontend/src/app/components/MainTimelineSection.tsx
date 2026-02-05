@@ -120,6 +120,10 @@ export function MainTimelineSection({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoWaveCanvasRef = useRef<HTMLCanvasElement>(null);
   const audioWaveCanvasRef = useRef<HTMLCanvasElement>(null);
+  const playheadRef = useRef<HTMLDivElement | null>(null);
+  const currentTimeRef = useRef(currentTime);
+  const smoothTimeRef = useRef(currentTime);
+  const lastFrameRef = useRef<number | null>(null);
   const clipDragRef = useRef<{ startX: number; startTime: number } | null>(null);
   const clipResizeRef = useRef<{ startX: number; startTime: number; startDuration: number; side: 'start' | 'end' } | null>(null);
   const selectionDragRef = useRef<{ startX: number; startTime: number } | null>(null);
@@ -304,6 +308,34 @@ export function MainTimelineSection({
       container.scrollLeft = Math.max(0, playheadX - container.clientWidth / 2);
     }
   }, [currentTime, duration, timelineWidth]);
+
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    let rafId: number | null = null;
+    const tick = () => {
+      const now = performance.now();
+      const last = lastFrameRef.current ?? now;
+      const dt = Math.min(0.1, Math.max(0.001, (now - last) / 1000));
+      lastFrameRef.current = now;
+      const target = Math.max(0, Math.min(duration, currentTimeRef.current));
+      const prev = smoothTimeRef.current;
+      const alpha = 1 - Math.exp(-dt * 28);
+      const next = prev + (target - prev) * alpha;
+      smoothTimeRef.current = Number.isFinite(next) ? next : target;
+      const x = duration > 0 ? (smoothTimeRef.current / duration) * timelineWidth : 0;
+      if (playheadRef.current) {
+        playheadRef.current.style.transform = `translate3d(${x}px, 0, 0)`;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [duration, timelineWidth]);
 
   useEffect(() => {
     if (zoomIndex !== 0) return;
@@ -870,8 +902,8 @@ export function MainTimelineSection({
               </div>
 
               <div
-                className="absolute top-0 h-full w-px bg-white"
-                style={{ left: (currentTime / duration) * timelineWidth }}
+                ref={playheadRef}
+                className="absolute left-0 top-0 h-full w-px bg-white pointer-events-none will-change-transform"
               />
             </div>
           </div>

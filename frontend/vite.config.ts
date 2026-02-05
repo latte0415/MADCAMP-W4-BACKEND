@@ -22,6 +22,7 @@ export default defineConfig({
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
   server: {
+    port: 5173,
     // Ensure SPA fallback for deep links in dev (e.g. /project/7).
     // This prevents accidental serving of legacy HTML.
     configureServer(server) {

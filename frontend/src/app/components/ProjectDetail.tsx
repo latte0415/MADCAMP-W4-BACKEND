@@ -50,8 +50,8 @@ export function ProjectDetail({
   const [progressOpen, setProgressOpen] = useState(true);
   const [selectionBars, setSelectionBars] = useState(8);
   const [isMuted, setIsMuted] = useState(true);
-  const rafRef = useRef<number | null>(null);
-  const pendingTimeRef = useRef(0);
+  const syncRafRef = useRef<number | null>(null);
+  const lastTimeUpdateRef = useRef(0);
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -72,15 +72,8 @@ export function ProjectDetail({
   };
 
   const handleTimeUpdate = (time: number) => {
-    pendingTimeRef.current = time;
-    if (rafRef.current !== null) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      setCurrentTime((prev) => {
-        const next = pendingTimeRef.current;
-        return Math.abs(next - prev) < 0.02 ? prev : next;
-      });
-    });
+    lastTimeUpdateRef.current = performance.now();
+    setCurrentTime(time);
   };
 
   const handleSeek = (time: number) => {
@@ -95,10 +88,41 @@ export function ProjectDetail({
   }, [hoverTime]);
 
   useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    const tick = () => {
+      if (!isPlaying) {
+        syncRafRef.current = null;
+        return;
+      }
+      const now = performance.now();
+      const stale = now - lastTimeUpdateRef.current > 200;
+      if (stale) {
+        const videoTime = videoPlayerRef.current?.getCurrentTime();
+        const audio = audioRef.current;
+        const hasVideoTime = Number.isFinite(videoTime) && (videoTime as number) >= 0;
+        let nextTime: number | null = null;
+        if (hasVideoTime) {
+          nextTime = videoTime as number;
+        } else if (audio && hasAudioClip) {
+          const audioTime = audio.currentTime;
+          if (Number.isFinite(audioTime)) {
+            nextTime = audioTime + audioClipStart - audioClipOffset;
+          }
+        }
+        if (nextTime != null && Number.isFinite(nextTime)) {
+          setCurrentTime(nextTime);
+        }
+      }
+      syncRafRef.current = requestAnimationFrame(tick);
     };
-  }, []);
+    if (syncRafRef.current !== null) cancelAnimationFrame(syncRafRef.current);
+    if (isPlaying) {
+      syncRafRef.current = requestAnimationFrame(tick);
+    }
+    return () => {
+      if (syncRafRef.current !== null) cancelAnimationFrame(syncRafRef.current);
+      syncRafRef.current = null;
+    };
+  }, [isPlaying, audioClipStart, audioClipOffset, hasAudioClip]);
 
   useEffect(() => {
     setAudioClipStart(0);
@@ -200,10 +224,14 @@ export function ProjectDetail({
       !project.videoUrl &&
       !project.audioUrl &&
       project.motionKeypoints.length === 0 &&
-      project.musicKeypoints.length === 0);
+      project.musicKeypoints.length === 0 &&
+      !project.streamsSectionsData);
   const actionsDisabled = isLoadingProject;
   const hasNoMusicResult =
-    project.status === 'done' && project.musicKeypoints.length === 0 && !project.audioUrl;
+    project.status === 'done' &&
+    project.musicKeypoints.length === 0 &&
+    !project.audioUrl &&
+    !project.streamsSectionsData;
   const hasError = project.status === 'failed';
   const statusLabel: Record<Project['status'], string> = {
     queued: '대기 중',
@@ -237,6 +265,7 @@ export function ProjectDetail({
   const audioRequested =
     Boolean(project.audioUrl) ||
     (project.musicKeypoints?.length ?? 0) > 0 ||
+    Boolean(project.streamsSectionsData) ||
     project.audioProgress !== undefined ||
     statusMessageLower.includes('music') ||
     statusMessageLower.includes('audio') ||
@@ -930,16 +959,20 @@ export function ProjectDetail({
                 <Skeleton className="h-3 w-56 bg-neutral-800" />
                 <Skeleton className="h-28 w-full bg-neutral-800" />
               </div>
-            ) : project.musicKeypoints.length > 0 || (project.bassNotes?.length ?? 0) > 0 ? (
+            ) : project.musicKeypoints.length > 0 ||
+              (project.bassNotes?.length ?? 0) > 0 ||
+              Boolean(project.streamsSectionsData) ? (
               <AudioDetailAnalysisSection
                 audioUrl={project.audioUrl}
                 duration={effectiveDuration}
                 currentTime={currentTime}
+                isPlaying={isPlaying}
                 selectionStart={selectionStart}
                 selectionDuration={selectionDuration}
                 musicKeypoints={project.musicKeypoints}
                 bassNotes={project.bassNotes}
                 musicDetail={project.musicDetail}
+                streamsSectionsData={project.streamsSectionsData}
                 stemUrls={project.stemUrls}
                 onSeek={handleSeek}
               />

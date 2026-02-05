@@ -1,3 +1,5 @@
+import type { StreamsSectionsData } from './types/streamsSections';
+
 export type ProjectMode = 'dance' | 'magic';
 export type ProjectStatus = 'queued' | 'running' | 'done' | 'failed' | 'draft';
 
@@ -117,6 +119,7 @@ export interface Project {
   motionKeypoints: MotionKeypoint[];
   bassNotes?: BassNote[];
   musicDetail?: MusicAnalysisDetail;
+  streamsSectionsData?: StreamsSectionsData;
   stemUrls?: StemUrls;
   pixieMeshes?: Record<string, PixieMeshInfo>;
   status: ProjectStatus;

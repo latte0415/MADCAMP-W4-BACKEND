@@ -101,5 +101,14 @@ def build_project_detail(
             "magic_json": _url_for_key(res.magic_json_s3_key) if res else None,
             "overlay_video": _url_for_key(res.overlay_video_s3_key) if res else None,
             "edited_motion_markers": _url_for_key(edit.motion_markers_s3_key) if edit else None,
+            "stems": {
+                "drums": _url_for_key(res.stem_drums_s3_key) if res else None,
+                "bass": _url_for_key(res.stem_bass_s3_key) if res else None,
+                "vocal": _url_for_key(res.stem_vocals_s3_key) if res else None,
+                "other": _url_for_key(res.stem_other_s3_key) if res else None,
+                "drum_low": _url_for_key(res.stem_drum_low_s3_key) if res else None,
+                "drum_mid": _url_for_key(res.stem_drum_mid_s3_key) if res else None,
+                "drum_high": _url_for_key(res.stem_drum_high_s3_key) if res else None,
+            } if res else None,
         },
     }

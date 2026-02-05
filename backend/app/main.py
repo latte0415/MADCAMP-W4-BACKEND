@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -14,6 +15,7 @@ from .core.config import (
     WORKER_CONCURRENCY,
     PROJECT_ROOT,
     MUSIC_WORKER_CONCURRENCY,
+    FRONTEND_URL,
 )
 from .db.base import Base, engine
 from .db.migrations import run_auto_migrations
@@ -25,6 +27,18 @@ from .workers.worker import MotionAnalysisWorker, MusicAnalysisWorker
 app = FastAPI()
 _motion_workers: list[MotionAnalysisWorker] = []
 _music_workers: list[MusicAnalysisWorker] = []
+
+allowed_origins = {
+    "https://madcamp-w4-backend.vercel.app",
+    FRONTEND_URL,
+}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin for origin in allowed_origins if origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     SessionMiddleware,

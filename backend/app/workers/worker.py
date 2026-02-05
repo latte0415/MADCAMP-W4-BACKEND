@@ -10,6 +10,7 @@ import time
 from typing import Optional
 from datetime import datetime
 import uuid
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -27,6 +28,27 @@ MOTION_PIPELINE = os.path.join(PROJECT_ROOT, MOTION_ROOT, "pipelines", "motion_p
 MAGIC_WORKER_CMD = os.environ.get("MAGIC_WORKER_CMD")
 
 logger = logging.getLogger(__name__)
+
+
+def _upload_music_stems(request_id: int, local_audio: str, stem_out_dir: str) -> dict[str, str]:
+    stem_dir = Path(stem_out_dir) / DEMUCS_MODEL / Path(local_audio).stem
+    stem_candidates = {
+        "drums": stem_dir / "drums.wav",
+        "bass": stem_dir / "bass.wav",
+        "vocal": stem_dir / "vocals.wav",
+        "other": stem_dir / "other.wav",
+        "drum_low": stem_dir / "drum_low.wav",
+        "drum_mid": stem_dir / "drum_mid.wav",
+        "drum_high": stem_dir / "drum_high.wav",
+    }
+    out: dict[str, str] = {}
+    for key, path in stem_candidates.items():
+        if not path.exists():
+            continue
+        s3_key = f"results/{request_id}/stems/{key}.wav"
+        upload_file(str(path), s3_key, content_type="audio/wav")
+        out[key] = s3_key
+    return out
 
 
 def _resolve_motion_pipeline() -> str:
@@ -363,11 +385,19 @@ class MotionAnalysisWorker(BaseAnalysisWorker):
 
                 result_key = f"results/{req.id}/streams_sections_cnn.json"
                 upload_file(out_json, result_key, content_type="application/json")
+                stem_keys = _upload_music_stems(req.id, local_audio, stem_out_dir)
 
                 if not res:
                     res = models.AnalysisResult(request_id=req.id)
                     db.add(res)
                 res.music_json_s3_key = result_key
+                res.stem_drums_s3_key = stem_keys.get("drums")
+                res.stem_bass_s3_key = stem_keys.get("bass")
+                res.stem_vocals_s3_key = stem_keys.get("vocal")
+                res.stem_other_s3_key = stem_keys.get("other")
+                res.stem_drum_low_s3_key = stem_keys.get("drum_low")
+                res.stem_drum_mid_s3_key = stem_keys.get("drum_mid")
+                res.stem_drum_high_s3_key = stem_keys.get("drum_high")
                 db.commit()
         except Exception:
             logger.exception("parallel music analysis failed")
@@ -512,12 +542,20 @@ class MusicAnalysisWorker(BaseAnalysisWorker):
             set_job(req.id, "running", message="music: uploading results", progress=0.95, db=db)
             result_key = f"results/{req.id}/streams_sections_cnn.json"
             upload_file(out_json, result_key, content_type="application/json")
+            stem_keys = _upload_music_stems(req.id, local_audio, stem_out_dir)
 
             res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
             if not res:
                 res = models.AnalysisResult(request_id=req.id)
                 db.add(res)
             res.music_json_s3_key = result_key
+            res.stem_drums_s3_key = stem_keys.get("drums")
+            res.stem_bass_s3_key = stem_keys.get("bass")
+            res.stem_vocals_s3_key = stem_keys.get("vocal")
+            res.stem_other_s3_key = stem_keys.get("other")
+            res.stem_drum_low_s3_key = stem_keys.get("drum_low")
+            res.stem_drum_mid_s3_key = stem_keys.get("drum_mid")
+            res.stem_drum_high_s3_key = stem_keys.get("drum_high")
             db.commit()
 
             # score if motion/magic already ready

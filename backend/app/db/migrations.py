@@ -38,6 +38,41 @@ def run_auto_migrations(engine: Engine) -> None:
                 conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS match_details JSON"))
             except Exception:
                 pass
+        if not _get_column_meta(conn, "analysis_results", "stem_drums_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_drums_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_bass_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_bass_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_vocals_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_vocals_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_other_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_other_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_drum_low_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_drum_low_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_drum_mid_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_drum_mid_s3_key VARCHAR"))
+            except Exception:
+                pass
+        if not _get_column_meta(conn, "analysis_results", "stem_drum_high_s3_key"):
+            try:
+                conn.execute(text("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS stem_drum_high_s3_key VARCHAR"))
+            except Exception:
+                pass
 
         # allow audio-only analysis
         meta = _get_column_meta(conn, "analysis_requests", "video_id")

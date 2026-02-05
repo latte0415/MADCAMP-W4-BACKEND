@@ -84,6 +84,13 @@ class AnalysisResultUpsert(BaseModel):
     music_json_s3_key: Optional[str] = None
     magic_json_s3_key: Optional[str] = None
     overlay_video_s3_key: Optional[str] = None
+    stem_drums_s3_key: Optional[str] = None
+    stem_bass_s3_key: Optional[str] = None
+    stem_vocals_s3_key: Optional[str] = None
+    stem_other_s3_key: Optional[str] = None
+    stem_drum_low_s3_key: Optional[str] = None
+    stem_drum_mid_s3_key: Optional[str] = None
+    stem_drum_high_s3_key: Optional[str] = None
     match_score: Optional[float] = None
     match_details: Optional[dict] = None
 

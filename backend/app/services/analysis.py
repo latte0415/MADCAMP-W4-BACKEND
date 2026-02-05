@@ -149,6 +149,20 @@ def upsert_analysis_result(db: Session, request_id: int, payload: AnalysisResult
     res.music_json_s3_key = payload.music_json_s3_key
     res.magic_json_s3_key = payload.magic_json_s3_key
     res.overlay_video_s3_key = payload.overlay_video_s3_key
+    if payload.stem_drums_s3_key is not None:
+        res.stem_drums_s3_key = payload.stem_drums_s3_key
+    if payload.stem_bass_s3_key is not None:
+        res.stem_bass_s3_key = payload.stem_bass_s3_key
+    if payload.stem_vocals_s3_key is not None:
+        res.stem_vocals_s3_key = payload.stem_vocals_s3_key
+    if payload.stem_other_s3_key is not None:
+        res.stem_other_s3_key = payload.stem_other_s3_key
+    if payload.stem_drum_low_s3_key is not None:
+        res.stem_drum_low_s3_key = payload.stem_drum_low_s3_key
+    if payload.stem_drum_mid_s3_key is not None:
+        res.stem_drum_mid_s3_key = payload.stem_drum_mid_s3_key
+    if payload.stem_drum_high_s3_key is not None:
+        res.stem_drum_high_s3_key = payload.stem_drum_high_s3_key
     if payload.match_score is not None:
         res.match_score = payload.match_score
     if payload.match_details is not None:
@@ -262,6 +276,13 @@ def delete_analysis_request(
                 res.music_json_s3_key,
                 res.magic_json_s3_key,
                 res.overlay_video_s3_key,
+                res.stem_drums_s3_key,
+                res.stem_bass_s3_key,
+                res.stem_vocals_s3_key,
+                res.stem_other_s3_key,
+                res.stem_drum_low_s3_key,
+                res.stem_drum_mid_s3_key,
+                res.stem_drum_high_s3_key,
             ]
         )
     if edit:
@@ -302,8 +323,27 @@ def remove_analysis_audio(
 
     res = db.query(models.AnalysisResult).filter(models.AnalysisResult.request_id == req.id).first()
     if res:
-        _delete_result_keys(res, [res.music_json_s3_key])
+        _delete_result_keys(
+            res,
+            [
+                res.music_json_s3_key,
+                res.stem_drums_s3_key,
+                res.stem_bass_s3_key,
+                res.stem_vocals_s3_key,
+                res.stem_other_s3_key,
+                res.stem_drum_low_s3_key,
+                res.stem_drum_mid_s3_key,
+                res.stem_drum_high_s3_key,
+            ],
+        )
         res.music_json_s3_key = None
+        res.stem_drums_s3_key = None
+        res.stem_bass_s3_key = None
+        res.stem_vocals_s3_key = None
+        res.stem_other_s3_key = None
+        res.stem_drum_low_s3_key = None
+        res.stem_drum_mid_s3_key = None
+        res.stem_drum_high_s3_key = None
         res.match_score = None
         res.match_details = None
     db.commit()

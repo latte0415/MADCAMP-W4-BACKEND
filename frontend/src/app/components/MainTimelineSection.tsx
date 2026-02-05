@@ -919,21 +919,21 @@ export function MainTimelineSection({
         <div
           className="fixed z-50 pointer-events-none"
           style={{
-            left: hoveredKeypoint.x + 10,
-            top: hoveredKeypoint.y - 220,
+            left: hoveredKeypoint.x + 20,
+            top: Math.max(20, hoveredKeypoint.y - 620),
           }}
         >
-          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-2 shadow-xl">
-            <MeshPreview url={meshUrl} width={180} height={180} />
-            <div className="mt-2 text-center">
-              <div className="text-[10px] text-neutral-400 uppercase tracking-wider">
+          <div className="bg-neutral-900/95 border border-neutral-600 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
+            <MeshPreview url={meshUrl} width={550} height={550} />
+            <div className="mt-3 text-center">
+              <div className="text-xs text-neutral-400 uppercase tracking-wider font-medium">
                 {hoveredKeypoint.kp.type}
               </div>
-              <div className="text-xs text-white">
+              <div className="text-sm text-white mt-1">
                 {hoveredKeypoint.kp.time.toFixed(2)}s
                 {hoveredKeypoint.kp.frame != null && (
-                  <span className="text-neutral-500 ml-1">
-                    (frame {hoveredKeypoint.kp.frame})
+                  <span className="text-neutral-500 ml-2">
+                    frame {hoveredKeypoint.kp.frame}
                   </span>
                 )}
               </div>

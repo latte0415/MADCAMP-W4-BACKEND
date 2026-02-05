@@ -33,11 +33,30 @@ WORKER_ENABLED = os.environ.get("WORKER_ENABLED", "true").lower() == "true"
 WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "1"))
 MUSIC_WORKER_CONCURRENCY = int(os.environ.get("MUSIC_WORKER_CONCURRENCY", "1"))
 MONITORING_PUBLIC = os.environ.get("MONITORING_PUBLIC", "false").lower() == "true"
-_default_root = Path(__file__).resolve().parents[3]
-PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", str(_default_root))).resolve()
-if not (PROJECT_ROOT / "motion").exists():
-    cwd_root = Path.cwd().resolve()
-    if (cwd_root / "motion").exists():
-        PROJECT_ROOT = cwd_root
+def _find_project_root() -> Path:
+    """Find the project root directory containing 'motion' and 'backend' folders."""
+    # Try from config.py location: backend/app/core/config.py -> parents[3] = project root
+    candidates = [
+        Path(__file__).resolve().parents[3],
+        Path.cwd().resolve(),
+        Path("/app"),  # Common container path
+        Path("/opt/app"),
+        Path.home() / "dance",
+    ]
+
+    # Also check PROJECT_ROOT env var
+    env_root = os.environ.get("PROJECT_ROOT")
+    if env_root:
+        candidates.insert(0, Path(env_root).resolve())
+
+    for candidate in candidates:
+        if candidate.exists() and (candidate / "motion").exists() and (candidate / "backend").exists():
+            return candidate
+
+    # Fallback to default
+    return Path(__file__).resolve().parents[3]
+
+
+PROJECT_ROOT = _find_project_root()
 MUSIC_ANALYZER_ROOT = os.environ.get("MUSIC_ANALYZER_ROOT", str(PROJECT_ROOT / "music-analyzer"))
 DEMUCS_MODEL = os.environ.get("DEMUCS_MODEL", "htdemucs")

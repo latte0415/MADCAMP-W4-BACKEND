@@ -23,8 +23,11 @@ from ..services.match_score import compute_match_score
 from ..core.config import PROJECT_ROOT, DEMUCS_MODEL
 from .jobs import set_job
 
-MOTION_ROOT = os.environ.get("MOTION_ROOT", "motion")
-MOTION_PIPELINE = os.path.join(PROJECT_ROOT, MOTION_ROOT, "pipelines", "motion_pipeline.py")
+# MOTION_ROOT should be relative to PROJECT_ROOT
+_motion_root_env = os.environ.get("MOTION_ROOT", "motion")
+# Strip leading slashes to ensure it's treated as relative path
+MOTION_ROOT = _motion_root_env.lstrip("/\\")
+MOTION_PIPELINE = str(PROJECT_ROOT / MOTION_ROOT / "pipelines" / "motion_pipeline.py")
 
 MAGIC_WORKER_CMD = os.environ.get("MAGIC_WORKER_CMD")
 
@@ -637,9 +640,11 @@ class MusicAnalysisWorker(BaseAnalysisWorker):
 # PIXIE Analysis Worker - runs in background after motion analysis completes
 # ============================================================================
 
-PIXIE_ROOT = os.path.join(PROJECT_ROOT, MOTION_ROOT, "gpu", "pixie", "PIXIE")
-PIXIE_DEMO = os.path.join(PIXIE_ROOT, "demos", "demo_fit_body.py")
-EXTRACT_KEYFRAMES = os.path.join(PROJECT_ROOT, MOTION_ROOT, "pipelines", "extract_keyframes.py")
+PIXIE_ROOT = str(PROJECT_ROOT / MOTION_ROOT / "gpu" / "pixie" / "PIXIE")
+PIXIE_DEMO = str(Path(PIXIE_ROOT) / "demos" / "demo_fit_body.py")
+EXTRACT_KEYFRAMES = str(PROJECT_ROOT / MOTION_ROOT / "pipelines" / "extract_keyframes.py")
+# PIXIE requires specific conda environment (pixie310) with its dependencies
+PIXIE_PYTHON = os.environ.get("PIXIE_PYTHON", "/opt/anaconda3/envs/pixie310/bin/python")
 
 
 def _extract_keyframes(video_path: str, motion_json_path: str, out_dir: str) -> dict[str, list[int]]:
@@ -691,9 +696,9 @@ def _run_pixie_on_keyframes(keyframe_dir: str, output_dir: str, kind: str) -> in
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # Run PIXIE with CPU
+    # Run PIXIE with CPU (uses pixie310 conda environment)
     cmd = [
-        sys.executable,
+        PIXIE_PYTHON,
         PIXIE_DEMO,
         "-i", input_dir,
         "-s", out_dir,
@@ -716,8 +721,14 @@ def _run_pixie_on_keyframes(keyframe_dir: str, output_dir: str, kind: str) -> in
         logger.error("PIXIE failed for kind=%s: %s", kind, proc.stderr or proc.stdout)
         return 0
 
-    # Count generated OBJ files
-    obj_count = len([f for f in os.listdir(out_dir) if f.endswith(".obj")])
+    # Count generated OBJ files (PIXIE creates subdirectories: out_dir/hit_000123/hit_000123.obj)
+    obj_count = 0
+    for subdir in os.listdir(out_dir):
+        subdir_path = os.path.join(out_dir, subdir)
+        if os.path.isdir(subdir_path):
+            obj_file = os.path.join(subdir_path, f"{subdir}.obj")
+            if os.path.isfile(obj_file):
+                obj_count += 1
     logger.info("PIXIE generated %d OBJ files for kind=%s", obj_count, kind)
     return obj_count
 
@@ -731,12 +742,18 @@ def _upload_pixie_outputs(request_id: int, output_dir: str, kind: str) -> tuple[
     s3_prefix = f"results/{request_id}/pixie/{kind}"
     count = 0
 
-    for fname in os.listdir(local_dir):
-        if not fname.endswith(".obj"):
+    # PIXIE creates subdirectories: local_dir/hit_000123/hit_000123.obj
+    # We need to upload as: s3_prefix/hit_000123.obj
+    for subdir in os.listdir(local_dir):
+        subdir_path = os.path.join(local_dir, subdir)
+        if not os.path.isdir(subdir_path):
             continue
-        local_path = os.path.join(local_dir, fname)
-        s3_key = f"{s3_prefix}/{fname}"
-        upload_file(local_path, s3_key, content_type="application/octet-stream")
+        obj_file = os.path.join(subdir_path, f"{subdir}.obj")
+        if not os.path.isfile(obj_file):
+            continue
+        # Upload with flattened name: hit_000123.obj
+        s3_key = f"{s3_prefix}/{subdir}.obj"
+        upload_file(obj_file, s3_key, content_type="application/octet-stream")
         count += 1
 
     logger.info("Uploaded %d OBJ files to %s", count, s3_prefix)
@@ -784,7 +801,10 @@ class PixieAnalysisWorker(BaseAnalysisWorker):
             db.close()
 
     def _handle_request(self, db: Session, req: models.AnalysisRequest) -> None:
-        # Check if PIXIE demo exists
+        # Check if PIXIE Python and demo exist
+        if not os.path.isfile(PIXIE_PYTHON):
+            logger.warning("PIXIE Python not found at %s, skipping", PIXIE_PYTHON)
+            return
         if not os.path.isfile(PIXIE_DEMO):
             logger.warning("PIXIE demo not found at %s, skipping", PIXIE_DEMO)
             return

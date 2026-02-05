@@ -137,7 +137,7 @@ const renderYAxisTicks = (items: Array<{ y: number; label: string }>) => (
           y={item.y + 3}
           fill="rgba(255,255,255,0.6)"
           fontSize={9}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+          fontFamily={`ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`}
         >
           {item.label}
         </text>

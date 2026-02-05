@@ -1,7 +1,7 @@
 # Core audio processing
 librosa>=0.10.0
 soundfile>=0.12.0
-numpy>=1.24.0
+numpy>=1.24.0,<2
 scipy>=1.10.0
 
 # Visualization
@@ -11,6 +11,7 @@ seaborn>=0.12.0
 # Jupyter
 jupyter>=1.0.0
 ipykernel>=6.25.0
+Cython<3
 
 # Data handling
 pandas>=2.0.0

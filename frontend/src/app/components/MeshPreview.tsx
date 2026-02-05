@@ -35,6 +35,9 @@ function MeshModel({ url }: MeshModelProps) {
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = 2 / maxDim;
       obj.scale.setScalar(scale);
+
+      // Flip vertically (PIXIE outputs upside down)
+      obj.rotation.x = Math.PI;
     }
   }, [obj]);
 
@@ -99,7 +102,8 @@ export function MeshPreview({ url, width = 200, height = 200, className = '' }: 
   return (
     <div className={`bg-neutral-900 rounded overflow-hidden ${className}`} style={{ width, height }}>
       <Canvas
-        camera={{ position: [0, 0, 4], fov: 45 }}
+        camera={{ position: [0, 0.8, 4], fov: 45 }}
+        onCreated={({ camera }) => camera.lookAt(0, 1.2, 0)}
         onError={() => setError(true)}
       >
         <ambientLight intensity={0.5} />

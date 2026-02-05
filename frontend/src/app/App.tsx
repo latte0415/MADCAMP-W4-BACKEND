@@ -247,7 +247,11 @@ export default function App() {
   };
 
   const handleSelectProject = async (project: Project) => {
-    setSelectedProject(project);
+    // Only set selectedProject if it's not already loaded with full data
+    // (openProjectById already sets selectedProject with full data)
+    if (selectedProject?.id !== project.id) {
+      setSelectedProject(project);
+    }
     navigate(`/project/${project.id}`);
   };
 

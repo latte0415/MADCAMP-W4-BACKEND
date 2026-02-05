@@ -54,8 +54,8 @@ export function RecordingOverlay({ onSubmit, onCancel }: RecordingOverlayProps) 
     <motion.div
       className="absolute overflow-hidden"
       style={{
-        width: 450,
-        height: 450,
+        width: 580,
+        height: 580,
         left: 0,
         top: 50,
         zIndex: 20,

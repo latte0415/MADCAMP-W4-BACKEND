@@ -21,6 +21,7 @@ tqdm>=4.65.0
 torch==2.10.0+cpu
 torchaudio==2.10.0+cpu
 torchvision==0.25.0+cpu
+torchcodec
 
 # Audio
 demucs>=4.0.0

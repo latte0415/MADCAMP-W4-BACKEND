@@ -86,7 +86,8 @@ function downsamplePhrasePoints(
   const buckets = new Map<number, { pitch: number[]; amp: number[] }>();
   for (const p of points) {
     const pitch = Number(p.pitch);
-    const amp = Number(p.amp) ?? 0;
+    const ampRaw = Number(p.amp);
+    const amp = Number.isFinite(ampRaw) ? ampRaw : 0;
     if (!Number.isFinite(pitch)) continue;
     const bucketCenter = Math.floor(p.t / bucketSec) * bucketSec + half;
     const key = Math.round(bucketCenter * 1e4) / 1e4;
@@ -102,7 +103,8 @@ function downsamplePhrasePoints(
       pitchSorted.length % 2 === 1
         ? pitchSorted[mid]!
         : (pitchSorted[mid - 1]! + pitchSorted[mid]!) / 2;
-    const avgAmp = v.amp.reduce((s, x) => s + x, 0) / v.amp.length;
+    const ampSum = v.amp.reduce((s, x) => s + x, 0);
+    const avgAmp = v.amp.length > 0 ? ampSum / v.amp.length : 0;
     out.push({ t: tKey, pitch: medianPitch, amp: avgAmp });
   }
   out.sort((a, b) => a.t - b.t);
@@ -137,7 +139,7 @@ const renderYAxisTicks = (items: Array<{ y: number; label: string }>) => (
           y={item.y + 3}
           fill="rgba(255,255,255,0.6)"
           fontSize={9}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+          fontFamily='ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
         >
           {item.label}
         </text>
@@ -802,13 +804,8 @@ export function AudioDetailAnalysisSection({
         const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
         return pad + (1 - clamped) * innerH;
       };
-      const bassYAxisTicks = [36, 42, 48, 54, 60].map((midi) => ({
-        y: bassPitchToY(midi),
-        label: formatHz(midiToHz(midi)),
-      }));
       return (
         <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-          {renderYAxisTicks(bassYAxisTicks)}
           {notesInRange.map((note, index) => {
             const start = Math.max(note.start, selectionStart);
             const end = Math.min(note.end, selectionEnd);
@@ -1044,6 +1041,18 @@ export function AudioDetailAnalysisSection({
       };
       const useTurnsMode = vocalTurns.length > 0 || vocalOnsets.length > 0;
       const filtered = vocalCurve.filter((p) => p.t >= selectionStart && p.t <= selectionEnd);
+      const rawPitches = filtered.map((p) => Number((p as any).pitch)).filter((v) => Number.isFinite(v));
+      const maxPitch = rawPitches.length ? Math.max(...rawPitches) : 0;
+      const pitchLooksLikeHz = maxPitch > 200;
+      const toMidi = (pitch: number) =>
+        pitchLooksLikeHz ? 69 + 12 * Math.log2(Math.max(pitch, 1) / 440) : pitch;
+      const normalized = filtered
+        .map((p) => ({
+          t: Number((p as any).t),
+          pitch: toMidi(Number((p as any).pitch)),
+          amp: Number.isFinite(Number((p as any).amp)) ? Number((p as any).amp) : 1,
+        }))
+        .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.pitch));
       if (filtered.length < 2) {
         return (
           <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
@@ -1065,24 +1074,9 @@ export function AudioDetailAnalysisSection({
       const phrases = vocalPhrases.filter(
         (ph: any) => ph.end >= selectionStart && ph.start <= selectionEnd
       );
-      const phraseGestures = (vocalData?.vocal_phrases ?? []).flatMap((ph: StreamsVocalPhrase) =>
-        (ph.gestures ?? []).map((g) => ({ g, ph }))
-      );
-      const visibleGestures = phraseGestures.filter(
-        ({ g, ph }) =>
-          g.t >= selectionStart &&
-          g.t <= selectionEnd &&
-          g.t > ph.start &&
-          g.t < ph.end
-      );
       const gridMidi = [48, 60, 72, 84, 96];
-      const vocalYAxisTicks = gridMidi.map((midi) => ({
-        y: pitchToY(midi),
-        label: formatHz(midiToHz(midi)),
-      }));
       return (
         <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-          {renderYAxisTicks(vocalYAxisTicks)}
           {gridMidi.map((midi) => (
             <line
               key={`vocal-grid-${midi}`}
@@ -1095,40 +1089,25 @@ export function AudioDetailAnalysisSection({
               strokeDasharray="2 4"
             />
           ))}
-          {!useTurnsMode &&
-            phrases.map((ph, index) => {
-              const x = xScale(Math.max(ph.start, selectionStart));
-              const w = Math.max(2, xScale(Math.min(ph.end, selectionEnd)) - x);
-              return (
-                <rect
-                  key={`vocal-phrase-${index}`}
-                  x={x}
-                  y={2}
-                  width={w}
-                  height={WAVEFORM_HEIGHT - 4}
-                  fill={STEM_COLORS.vocal}
-                  opacity={index % 2 === 0 ? 0.08 : 0.14}
-                  rx={2}
-                />
-              );
-            })}
           {(() => {
-            const segments = useTurnsMode
-              ? [{ start: selectionStart, end: selectionEnd }]
-              : phrases;
+            const fallbackSegment = { start: selectionStart, end: selectionEnd };
+            const segments = [fallbackSegment];
             const lines: JSX.Element[] = [];
             segments.forEach((ph, segIndex) => {
-              const segPoints = filtered.filter((p) => p.t >= ph.start && p.t <= ph.end);
+              const segPoints = normalized.filter((p) => p.t >= ph.start && p.t <= ph.end);
               if (segPoints.length < 2) return;
               const down = downsamplePhrasePoints(segPoints, VOCAL_VIS_DOWNSAMPLE_SEC);
-              if (down.length < 2) return;
-              const vis = smoothPitchSeries(down, VOCAL_VIS_SMOOTH_WINDOW);
+              const vis = down.length >= 2 ? smoothPitchSeries(down, VOCAL_VIS_SMOOTH_WINDOW) : segPoints;
               for (let i = 0; i < vis.length - 1; i++) {
                 const a = vis[i]!;
                 const b = vis[i + 1]!;
-                if (a.amp < VOCAL_AMP_DRAW_MIN && b.amp < VOCAL_AMP_DRAW_MIN) continue;
-                const amp = clamp(Math.max(a.amp, b.amp), 0, 1);
-                const stroke = 1 + amp * 6;
+                const ampRaw = Math.max(
+                  Number.isFinite(a.amp) ? a.amp : 0,
+                  Number.isFinite(b.amp) ? b.amp : 0
+                );
+                const amp = clamp(ampRaw, 0, 1);
+                const ampForStroke = Math.max(0.2, amp);
+                const stroke = 1 + ampForStroke * 6;
                 lines.push(
                   <line
                     key={`vocal-${segIndex}-${i}`}
@@ -1139,7 +1118,7 @@ export function AudioDetailAnalysisSection({
                     stroke={STEM_COLORS.vocal}
                     strokeWidth={stroke}
                     strokeLinecap="round"
-                    opacity={0.2 + amp * 0.7}
+                    opacity={0.35 + ampForStroke * 0.6}
                   />
                 );
               }
@@ -1151,7 +1130,8 @@ export function AudioDetailAnalysisSection({
               .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
               .map((t, index) => {
                 const isActive = isActiveAtTime(t.t);
-                const size = isActive ? 7 : 5;
+                const score = clamp(Number(t.score ?? 0.6), 0, 1);
+                const size = (isActive ? 6 : 4) + score * 4;
                 const cx = xScale(t.t);
                 const cy = WAVEFORM_HEIGHT * 0.25;
                 const up = t.direction === 'down_to_up' || (t.direction !== 'up_to_down' && !t.direction);
@@ -1172,64 +1152,25 @@ export function AudioDetailAnalysisSection({
           {useTurnsMode &&
             vocalOnsets
               .filter((t) => t.t >= selectionStart && t.t <= selectionEnd)
-              .map((t, index) => (
-                <circle
-                  key={`vocal-onset-${index}`}
-                  cx={xScale(t.t)}
-                  cy={WAVEFORM_HEIGHT * 0.75}
-                  r={isActiveAtTime(t.t) ? 5 : 3}
-                  fill="#f472b6"
-                  opacity={isActiveAtTime(t.t) ? 1 : 0.75}
-                  stroke={isActiveAtTime(t.t) ? '#fff' : 'none'}
-                  strokeWidth={isActiveAtTime(t.t) ? 1.5 : 0}
-                />
-              ))}
-          {!useTurnsMode &&
-            visibleGestures.map(({ g, ph }, index) => {
-              const nearest = filtered.length > 0
-                ? filtered.reduce((a, b) =>
-                    Math.abs(b.t - g.t) < Math.abs(a.t - g.t) ? b : a
-                  )
-                : null;
-              const cy = nearest != null ? pitchToY(nearest.pitch) : WAVEFORM_HEIGHT / 2;
-              const x0 = xScale(Math.max(ph.start, selectionStart)) + 2;
-              const x1 = xScale(Math.min(ph.end, selectionEnd)) - 2;
-              const cx = Math.max(x0, Math.min(x1, xScale(g.t)));
-              const isActive = isActiveAtTime(g.t);
-              const fill =
-                g.type === 'accent' ? '#e74c3c' : g.type === 'onset' ? '#3498db' : '#f39c12';
-              if (g.type === 'pitch_gesture') {
-                const size = 6;
-                const up =
-                  g.direction === 'down_to_up' ||
-                  (g.direction !== 'up_to_down' && (g.direction === 'up' || !g.direction));
-                const pts = up
-                  ? `${cx},${cy - size} ${cx - size},${cy + size} ${cx + size},${cy + size}`
-                  : `${cx},${cy + size} ${cx - size},${cy - size} ${cx + size},${cy - size}`;
+              .map((t, index) => {
+                const strength = clamp(Number(t.strength ?? t.score ?? 0.6), 0, 1);
+                const isActive = isActiveAtTime(t.t);
+                const r = (isActive ? 4 : 2) + strength * 4;
                 return (
-                  <polygon
-                    key={`gesture-${index}-${g.t}`}
-                    points={pts}
-                    fill={fill}
-                    stroke="#fff"
-                    strokeWidth={isActive ? 2 : 1}
-                    opacity={isActive ? 1 : 0.6}
+                  <circle
+                    key={`vocal-onset-${index}`}
+                    cx={xScale(t.t)}
+                    cy={WAVEFORM_HEIGHT * 0.75}
+                    r={r}
+                    fill="#f472b6"
+                    opacity={isActive ? 1 : 0.75}
+                    stroke={isActive ? '#fff' : 'none'}
+                    strokeWidth={isActive ? 1.5 : 0}
                   />
                 );
-              }
-              return (
-                <circle
-                  key={`gesture-${index}-${g.t}`}
-                  cx={cx}
-                  cy={cy}
-                  r={(g.type === 'onset' ? 4 : 5) + (isActive ? 2 : 0)}
-                  fill={fill}
-                  stroke="#fff"
-                  strokeWidth={isActive ? 2 : 1}
-                  opacity={isActive ? 1 : 0.6}
-                />
-              );
-            })}
+              })}
+          {!useTurnsMode &&
+            null}
         </svg>
       );
     }
@@ -1271,13 +1212,6 @@ export function AudioDetailAnalysisSection({
         const v = clamp(density, 0, 1);
         return pad + (1 - v) * innerH;
       };
-      const otherYAxisTicks = hasPitch
-        ? [
-            { value: pitchMax, label: `${pitchMax.toFixed(1)}` },
-            { value: (pitchMin + pitchMax) / 2, label: `${((pitchMin + pitchMax) / 2).toFixed(1)}` },
-            { value: pitchMin, label: `${pitchMin.toFixed(1)}` },
-          ].map((item) => ({ y: pitchToY(item.value), label: item.label }))
-        : [1, 0.5, 0].map((v) => ({ y: densityToY(v), label: v.toFixed(1) }));
       const nearestCurvePoint = (t: number) => {
         if (curve.length === 0) return null;
         let nearest = curve[0]!;
@@ -1312,7 +1246,6 @@ export function AudioDetailAnalysisSection({
       }
       return (
         <svg width={timelineWidth} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
-          {renderYAxisTicks(otherYAxisTicks)}
           {regions.map((r, index) => {
             const x = xScale(r.start);
             const w = Math.max(2, xScale(r.end) - x);
@@ -1353,14 +1286,18 @@ export function AudioDetailAnalysisSection({
             })}
           {keypoints.map((kp, index) => {
             const nearest = nearestCurvePoint(kp.t);
-            const intensity = clamp(Number(kp.score ?? 0.6), 0, 1);
+            const intensity = clamp(
+              Number(kp.score ?? nearest?.density ?? nearest?.amp ?? 0.6),
+              0,
+              1
+            );
             const isActive = isActiveAtTime(kp.t);
             const baseY = hasPitch && nearest?.pitch != null
               ? pitchToY(nearest.pitch)
               : densityToY(nearest?.density ?? nearest?.amp ?? 0.6);
             const cx = xScale(kp.t);
             if (kp.type === 'density_peak') {
-              const size = 5;
+              const size = 4 + intensity * 4 + (isActive ? 1 : 0);
               const pts = `${cx},${baseY - size} ${cx - size},${baseY + size} ${cx + size},${baseY + size}`;
               return (
                 <polygon
@@ -1374,7 +1311,7 @@ export function AudioDetailAnalysisSection({
               );
             }
             if (kp.type === 'phrase_start') {
-              const size = 5;
+              const size = 4 + intensity * 4 + (isActive ? 1 : 0);
               const pts = `${cx},${baseY - size} ${cx - size},${baseY + size} ${cx + size},${baseY + size}`;
               return (
                 <polygon
@@ -1388,7 +1325,7 @@ export function AudioDetailAnalysisSection({
               );
             }
             if (kp.type === 'pitch_turn') {
-              const size = 4;
+              const size = 3 + intensity * 3 + (isActive ? 1 : 0);
               const pts = `${cx},${baseY - size} ${cx - size},${baseY} ${cx},${baseY + size} ${cx + size},${baseY}`;
               return (
                 <polygon
@@ -1407,7 +1344,7 @@ export function AudioDetailAnalysisSection({
                   key={`other-kp-${index}`}
                   cx={cx}
                   cy={baseY}
-                  r={4 + (isActive ? 2 : 0)}
+                  r={3 + intensity * 4 + (isActive ? 1.5 : 0)}
                   fill="#e74c3c"
                   stroke="#fff"
                   strokeWidth={isActive ? 2 : 1}
@@ -1420,7 +1357,7 @@ export function AudioDetailAnalysisSection({
                 key={`other-kp-${index}`}
                 cx={cx}
                 cy={baseY}
-                r={3 + intensity * 4 + (isActive ? 2 : 0)}
+                r={2.5 + intensity * 4 + (isActive ? 1.5 : 0)}
                 fill={STEM_COLORS.other}
                 opacity={isActive ? 1 : 0.7}
                 stroke={isActive ? '#fff' : 'none'}
@@ -1498,6 +1435,76 @@ export function AudioDetailAnalysisSection({
       count: otherKeypoints.length || otherCurve.length || otherEvents.length,
     },
   ];
+
+  const bassAxisTicks = useMemo(() => {
+    const bassPitchToY = (midi: number) => {
+      const hz = midiToHz(midi);
+      const minHz = 50;
+      const maxHz = 250;
+      const logMin = Math.log(minHz);
+      const logMax = Math.log(maxHz);
+      const norm = (Math.log(Math.max(hz, minHz)) - logMin) / (logMax - logMin);
+      const clamped = clamp(norm, 0, 1);
+      const pad = 8;
+      const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+      return pad + (1 - clamped) * innerH;
+    };
+    return [36, 42, 48, 54, 60].map((midi) => ({
+      y: bassPitchToY(midi),
+      label: formatHz(midiToHz(midi)),
+    }));
+  }, []);
+
+  const vocalAxisTicks = useMemo(() => {
+    const pitchMinHz = 80;
+    const pitchMaxHz = 1000;
+    const logMin = Math.log(pitchMinHz);
+    const logMax = Math.log(pitchMaxHz);
+    const pitchToY = (midi: number) => {
+      const hz = midiToHz(midi);
+      const norm = (Math.log(Math.max(hz, pitchMinHz)) - logMin) / (logMax - logMin);
+      const clamped = clamp(norm, 0, 1);
+      const pad = 8;
+      const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+      return pad + (1 - clamped) * innerH;
+    };
+    return [48, 60, 72, 84, 96].map((midi) => ({
+      y: pitchToY(midi),
+      label: formatHz(midiToHz(midi)),
+    }));
+  }, []);
+
+  const otherAxisTicks = useMemo(() => {
+    const curve = otherCurve.filter((p) => p.t >= selectionStart && p.t <= selectionEnd);
+    const pitchVals = curve
+      .map((p) => p.pitch)
+      .filter((v): v is number => v != null && Number.isFinite(v));
+    const pitchMin = pitchVals.length ? Math.min(...pitchVals) : 0;
+    const pitchMax = pitchVals.length ? Math.max(...pitchVals) : 1;
+    const hasPitch = pitchVals.length > 0;
+    const pitchToY = (pitch: number) => {
+      const pad = 8;
+      const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+      const range = Math.max(1, pitchMax - pitchMin);
+      const v = (pitch - pitchMin) / range;
+      return pad + (1 - v) * innerH;
+    };
+    const densityToY = (density: number) => {
+      const pad = 8;
+      const innerH = Math.max(0, WAVEFORM_HEIGHT - 2 * pad);
+      const v = clamp(density, 0, 1);
+      return pad + (1 - v) * innerH;
+    };
+    if (hasPitch) {
+      const mid = (pitchMin + pitchMax) / 2;
+      return [
+        { y: pitchToY(pitchMax), label: pitchMax.toFixed(1) },
+        { y: pitchToY(mid), label: mid.toFixed(1) },
+        { y: pitchToY(pitchMin), label: pitchMin.toFixed(1) },
+      ];
+    }
+    return [1, 0.5, 0].map((v) => ({ y: densityToY(v), label: v.toFixed(1) }));
+  }, [otherCurve, selectionStart, selectionEnd]);
 
   return (
     <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5">
@@ -1692,13 +1699,18 @@ export function AudioDetailAnalysisSection({
                       )}
                     </div>
                     <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">Pitch / Groove</div>
-                    <div
-                      onClick={handleSeekClick}
-                      ref={(el) => {
-                        scrollRefs.current[index * 10 + 1] = el;
-                      }}
-                      className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer scrollbar-hidden"
-                    >
+                <div
+                  onClick={handleSeekClick}
+                  ref={(el) => {
+                    scrollRefs.current[index * 10 + 1] = el;
+                  }}
+                  className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer scrollbar-hidden"
+                >
+                  <div className="sticky left-0 top-0 z-10 h-full w-14 pointer-events-none bg-neutral-950/80">
+                    <svg width={56} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+                      {renderYAxisTicks(bassAxisTicks)}
+                    </svg>
+                  </div>
                   <div className="absolute left-0 top-0" style={{ width: timelineWidth, height: WAVEFORM_HEIGHT }}>
                     {renderOverlayFor('bass')}
                     <div
@@ -1717,6 +1729,11 @@ export function AudioDetailAnalysisSection({
                     }}
                     className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer scrollbar-hidden"
                   >
+                    <div className="sticky left-0 top-0 z-10 h-full w-14 pointer-events-none bg-neutral-950/80">
+                      <svg width={56} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+                        {renderYAxisTicks(vocalAxisTicks)}
+                      </svg>
+                    </div>
                   {stemAudioUrls.vocal ? (
                     <>
                       <canvas
@@ -1767,6 +1784,11 @@ export function AudioDetailAnalysisSection({
                 }}
                 className="relative h-[120px] overflow-x-auto overflow-y-hidden rounded border border-neutral-800 bg-neutral-950 cursor-pointer scrollbar-hidden"
               >
+                <div className="sticky left-0 top-0 z-10 h-full w-14 pointer-events-none bg-neutral-950/80">
+                  <svg width={56} height={WAVEFORM_HEIGHT} style={{ display: 'block' }}>
+                    {renderYAxisTicks(otherAxisTicks)}
+                  </svg>
+                </div>
                 {stemAudioUrls.other ? (
                   <>
                     <canvas

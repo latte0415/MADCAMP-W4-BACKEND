@@ -760,9 +760,37 @@ export function ProjectDetail({
                       </span>
                     </div>
                   </div>
-                  {!project.videoUrl ? (
-                    <div className="rounded border border-neutral-800 bg-neutral-950/80 p-8 text-center">
-                      <p className="text-neutral-400 mb-4">영상이 없습니다.</p>
+              {!project.videoUrl ? (
+                <div className="rounded border border-neutral-800 bg-neutral-950/80 p-8 text-center">
+                  <p className="text-neutral-400 mb-4">영상이 없습니다.</p>
+                  {onReplaceVideo ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
+                        onClick={() => videoInputRef.current?.click()}
+                        disabled={actionsDisabled}
+                      >
+                        <Upload className="size-4 mr-2" />
+                        영상 업로드
+                      </Button>
+                      <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) onReplaceVideo(file);
+                          e.currentTarget.value = '';
+                        }}
+                      />
+                      <p className="text-xs text-neutral-500 mt-2">
+                        현재 프로젝트에 영상을 업로드합니다.
+                      </p>
+                    </>
+                  ) : (
+                    <>
                       <Button
                         variant="outline"
                         className="bg-transparent border-neutral-700 text-zinc-100 hover:bg-white/5"
@@ -775,8 +803,10 @@ export function ProjectDetail({
                       <p className="text-xs text-neutral-500 mt-2">
                         새 프로젝트에서 영상을 업로드할 수 있습니다.
                       </p>
-                    </div>
-                  ) : (
+                    </>
+                  )}
+                </div>
+              ) : (
                     <div className="relative mb-4">
                       <VideoPlayer
                         ref={videoPlayerRef}

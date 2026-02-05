@@ -33,6 +33,28 @@ WORKER_ENABLED = os.environ.get("WORKER_ENABLED", "true").lower() == "true"
 WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "1"))
 MUSIC_WORKER_CONCURRENCY = int(os.environ.get("MUSIC_WORKER_CONCURRENCY", "1"))
 MONITORING_PUBLIC = os.environ.get("MONITORING_PUBLIC", "false").lower() == "true"
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+def _resolve_project_root() -> Path:
+    env_root = os.environ.get("PROJECT_ROOT")
+    if env_root:
+        return Path(env_root)
+
+    here = Path(__file__).resolve()
+    # Prefer a parent that actually contains motion/music-analyzer
+    for parent in here.parents:
+        if (parent / "motion" / "pipelines" / "motion_pipeline.py").is_file():
+            return parent
+        if (parent / "backend").is_dir() and (parent / "music-analyzer").is_dir():
+            return parent
+
+    # Fallback to repo root if we're inside backend/
+    for parent in here.parents:
+        if parent.name == "backend":
+            return parent.parent
+
+    # Last resort: backend root
+    return here.parents[2]
+
+
+PROJECT_ROOT = _resolve_project_root()
 MUSIC_ANALYZER_ROOT = os.environ.get("MUSIC_ANALYZER_ROOT", str(PROJECT_ROOT / "music-analyzer"))
 DEMUCS_MODEL = os.environ.get("DEMUCS_MODEL", "htdemucs")

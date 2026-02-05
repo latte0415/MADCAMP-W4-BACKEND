@@ -16,6 +16,7 @@ import {
   parseMotionKeypoints,
   parseBassNotes,
   parseMusicDetail,
+  parseStreamsSectionsData,
   mapProjectDetail,
   presignUpload,
   uploadFileToS3,
@@ -123,6 +124,7 @@ export default function App() {
         motionKeypoints: cached.motionKeypoints?.length ? cached.motionKeypoints : summary.motionKeypoints,
         bassNotes: cached.bassNotes?.length ? cached.bassNotes : summary.bassNotes,
         musicDetail: cached.musicDetail ?? summary.musicDetail,
+        streamsSectionsData: cached.streamsSectionsData ?? summary.streamsSectionsData,
         stemUrls: cached.stemUrls ?? summary.stemUrls,
         duration: summary.duration || cached.duration,
         errorMessage: summary.errorMessage ?? cached.errorMessage,
@@ -161,7 +163,8 @@ export default function App() {
       const hasMusic =
         cached.project.musicKeypoints.length > 0 ||
         (cached.project.bassNotes?.length ?? 0) > 0 ||
-        Boolean(cached.project.musicDetail);
+        Boolean(cached.project.musicDetail) ||
+        Boolean(cached.project.streamsSectionsData);
       const hasMotion = cached.project.motionKeypoints.length > 0;
       const needsMusic = Boolean(cached.project.audioUrl);
       const needsMotion = Boolean(cached.project.videoUrl);
@@ -205,12 +208,14 @@ export default function App() {
         ];
         const bassNotes = parseBassNotes(musicJson);
         const musicDetail = parseMusicDetail(musicJson);
+        const streamsSectionsData = parseStreamsSectionsData(musicJson);
         const mapped = mapProjectDetail(
           detail,
           musicKeypoints,
           motionKeypoints,
           bassNotes,
-          musicDetail
+          musicDetail,
+          streamsSectionsData
         );
         setSelectedProject((prev) => (prev?.id === String(id) || !prev ? mapped : prev));
         setProjects((prev) =>
@@ -340,7 +345,15 @@ export default function App() {
     ];
     const bassNotes = parseBassNotes(musicJson);
     const musicDetail = parseMusicDetail(musicJson);
-    const mapped = mapProjectDetail(detail, musicKeypoints, motionKeypoints, bassNotes, musicDetail);
+    const streamsSectionsData = parseStreamsSectionsData(musicJson);
+    const mapped = mapProjectDetail(
+      detail,
+      musicKeypoints,
+      motionKeypoints,
+      bassNotes,
+      musicDetail,
+      streamsSectionsData
+    );
     setSelectedProject(prev => {
       if (prev?.id !== String(requestId)) return prev;
       if (prev.videoUrl?.startsWith('blob:')) URL.revokeObjectURL(prev.videoUrl);

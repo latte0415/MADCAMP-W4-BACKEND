@@ -19,6 +19,9 @@ export interface VideoPlayerHandle {
 export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
   ({ videoUrl, isPlaying, onPlayPause, onTimeUpdate, currentTime, onDuration, muted = true }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const rafRef = useRef<number | null>(null);
+    const vfcRef = useRef<number | null>(null);
+    const isPlayingRef = useRef(isPlaying);
 
     useImperativeHandle(ref, () => ({
       seek: (time: number) => {
@@ -34,7 +37,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     useEffect(() => {
       const video = videoRef.current;
       if (!video) return;
-
+      isPlayingRef.current = isPlaying;
       if (isPlaying) {
         video.play();
       } else {
@@ -53,6 +56,44 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       const video = videoRef.current;
       if (!video) return;
 
+      const cancelLoop = () => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
+        if (vfcRef.current !== null && typeof (video as any).cancelVideoFrameCallback === 'function') {
+          (video as any).cancelVideoFrameCallback(vfcRef.current);
+          vfcRef.current = null;
+        }
+      };
+
+      const tickRaf = () => {
+        if (!video || !isPlayingRef.current) return;
+        onTimeUpdate(video.currentTime);
+        rafRef.current = requestAnimationFrame(tickRaf);
+      };
+
+      const tickVideoFrame = (_now: number, metadata: { mediaTime?: number }) => {
+        if (!video || !isPlayingRef.current) return;
+        const t = Number.isFinite(metadata?.mediaTime) ? metadata.mediaTime! : video.currentTime;
+        onTimeUpdate(t);
+        vfcRef.current = (video as any).requestVideoFrameCallback(tickVideoFrame);
+      };
+
+      const startLoop = () => {
+        cancelLoop();
+        if (!isPlayingRef.current) return;
+        if (typeof (video as any).requestVideoFrameCallback === 'function') {
+          vfcRef.current = (video as any).requestVideoFrameCallback(tickVideoFrame);
+        } else {
+          rafRef.current = requestAnimationFrame(tickRaf);
+        }
+      };
+
+      const handleSeeking = () => {
+        onTimeUpdate(video.currentTime);
+      };
+
       const handleTimeUpdate = () => {
         onTimeUpdate(video.currentTime);
       };
@@ -61,12 +102,28 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           onDuration?.(video.duration);
         }
       };
+      const handlePlay = () => {
+        isPlayingRef.current = true;
+        startLoop();
+      };
+      const handlePause = () => {
+        isPlayingRef.current = false;
+        cancelLoop();
+      };
 
+      startLoop();
       video.addEventListener('timeupdate', handleTimeUpdate);
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('seeking', handleSeeking);
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
       return () => {
+        cancelLoop();
         video.removeEventListener('timeupdate', handleTimeUpdate);
         video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('seeking', handleSeeking);
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
       };
     }, [onTimeUpdate]);
 

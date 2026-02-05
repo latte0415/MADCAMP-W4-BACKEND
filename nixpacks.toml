@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["python311", "gcc", "ffmpeg"]
+
+[phases.install]
+cmds = [
+  "python -m venv /opt/venv",
+  "/opt/venv/bin/pip install --upgrade pip setuptools wheel Cython",
+  "/opt/venv/bin/pip install --no-build-isolation -r backend/requirements.txt",
+]
+
+[start]
+cmd = "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"

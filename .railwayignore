@@ -18,8 +18,6 @@ __pycache__
 node_modules
 
 # Large/local-only directories
-motion
-music-analyzer
 experiments
 
 # Model/weights/artifacts

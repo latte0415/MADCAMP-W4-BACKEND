@@ -1,0 +1,33 @@
+.git
+.gitignore
+.DS_Store
+.venv
+.env
+.env.*
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.cache
+.idea
+.vscode
+node_modules
+
+# Large/local-only directories
+motion
+music-analyzer
+experiments
+
+# Model/weights/artifacts
+*.pt
+*.pth
+*.onnx
+*.npz
+*.ckpt
+*.tar
+*.tgz
+*.zip

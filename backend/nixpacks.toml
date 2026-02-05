@@ -1,6 +1,6 @@
 [phases.install]
 cmds = [
-  "python -m ensurepip --upgrade",
-  "python -m pip install --upgrade pip setuptools wheel Cython",
-  "python -m pip install --no-build-isolation -r requirements.txt",
+  "python -m venv /opt/venv",
+  "/opt/venv/bin/pip install --upgrade pip setuptools wheel Cython",
+  "/opt/venv/bin/pip install --no-build-isolation -r requirements.txt",
 ]

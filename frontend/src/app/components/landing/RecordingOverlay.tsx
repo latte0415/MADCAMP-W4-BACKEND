@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ProjectMode } from '../../types';
 
 interface RecordingOverlayProps {
   onSubmit: (data: {
@@ -15,7 +14,6 @@ interface RecordingOverlayProps {
 
 export function RecordingOverlay({ onSubmit, onCancel }: RecordingOverlayProps) {
   const [title, setTitle] = useState('');
-  const [mode, setMode] = useState<ProjectMode>('dance');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [extractAudio, setExtractAudio] = useState(true);
@@ -30,7 +28,7 @@ export function RecordingOverlay({ onSubmit, onCancel }: RecordingOverlayProps) 
 
     onSubmit({
       title: title.trim(),
-      mode,
+      mode: 'dance', // Always use dance mode
       videoFile: videoFile || undefined,
       audioFile: audioFile || undefined,
       extractAudio: videoFile && !audioFile ? extractAudio : undefined,
@@ -92,24 +90,6 @@ export function RecordingOverlay({ onSubmit, onCancel }: RecordingOverlayProps) 
           className="bg-transparent border-b border-neutral-700 focus:border-neutral-400 outline-none text-white text-xl font-medium py-2 mb-6 transition-colors"
           autoFocus
         />
-
-        {/* Mode selector */}
-        <div className="flex gap-3 mb-6">
-          {(['dance', 'magic'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className="px-4 py-2 text-xs uppercase tracking-wider transition-all"
-              style={{
-                background: mode === m ? (m === 'magic' ? '#5a5a9a' : '#d97706') : 'transparent',
-                border: `1px solid ${mode === m ? (m === 'magic' ? '#7a7aba' : '#f59e0b') : '#444'}`,
-                color: mode === m ? '#fff' : '#888',
-              }}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
 
         {/* File upload areas */}
         <div className="flex-1 flex flex-col gap-3">

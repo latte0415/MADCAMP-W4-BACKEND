@@ -9,9 +9,10 @@ interface LandingPageProps {
   onEnterProject?: (
     project: Project,
     onProgress?: (value: number, label?: string) => void
-  ) => Promise<void> | void;
+  ) => Promise<boolean> | boolean | void;
   onNewProject?: () => void;
   onCreateProject?: (data: NewProjectData) => void;
+  onDeleteProject?: (project: Project) => void;
   userName?: string;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -23,6 +24,7 @@ export function LandingPage({
   onEnterProject,
   onNewProject,
   onCreateProject,
+  onDeleteProject,
   userName,
   onLogin,
   onLogout,
@@ -92,6 +94,7 @@ export function LandingPage({
           onEnterProject={onEnterProject}
           onNewProject={onNewProject}
           onCreateProject={onCreateProject}
+          onDeleteProject={onDeleteProject}
           userName={userName}
           onLogin={onLogin}
           onLogout={onLogout}

@@ -55,6 +55,16 @@ backend/*.sqlite3
 
 # Outputs / Generated artifacts
 outputs*/
+motion/outputs*/
+motion/outputs_magic/
+experiments/**/out_*/
+experiments/**/pixie_test*/
+experiments/**/stems/
+experiments/**/keyframes/
+experiments/**/pixie_mesh/
+experiments/**/motion_result.json
+experiments/**/streams_sections_cnn.json
+experiments/**/extracted_audio.wav
 weights/
 inputs/
 *.mp4

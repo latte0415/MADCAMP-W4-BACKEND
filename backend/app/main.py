@@ -23,11 +23,12 @@ from .db.migrations import run_auto_migrations
 from .db import models  # noqa: F401
 from .api.auth import router as auth_router
 from .api.api import router as api_router
-from .workers.worker import MotionAnalysisWorker, MusicAnalysisWorker
+from .workers.worker import MotionAnalysisWorker, MusicAnalysisWorker, PixieAnalysisWorker
 
 app = FastAPI()
 _motion_workers: list[MotionAnalysisWorker] = []
 _music_workers: list[MusicAnalysisWorker] = []
+_pixie_workers: list[PixieAnalysisWorker] = []
 
 allowed_origins = {
     "https://madcamp-w4-backend.vercel.app",
@@ -73,6 +74,11 @@ def on_startup() -> None:
             worker = MusicAnalysisWorker()
             worker.start()
             _music_workers.append(worker)
+
+        # Start PIXIE worker (runs in background after motion analysis)
+        pixie_worker = PixieAnalysisWorker()
+        pixie_worker.start()
+        _pixie_workers.append(pixie_worker)
 
 
 @app.get("/")

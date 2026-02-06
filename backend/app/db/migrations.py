@@ -81,3 +81,32 @@ def run_auto_migrations(engine: Engine) -> None:
                 conn.execute(text("ALTER TABLE analysis_requests ALTER COLUMN video_id DROP NOT NULL"))
             except Exception:
                 pass
+
+        # pixie_outputs table for 3D mesh storage
+        try:
+            conn.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS pixie_outputs (
+                        id BIGSERIAL PRIMARY KEY,
+                        request_id BIGINT NOT NULL REFERENCES analysis_requests(id),
+                        kind VARCHAR NOT NULL,
+                        s3_prefix VARCHAR NOT NULL,
+                        file_count INTEGER,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                    """
+                )
+            )
+        except Exception:
+            pass
+
+        # Index for faster lookups by request_id
+        try:
+            conn.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_pixie_outputs_request_id ON pixie_outputs(request_id)"
+                )
+            )
+        except Exception:
+            pass

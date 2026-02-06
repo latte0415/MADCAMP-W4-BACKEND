@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { MotionKeypoint } from '../types';
 import { Button } from './ui/button';
+import { MeshPreview } from './MeshPreview';
+import { getMeshUrl } from '../api';
 import {
   ZoomIn,
   ZoomOut,
@@ -46,6 +48,9 @@ interface MainTimelineSectionProps {
   drumBand?: DrumBand;
   onDrumBandChange?: (band: DrumBand) => void;
   drumBandUrls?: { low?: string; mid?: string; high?: string };
+  // Mesh preview
+  projectId?: string | number;
+  hasMeshes?: boolean;
 }
 
 const KEYPOINT_COLORS: Record<MotionKeypoint['type'], string> = {
@@ -103,6 +108,8 @@ export function MainTimelineSection({
   drumBand = 'all',
   onDrumBandChange,
   drumBandUrls,
+  projectId,
+  hasMeshes = false,
 }: MainTimelineSectionProps) {
   const zoomLevels = [1, 1.5, 3, 6, 12];
   const [zoomIndex, setZoomIndex] = useState(0);
@@ -120,6 +127,11 @@ export function MainTimelineSection({
   const clipDragRef = useRef<{ startX: number; startTime: number } | null>(null);
   const clipResizeRef = useRef<{ startX: number; startTime: number; startDuration: number; side: 'start' | 'end' } | null>(null);
   const selectionDragRef = useRef<{ startX: number; startTime: number } | null>(null);
+
+  // Mesh preview state
+  const [hoveredKeypoint, setHoveredKeypoint] = useState<{ kp: MotionKeypoint; x: number; y: number } | null>(null);
+  const [meshUrl, setMeshUrl] = useState<string | null>(null);
+  const meshFetchRef = useRef<number>(0);
 
   const loadWaveform = (
     url: string | null | undefined,
@@ -160,6 +172,21 @@ export function MainTimelineSection({
 
   useEffect(() => loadWaveform(videoUrl, setVideoWaveform), [videoUrl]);
   useEffect(() => loadWaveform(audioUrl, setAudioWaveform, setAudioWaveDuration), [audioUrl]);
+
+  // Fetch mesh URL when hovering keypoint
+  useEffect(() => {
+    if (!hoveredKeypoint || !projectId || hoveredKeypoint.kp.frame == null) {
+      setMeshUrl(null);
+      return;
+    }
+    const fetchId = ++meshFetchRef.current;
+    const { kp } = hoveredKeypoint;
+    getMeshUrl(projectId, kp.type, kp.frame).then((url) => {
+      if (fetchId === meshFetchRef.current) {
+        setMeshUrl(url);
+      }
+    });
+  }, [hoveredKeypoint, projectId]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -597,8 +624,17 @@ export function MainTimelineSection({
                 className="rounded border border-neutral-800 bg-neutral-900/60 px-2 flex flex-col justify-center leading-none"
                 style={{ height: ROW_HEIGHT }}
               >
-                <div className="text-neutral-300 text-[10px] leading-none">VIDEO</div>
-                <div className="text-[10px] text-neutral-500 leading-none">keypoints</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-neutral-300 text-[10px] leading-none">VIDEO</span>
+                  {hasMeshes && (
+                    <span className="px-1 py-0.5 text-[8px] bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">
+                      3D
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-neutral-500 leading-none">
+                  {hasMeshes ? 'hover for 3D mesh' : 'keypoints'}
+                </div>
               </div>
               <div
                 className="rounded border border-neutral-800 bg-neutral-900/60 px-2 flex flex-col justify-center leading-none"
@@ -730,10 +766,11 @@ export function MainTimelineSection({
               {videoKeypoints.map((kp, idx) => {
                 const left = (kp.time / duration) * timelineWidth;
                 const height = kp.type === 'hold' && kp.duration ? 30 : 20;
+                const hasMesh = kp.frame != null && projectId;
                 return (
                   <div
                     key={`kp-${idx}-${kp.time}`}
-                    className="absolute w-[3px] rounded-full"
+                    className={`absolute w-[3px] rounded-full ${hasMesh ? 'cursor-pointer hover:w-[5px] transition-all' : ''}`}
                     style={{
                       left,
                       height,
@@ -741,6 +778,12 @@ export function MainTimelineSection({
                       opacity: 0.35 + kp.intensity * 0.5,
                       top: RULER_HEIGHT + (ROW_HEIGHT - height) / 2,
                     }}
+                    onMouseEnter={(e) => {
+                      if (!hasMesh) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoveredKeypoint({ kp, x: rect.left, y: rect.top });
+                    }}
+                    onMouseLeave={() => setHoveredKeypoint(null)}
                   />
                 );
               })}
@@ -870,6 +913,34 @@ export function MainTimelineSection({
       <div className="mt-3 text-xs text-neutral-500">
         스크롤로 이동, 버튼으로 줌 조절. 오디오 클립을 드래그해 비디오 타임라인에 맞춰 배치하세요.
       </div>
+
+      {/* Mesh Preview Popup */}
+      {hoveredKeypoint && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: hoveredKeypoint.x + 20,
+            top: Math.max(20, hoveredKeypoint.y - 620),
+          }}
+        >
+          <div className="bg-neutral-900/95 border border-neutral-600 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
+            <MeshPreview url={meshUrl} width={550} height={550} />
+            <div className="mt-3 text-center">
+              <div className="text-xs text-neutral-400 uppercase tracking-wider font-medium">
+                {hoveredKeypoint.kp.type}
+              </div>
+              <div className="text-sm text-white mt-1">
+                {hoveredKeypoint.kp.time.toFixed(2)}s
+                {hoveredKeypoint.kp.frame != null && (
+                  <span className="text-neutral-500 ml-2">
+                    frame {hoveredKeypoint.kp.frame}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

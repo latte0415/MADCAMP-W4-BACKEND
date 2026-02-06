@@ -74,7 +74,19 @@ def build_project_detail(
     audio: Optional[models.MediaFile],
     res: Optional[models.AnalysisResult],
     edit: Optional[models.AnalysisEdit],
+    pixie_outputs: Optional[list] = None,
 ) -> Dict[str, Any]:
+    # Build pixie meshes info
+    pixie_meshes = None
+    if pixie_outputs:
+        pixie_meshes = {
+            p.kind: {
+                "s3_prefix": p.s3_prefix,
+                "file_count": p.file_count,
+            }
+            for p in pixie_outputs
+        }
+
     return {
         "id": req.id,
         "title": req.title,
@@ -111,4 +123,5 @@ def build_project_detail(
                 "drum_high": _url_for_key(res.stem_drum_high_s3_key) if res else None,
             } if res else None,
         },
+        "pixie_meshes": pixie_meshes,
     }

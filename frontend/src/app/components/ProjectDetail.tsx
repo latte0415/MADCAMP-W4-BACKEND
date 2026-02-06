@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { VideoPlayer, VideoPlayerHandle } from './VideoPlayer';
 import { MainTimelineSection } from './MainTimelineSection';
 import { AudioDetailAnalysisSection } from './AudioDetailAnalysisSection';
+import { ScorePanel } from './ScorePanel';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Skeleton } from './ui/skeleton';
@@ -530,10 +531,32 @@ export function ProjectDetail({
             )}
           </section>
 
-          {/* 진행률 섹션 */}
+          {/* 스코어 + 진행률 섹션 */}
           <section className="mb-8">
-            <div className="rounded border border-neutral-800 bg-neutral-950/80 px-5 py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+              {/* 매칭 스코어 패널 */}
               {isLoadingProject ? (
+                <div className="rounded border border-neutral-800 bg-neutral-950/80 p-5 space-y-3">
+                  <Skeleton className="h-4 w-24 bg-neutral-800" />
+                  <Skeleton className="h-12 w-16 bg-neutral-800" />
+                  <Skeleton className="h-20 w-full bg-neutral-800" />
+                </div>
+              ) : (
+                <ScorePanel
+                  musicKeypoints={project.musicKeypoints}
+                  motionKeypoints={project.motionKeypoints}
+                  selectionStart={selectionStart}
+                  selectionDuration={selectionDuration}
+                  audioClipStart={audioClipStart}
+                  audioClipOffset={audioClipOffset}
+                  audioClipDuration={audioClipDuration}
+                  hasAudioClip={hasAudioClip}
+                />
+              )}
+
+              {/* 진행률 */}
+              <div className="rounded border border-neutral-800 bg-neutral-950/80 px-5 py-4">
+                {isLoadingProject ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-4 w-20 bg-neutral-800" />
@@ -699,6 +722,7 @@ export function ProjectDetail({
                   )}
                 </>
               )}
+              </div>
             </div>
           </section>
 
@@ -952,6 +976,8 @@ export function ProjectDetail({
               onHoverTime={setHoverTime}
               loading={isLoadingProject}
               controlsDisabled={actionsDisabled}
+              projectId={project.id}
+              hasMeshes={!!project.pixieMeshes && Object.keys(project.pixieMeshes).length > 0}
             />
           </section>
 
